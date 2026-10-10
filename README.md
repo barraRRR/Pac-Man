@@ -1,3 +1,4 @@
+```
 pacman/
 ├── assets/                  # Sprites, mapas, sonidos
 ├── src/                     # Código fuente directo
@@ -17,3 +18,4 @@ pacman/
 ├── config.json              # Config file
 ├── Makefile
 └── requirements.txt
+```
