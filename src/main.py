@@ -15,12 +15,13 @@ def main() -> int:
     try:
         parser = JSONParser(sys.argv[1])
         config = parser.get()
-    except (FileNotFoundError, json.JSONDecodeError) as e:
+    except (OSError, FileNotFoundError, json.JSONDecodeError) as e:
         print(f"Error loading config: {e}", file=sys.stderr)
         return 1
     
     # ——— test suite ———
-    print(parser._config_clean)
+    # print(parser._config_clean) #Documento
+    print(config.model_dump_json(indent=4)) #Objeto Config creado
     return 0
 
 
