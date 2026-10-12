@@ -28,7 +28,7 @@ run:
 	@echo "|   __/  ___  \  |___ |_____||  |  |  |/  ___  \|  |\   |"
 	@echo "|__| /__/   \__\_____|       |__|  |__/__/   \__\__| \__|"
 	@echo "\033[0m"
-	-@uv run python -m src $(RUN_ARGS)
+	-@uv run python pac-man.py $(RUN_ARGS)
 	@echo "\033[1;31m"
 	@echo "\nEND OF PROGRAM - SEE YOU SOON!"
 	@echo "\033[0m"

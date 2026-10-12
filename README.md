@@ -26,3 +26,6 @@ pacman/
 ├── Makefile
 └── requirements.txt
 ```
+
+
+config.json

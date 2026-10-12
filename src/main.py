@@ -1,4 +1,5 @@
 from src.utils.class_config import JSONParser, Config
+import json
 import sys
 
 
@@ -11,10 +12,13 @@ def main() -> int:
             file=sys.stderr,
         )
         return 1
-
-    parser = JSONParser(sys.argv[1])
-    config = parser.get()
-
+    try:
+        parser = JSONParser(sys.argv[1])
+        config = parser.get()
+    except (FileNotFoundError, json.JSONDecodeError) as e:
+        print(f"Error loading config: {e}", file=sys.stderr)
+        return 1
+    
     # ——— test suite ———
     print(parser._config_clean)
     return 0
