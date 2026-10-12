@@ -28,48 +28,75 @@ pacman/
 ```
 
 
-#config.json
+## Configuración
 
-¿Alguna clave del config es obligatoria?
-    El subject lo deja claro: "The exact structure is up to you" (la estructura exacta depende de ti) y las claves son sugeridas ("Suggested keys (names are indicative)").
-    Pero hay tres condiciones que sí son obligatorias:
-        Que sean claras y las documentéis en el README.
-        Que tengáis valores por defecto robustos (si falta una clave, el juego usa su valor por defecto y sigue).
-        Que cualquier valor inválido o falta se acote a un valor seguro, se avise y continúe (sin traceback).
+El juego lee sus opciones desde un archivo JSON llamado `config.json`. El archivo admite comentarios: `#`, `//` y `/* ... */`.
 
-Las claves que sugiere el subject
-    highscore_filename	(indicativo del nombre del archivo de récords)
-    level	array de múltiples niveles
-    width, height	por cada nivel
-    lives	3
-    pacgum	42
-    points_per_pacgum	10
-    points_per_super_pacgum	50
-    points_per_ghost	200
-    seed	42
-    level_max_time	90
+La estructura exacta del archivo es una decisión del proyecto. Las claves del subject son sugerencias, pero el README debe explicar qué claves acepta el juego y cuáles son sus valores por defecto.
+Try:
+|
+highscore_filename
+highscore.csv
+Nombre del archivo donde se guardarán las puntuaciones. Debe terminar en .csv.
+level
+10 niveles de 15 × 15
+Lista de niveles. Cada nivel tiene su propio width y height.
+width
+15
+Ancho usado para crear los niveles cuando no se proporciona una lista level.
+height
+15
+Alto usado para crear los niveles cuando no se proporciona una lista level.
+lives
+3
+Vidas iniciales; se limita al intervalo de 1 a 9.
+pacgum
+42
+Cantidad de pacgums.
+points_per_pacgum
+10
+Puntos obtenidos por cada pacgum normal.
+points_per_super_pacgum
+50
+Puntos obtenidos por cada super-pacgum.
+points_per_ghost
+200
+Puntos obtenidos por cada fantasma comestible.
+seed
+42
+Semilla prevista para la generación de laberintos.
+level_max_time
+90
+Tiempo máximo de cada nivel, en segundos.
+Niveles
+level es una lista de niveles, no un número. Cada elemento de la lista define el ancho y el alto de un nivel:
 
-    El subject sugiere que level sea un array de niveles, no un único int.
-        "levels": [
-            {"width": 15, "height": 15},
-            {"width": 17, "height": 17},
-            etc...
-        ]
-    Y que width y height sean por cada nivel.
-    Si hay escritos 10 niveles serás ganador al llegar a lso 10 niveles, el fin del juego
-    Si se han puesto 10 niveles y solo se han escrito 3, dos opciones o modificar el total de niveles a 3 o complementar hasta 10 cogiendo el ancho y alto de config o default
-    Si existe niveles, ancho y alto aunque estén rellenados se obvian. Si no existe niveles, se tiene en cuenta, si no se rellena ninguno de los dos, coge losd efault
+json
+Copy
+{
+    "level": [
+        {"width": 15, "height": 15},
+        {"width": 17, "height": 17}
+    ]
+}
+Try:
+|
+El juego requiere un mínimo de 10 niveles. Si se proporciona una lista con menos de 10, se completa hasta llegar a 10, usando niveles de 15 × 15 para los que faltan.
 
-    Semilla y Niveles entran en juego, es decir, el amazing habrá que iterarlo como un generador, "yield" imagino, para intentar mantener la semilla y que el mapa sea los mismos, si semilla no existe o es None, entonces es aleatorio
+Si se proporciona level, los valores de width y height de la raíz no se usan. Si no se proporciona una lista level, se crean 10 niveles usando el width y el height de la raíz; si tampoco se indican, se usa el tamaño predeterminado de 15 × 15.
 
+Valores inválidos y claves desconocidas
+La configuración tiene valores por defecto para las claves que falten. Cuando se recibe un valor numérico fuera del intervalo establecido, se limita al valor más cercano permitido; por ejemplo, un lives de 45 se ajusta a 9. Si un valor no se puede convertir al tipo esperado, se usa el valor por defecto correspondiente y se muestra un mensaje de error claro.
 
-El generador de laberintos (A-Maze-ing)
+Las claves desconocidas se ignoran. Los errores de configuración deben gestionarse sin mostrar un traceback.
 
-El subject dice textualmente:
-    "Maze generation based on an external 'A-Maze-ing' package (not yours!)".
-    "You must not write your own generator."
-    "You must use their package as-is, without modifying it."
-    "Your loader must adapt to their interface, not the opposite."
-    "The parameter PERFECT will be set to False to produce Pac-Man-compatible corridors (see A-Maze-ing subject)."
-    "If the generator fails, you must handle the error cleanly."
-    PERFECT = False
+Un archivo con sintaxis JSON rota —por ejemplo, un número escrito sin comillas y con letras— no es lo mismo que una clave con un valor inválido: no se puede construir la configuración porque el JSON no llega a cargarse. En ese caso se muestra un mensaje de error; actualmente no se debe afirmar que el juego continúa con los valores por defecto.
+
+Generación de laberintos
+El subject exige usar el paquete externo A-Maze-ing asignado al proyecto:
+
+No se debe escribir un generador propio ni modificar el paquete.
+El adaptador del proyecto debe ajustarse a la interfaz del paquete.
+El parámetro PERFECT debe configurarse como False.
+Si el generador falla, el error debe gestionarse limpiamente.
+La integración del generador y el uso efectivo de la semilla deben documentarse cuando estén implementados y comprobados. No se afirma aquí que ya estén terminados.
