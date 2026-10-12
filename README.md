@@ -1,3 +1,10 @@
+<div align="center">
+
+[![pacman](https://ascii.rest/banner/pacman.svg?color=f97316&speed=fast&font=tall&shadow=rounded)](https://ascii.rest/banner/)
+
+</div>
+
+
 ```
 pacman/
 ├── assets/                  # Sprites, mapas, sonidos
