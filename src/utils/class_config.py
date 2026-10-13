@@ -106,71 +106,27 @@ class Config(BaseModel):
             datos["level"] = niveles + [{} for _ in range(10 - len(niveles))]
         return datos
 
-class JSONParser:
+
+def json_parser(config_file_path: str) -> Config:
     """
     """
-    def __init__(self, config_file_path: str) -> None:
-        self._config_file_path: str = config_file_path
-
-        with open(self._config_file_path, "r", encoding="utf-8") as file:
-            self._config_raw: str = file.read()
-
-        # Proteger read() con try-except (o hacerlo desde la llamada??
-        self._config_clean: str = self.comment_remover(self._config_raw)
-        self._config_dict: Dict[str, Any] = json.loads(self._config_clean)
-        # Proteger json.loads() con try-except
-
+    with open(config_file_path, "r", encoding="utf-8") as file:
+        config_raw: str = file.read()
+    # Proteger read() con try-except (o hacerlo desde la llamada??
         
     # TEAM NOTE: antes de procesar y parsear el json, le quitamos los comentarios para evitar un JSONError al cargarlo.
-    @staticmethod
-    def comment_remover(json_str: str) -> str:
-        """
-        Takes a json formt str and removes comments using regex.
-        """
-        # Este patrón lo vemos juntos mejor. Básicamente crea 4 grupos. El primero recoje todo lo válido y los otros son grupos que incluyen los comentarios
-        pattern = r'("(?:\\.|[^"\\])*")|//.*|/\*[\s\S]*?\*/|#.*'
+    # Este patrón lo vemos juntos mejor. Básicamente crea 4 grupos. El primero recoje todo lo válido y los otros son grupos que incluyen los comentarios
+    pattern = r'("(?:\\.|[^"\\])*")|//.*|/\*[\s\S]*?\*/|#.*'
 
-        # Creamos una función que recibe un objeto Match y comprobamos si hay coincidencia con el primer grupo de paréntesis
-        def replacer(match: re.Match):
-            if match.group(1):
-                return match.group(1)
-            return ""
+    # Creamos una función que recibe un objeto Match y comprobamos si hay coincidencia con el primer grupo de paréntesis
+    def replacer(match: re.Match):
+        if match.group(1):
+            return match.group(1)
+        return ""
 
-        # Aquí re.sub() actúa como función de orden superior para ejectura replacer
-        return re.sub(pattern, replacer, json_str)
+    # Aquí re.sub() actúa como función de orden superior para ejectura replacer
+    config_clean: str = re.sub(pattern, replacer, config_raw)
+    config_dict: Dict[str, Any] = json.loads(config_clean)
+    # Proteger json.loads() con try-except
 
-    # He considerado crear este get que dejastes vacío, espero no fastidiar - jitowerr
-    def get(self) -> Config:
-        """Construye y devuelve el objeto Config a partir del JSON cargado.
-
-        Si "level" falta, está vacío o no es una lista (por ejemplo el
-        formato antiguo "level": 10), crea 10 niveles con el width y height
-        de la raíz, o 15x15 si tampoco existen. Si aun así los niveles
-        vienen mal formados, usa 10 niveles 15x15 y avisa por stderr.
-
-        Returns:
-            El Config validado, con los valores fuera de rango ya acotados.
-        """
-        """
-        """
-        # Si "level" no viene, viene vacío, o viene como un número (ej. 10),
-        # lo convertimos a una lista de 10 niveles con los tamaños indicados
-        # en la raíz, o con los por defecto si no hay ninguno.
-        lvl = self._config_dict.get("level")
-        if not isinstance(lvl, list) or not lvl:
-            w = self._config_dict.get("width", 15)
-            h = self._config_dict.get("height", 15)
-            self._config_dict["level"] = [
-                {"width": w, "height": h} for _ in range(10)
-            ]
-
-        try:
-            return Config(**self._config_dict)
-        except ValidationError:
-            # Si algún nivel viene mal formado, lo dejamos con defectos seguros.
-            print("Error: invalid level list, using default levels.",
-                file=sys.stderr)
-            self._config_dict["level"] = [{"width": 15, "height": 15} for _ in range(10)]
-            return Config(**self._config_dict)
-
-        
+    return Config(**config_dict)
