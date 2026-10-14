@@ -6,5 +6,6 @@ requires-python = ">=3.10"
 dependencies = [
     "flake8",
     "mypy",
-    "pydantic"
+    "pydantic",
+    "pygame"
 ]
