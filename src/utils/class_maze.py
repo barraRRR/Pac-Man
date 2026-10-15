@@ -73,22 +73,6 @@ class Maze:
         # print(best)
         return best
 
-    # def ghost_corners(self) -> list[tuple[int, int]]:
-    #     """Devuelve las cuatro esquinas del laberinto como (x, y).
-
-    #     El orden es: arriba-izquierda, arriba-derecha,
-    #     abajo-izquierda y abajo-derecha.
-    #     """
-    #     height = len(self._grid)
-    #     width = len(self._grid[0])
-
-    #     return [
-    #         (0, 0),
-    #         (width - 1, 0),
-    #         (0, height - 1),
-    #         (width - 1, height - 1),
-    #     ]
-
     def select_ghost_spawns(
         self,
         reachable: set[tuple[int, int]],

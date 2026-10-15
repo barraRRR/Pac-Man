@@ -23,15 +23,16 @@ class App:
         for number, level in enumerate(self.config.level, start=1):
             try:
                 self._start_level(number, level)   # Momento 1: preparar el nivel (mapa)
+                # self._spawn_entities() # Momento 2: colocar Pac-Man y fantasmas (aún no existe)
+                # self._game_loop()      # Momento 3: mover, comer, morir (aún no existe)
+                # self._end_game()       # Momento 4: guardar puntuación, despedida
             except Exception:
                 print(
                     f"Error: Could not generate level {number}.",
                     file=sys.stderr,
                 )
                 return 1
-            # self._spawn_entities() # Momento 2: colocar Pac-Man y fantasmas (aún no existe)
-            # self._game_loop()      # Momento 3: mover, comer, morir (aún no existe)
-            # self._end_game()       # Momento 4: guardar puntuación, despedida
+
         return 0
 
     def _start_level(self, number: int, level: Level) -> None:
