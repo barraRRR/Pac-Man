@@ -43,9 +43,32 @@ class Maze:
         return self._grid
 
 
+    def player_center(self) -> tuple[int, int]:
+        """
+        Devuelve la celda transitable más cercana al centro, como (x, y).
 
+        Recorre la cuadrícula y elige, entre las celdas que no son un
+        bloque sólido (15), la que menos distancia tiene al centro.
+        """
+        height_map = len(self.grid)
+        width = len(self._grid[0])
+        center_x = width // 2
+        center_y = height_map // 2
 
+        best: tuple[int, int] | None = None
+        best_best: int | None = None
 
-
+        for y in range(height_map):
+            for x in range(width):
+                if self._grid[y][x] == 15: #El 15 SOn los bloques del 42
+                    continue
+                dist = (x - center_x) ** 2 + (y -center_y) ** 2
+                if best_best is None or dist < best_best:
+                    best = (x, y)
+                    best_best = dist
+        if best is None:
+            raise ValueError("Maze has no walkable cells.")
+        print(best)
+        return best
 
 

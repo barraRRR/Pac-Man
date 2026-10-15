@@ -1,5 +1,6 @@
 from src.utils.class_config import Config, Level
 from src.utils.class_maze import Maze
+import sys
 
 
 class App:
@@ -8,6 +9,7 @@ class App:
     def __init__(self, config: Config) -> None:
         self.config = config
         self.maze = Maze(config.seed)
+        self.pacman_start: tuple[int, int] | None = None
 
     def run(self) -> None:
         """Recorre los niveles en orden y ejecuta los momentos del juego."""
@@ -32,6 +34,8 @@ class App:
             width=level.width,
             height=level.height,
         )
+        self.pacman_start = self.maze.center_cell()
+        print(f"Level {number}: Pac-Man starts at {self.pacman_start}")
         # print()           #print de prueba para impresion mapa, imprime los 10, el primero semilla resto aleatorio
         # for row in self.maze.grid:
         #     print(row)
