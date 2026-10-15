@@ -21,7 +21,7 @@ class Level(BaseModel):
             print(f"Error: invalid {info.field_name} '{valor}', using 15.",
                   file=sys.stderr)
             return 15
-        acotado = max(5, min(99, numero))
+        acotado = max(10, min(99, numero))
         if acotado != numero:
             print(f"Error: {info.field_name} {numero} out of range, "
                   f"using {acotado}.", file=sys.stderr)

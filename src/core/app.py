@@ -1,6 +1,7 @@
 from src.utils.class_config import Config, Level
 from src.utils.class_maze import Maze
 import sys
+import random
 
 
 class App:
@@ -40,9 +41,22 @@ class App:
         #     print(row)
 
         self.pacman_start = self.maze.center_comecocos()
-        self.ghost_spawns = self.maze.ghost_corners()
-        print(f"Level {number}: Pac-Man starts at {self.pacman_start} - Ghosts start at {self.ghost_spawns}")
+        # self.ghost_spawns = self.maze.ghost_corners()
+        self.ghost_spawns = self.maze.select_ghost_spawns(self.pacman_start)
+        # print(f"Level {number}: Pac-Man starts at {self.pacman_start} - Ghosts start at {self.ghost_spawns}")
+        reachable = self.maze.reachable_cells(self.pacman_start)
+        # print(f"Level {number}: reachable cells: {len(reachable)}")
+        print(f"Level {number}: Ghosts start at {self.ghost_spawns}")
+        zones = self.maze.corner_zone_cells()
+        reachability = self.maze.corner_zone_reachability(self.pacman_start)
 
+        corner_names = (
+            "Top-left",
+            "Top-right",
+            "Bottom-left",
+            "Bottom-right",
+        )
+        print()
 
 
 
