@@ -32,7 +32,7 @@
 └── wheels/
     └── mazegenerator-2.1.0-py3-none-any.whl  # Assigned A-Maze-ing package wheel
 ```
-
+tree -I '.venv|.git'
 
 ## Configuración
 
@@ -109,6 +109,55 @@ La integración del generador y el uso efectivo de la semilla deben documentarse
 
 
 
+
+
+
+# 15/10/2026 — Integración del generador: cómo se hilan Config, App y Maze
+
+Hoy hemos cerrado el circuito completo: la configuración llega al generador
+y los 10 niveles se generan de verdad por `make run`.
+
+- `main()` solo construye `App` con la configuración y llama a `app.run()`. No sabe nada de mapas.
+- `App` es la mecánica del juego: decide **cuándo** se genera cada nivel y en qué orden ocurren
+  los momentos (preparar nivel, spawn de entidades, game loop, fin de partida).
+- `Maze` es el adaptador: sabe **cómo** generar. Sigue siendo la única clase del proyecto que
+  importa `mazegenerator`.
+
+La cadena queda así:
+
+```python
+# main.py
+app = App(config)
+app.run()
+
+# app.py — App recorre los niveles y pasa el número real de cada uno
+for number, level in enumerate(self.config.level, start=1):
+    self._start_level(number, level)          # -> self.maze.generate_level(...)
+
+# class_maze.py — Maze traduce el número de nivel a semilla
+semilla = self._seed if number == 1 else 0
+generator_map = MazeGenerator(size=(width, height), perfect=False, seed=semilla)
+```
+
+App no sabe qué significa 0: la regla de la semilla vive solo en Maze, única fuente de verdad.
+
+
+La semilla: nivel 1 fijo, resto aleatorio
+Config.seed (42) se guarda como semilla base y solo se usa para el nivel 1. Del 2 en adelante se
+genera con seed=0, que en el paquete significa aleatorio. Así el primer nivel es siempre el mismo
+y el resto cambian en cada partida.
+
+Comprobación hecha
+Dos ejecuciones seguidas de make run, comparadas a mano: el nivel 1 sale idéntico entre
+ejecuciones (misma semilla → mismo mapa) y los niveles 2-10 salen distintos entre ejecuciones y
+dentro de una misma ejecución.
+
+
+
+
+
+
+
 ## Extracción del mapa - paquete mazegenerator-00001.whl
 Es el paquete A-Maze-ing que exige el subject como generador de laberintos. La versión que os han dado es la 2.1.0
 
@@ -124,7 +173,14 @@ No generar mapa a mano - todo el mapa (muros y pasillos) sale de este generador.
 
 El patrón "42" - el generador inserta un patrón "42" oculto en el centro del laberinto (será un bloque de celdas valladas que os puede servir de pista/punto de referencia). Si el mapa es muy pequeño no cabe y lo avisa solo.
 
+## *************ATENCIÓN*******************
+Verificado contra el código fuente del .whl (lo acabo de desempaquetar y leer). Tres confirmaciones que afectan directo a maze.py:
 
+    - El constructor genera el mapa solo: en __init__ hace self.generate(self._seed). Por eso no hay que llamar a ningún método tras crear el objeto: crear el MazeGenerator es generar el nivel.
+
+    - maze_entry/maze_exit devuelven (x, y) = (columna, fila): el código hace return self._entryx, self._entryy, y el grid se indexa como maze[y][x]. O sea, el README de nuevo miente (dice (row, col)). Para coger la entrada sería grid[entry[1]][entry[0]]. Trampa apuntada.
+
+    - Semilla: random.seed(seed) if seed > 0 else random.seed() — con semilla > 0 el mapa es reproducible; con 0 (o negativa), aleatorio total. Tu seed: 88 del config funcionará tal cual.
 
 
 
