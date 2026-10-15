@@ -1,7 +1,6 @@
 from src.utils.class_config import Config, Level
 from src.utils.class_maze import Maze
 import sys
-import random
 
 
 class App:
@@ -14,7 +13,7 @@ class App:
         self.ghost_spawns: list[tuple[int, int]] = []
         self.super_pacgum_spawns: list[tuple[int, int]] = []
 
-    def run(self) -> None:
+    def run(self) -> int:
         """Recorre los niveles en orden y ejecuta los momentos del juego."""
         for number, level in enumerate(self.config.level, start=1):
             try:
@@ -37,27 +36,16 @@ class App:
             width=level.width,
             height=level.height,
         )
-        # print()           #print de prueba para impresion mapa, imprime los 10, el primero semilla resto aleatorio
-        # for row in self.maze.grid:
-        #     print(row)
 
         self.pacman_start = self.maze.center_comecocos()
-        # self.ghost_spawns = self.maze.ghost_corners()
-        self.ghost_spawns = self.maze.select_ghost_spawns(self.pacman_start)
-        self.super_pacgum_spawns = self.maze.select_super_pacgum_spawns(self.pacman_start, self.ghost_spawns)
-        # print(f"Level {number}: Pac-Man starts at {self.pacman_start} - Ghosts start at {self.ghost_spawns}")
         reachable = self.maze.reachable_cells(self.pacman_start)
-        # print(f"Level {number}: reachable cells: {len(reachable)}")
-        # print(f"Level {number}: Ghosts start at {self.ghost_spawns}")
-        zones = self.maze.corner_zone_cells()
-        reachability = self.maze.corner_zone_reachability(self.pacman_start)
 
-        corner_names = (
-            "Top-left",
-            "Top-right",
-            "Bottom-left",
-            "Bottom-right",
+        self.ghost_spawns = self.maze.select_ghost_spawns(reachable)
+        self.super_pacgum_spawns = self.maze.select_super_pacgum_spawns(
+            reachable,
+            self.ghost_spawns,
         )
+
         print(f"Level {number}:")
         print(f"  Pac-Man: {self.pacman_start}")
         print(f"  Ghosts: {self.ghost_spawns}")

@@ -111,76 +111,130 @@ La integración del generador y el uso efectivo de la semilla deben documentarse
 
 
 
+15/10/2026
+# Generación del laberinto y colocación de entidades
 
-# 15/10/2026 — Integración del generador: cómo se hilan Config, App y Maze
+> Anotaciones del proyecto — 15/10/2026
 
-Hoy hemos cerrado el circuito completo: la configuración llega al generador
-y los 10 niveles se generan de verdad por `make run`.
+## Cómo se conectan `main`, `App` y `Maze`
 
-- `main()` solo construye `App` con la configuración y llama a `app.run()`. No sabe nada de mapas.
-- `App` es la mecánica del juego: decide **cuándo** se genera cada nivel y en qué orden ocurren
-  los momentos (preparar nivel, spawn de entidades, game loop, fin de partida).
-- `Maze` es el adaptador: sabe **cómo** generar. Sigue siendo la única clase del proyecto que
-  importa `mazegenerator`.
+La idea es que cada parte tenga una responsabilidad clara:
 
-La cadena queda así:
+| Clase o función | Qué hace en esta parte del proyecto |
+|---|---|
+| `main()` | Carga la configuración, crea `App` y devuelve el resultado de `app.run()`. No genera ni manipula mapas. |
+| `App` | Recorre los niveles definidos en la configuración y organiza la preparación de cada uno. También guarda las posiciones iniciales de las entidades. |
+| `Maze` | Hace de adaptador del paquete `mazegenerator`: genera el mapa y ofrece operaciones para calcular posiciones y comprobar qué celdas son alcanzables. |
+
+`Maze` es la única clase del proyecto que importa `mazegenerator`. `App` decide cuándo toca preparar el mapa y le pasa a `Maze` el número, el ancho y el alto del nivel.
+
+El flujo, simplificado, es este:
 
 ```python
-# main.py
 app = App(config)
 app.run()
 
-# app.py — App recorre los niveles y pasa el número real de cada uno
+# App prepara los niveles en orden
 for number, level in enumerate(self.config.level, start=1):
-    self._start_level(number, level)          # -> self.maze.generate_level(...)
+    self._start_level(number, level)
 
-# class_maze.py — Maze traduce el número de nivel a semilla
-semilla = self._seed if number == 1 else 0
-generator_map = MazeGenerator(size=(width, height), perfect=False, seed=semilla)
+# Maze elige la semilla y crea el generador
+seed = self._seed if number == 1 else 0
+generator = MazeGenerator(
+    size=(width, height),
+    perfect=False,
+    seed=seed,
+)
 ```
 
-App no sabe qué significa 0: la regla de la semilla vive solo en Maze, única fuente de verdad.
+Este ejemplo muestra la idea general; no es una copia literal de cada línea del proyecto.
+
+## Generación de niveles y semilla
+
+`App._start_level()` llama a `Maze.generate_level()` con el número y las dimensiones del nivel. `Maze` crea un `MazeGenerator` nuevo y guarda la cuadrícula generada en `self._grid`.
+
+Para el primer nivel se utiliza la semilla recibida desde la configuración. Para los siguientes se pasa `0`, que el paquete utiliza para generar un mapa aleatorio. Así, el código solicita que el primer nivel use una semilla fija y que los demás se generen aleatoriamente. Eso no significa que todos los mapas posteriores tengan que ser distintos entre sí: podría haber coincidencias.
+
+El parámetro `perfect=False` se pasa al generador. El resto de la lógica de este proyecto trabaja sobre el mapa que devuelve el paquete; aquí no se construye un generador propio.
+
+## Dónde empieza Pac-Man
+
+Después de generar el mapa, `App._start_level()` llama a `center_comecocos()` para elegir la posición inicial de Pac-Man.
+
+El método busca la celda distinta de `15` que esté más cerca del centro de la cuadrícula. El valor `15` representa una celda cerrada en las cuatro direcciones y se evita para que Pac-Man no empiece dentro de uno de esos bloques.
+
+La cuadrícula se consulta como `grid[y][x]`: primero la fila (`y`) y luego la columna (`x`). Las posiciones que guardamos, en cambio, se expresan como `(x, y)`. Es importante no intercambiar esos dos órdenes.
+
+## Zonas de las esquinas
+
+Para colocar fantasmas y super-pacgums, `corner_zone_cells()` divide las esquinas del mapa en cuatro zonas. El orden siempre es:
+
+1. Arriba a la izquierda.
+2. Arriba a la derecha.
+3. Abajo a la izquierda.
+4. Abajo a la derecha.
+
+El ancho de cada zona se calcula como una quinta parte del ancho del mapa, y su alto como una quinta parte de la altura. Se descartan las fracciones y se asegura un mínimo de una celda en cada dimensión.
+
+| Tamaño del mapa | Tamaño de cada zona | Celdas por zona |
+|---|---:|---:|
+| 10 × 10 | 2 × 2 | 4 |
+| 15 × 15 | 3 × 3 | 9 |
+| 21 × 15 | 4 × 3 | 12 |
+| 25 × 21 | 5 × 4 | 20 |
+
+Las zonas se hacen mayores a medida que crece el mapa, para que haya más casillas posibles donde elegir las posiciones.
+
+## Cómo se comprueba si una celda es alcanzable: BFS
+
+`reachable_cells(start)` calcula qué celdas se pueden alcanzar desde una posición inicial. Para ello usa una búsqueda en anchura, conocida como BFS (*Breadth-First Search*).
+
+La búsqueda empieza en `start` y va visitando las celdas vecinas a las que se puede llegar. Utiliza:
+
+- Una `deque` como cola FIFO: las celdas descubiertas se añaden al final y se procesa primero la que lleva más tiempo esperando.
+- Un conjunto `visited`: guarda las celdas ya descubiertas, para no procesarlas varias veces.
+- Las paredes codificadas como bits: norte `1`, este `2`, sur `4` y oeste `8`.
+
+Para moverse a una celda vecina, el método comprueba las dos caras que comparten las celdas: que no haya pared en la dirección de salida de la celda actual ni en la dirección opuesta de la celda vecina. Por ejemplo, para moverse al este, comprueba la pared este de la celda actual y la pared oeste de la siguiente.
+
+Una celda con valor `15` tiene activados los cuatro bits de pared. Por eso no se puede entrar en ella desde una celda vecina siguiendo las reglas del BFS.
+
+El método devuelve un conjunto de coordenadas `(x, y)` alcanzables. No guarda distancias ni números de oleada. Los números que aparecen en el dibujo explicativo muestran el orden aproximado en que se van descubriendo las celdas; no son un resultado que el método almacene.
+
+## Elección de posiciones para fantasmas y super-pacgums
+
+`select_ghost_spawns(start)` obtiene las cuatro zonas, comprueba qué celdas son alcanzables desde Pac-Man y escoge al azar una candidata de cada zona. Devuelve las posiciones en el mismo orden fijo de las zonas.
+
+`select_super_pacgum_spawns(start, ghost_spawns)` hace algo parecido: busca una candidata alcanzable por zona, pero excluye las celdas que ya ocupan los fantasmas. De este modo una super-pacgum no comparte casilla con un fantasma.
+
+Si en alguna zona no hay una casilla alcanzable adecuada, el método lanza una excepción. En el código actual no se agranda la zona para intentar encontrar otra; `App.run()` captura el error al preparar el nivel y devuelve un código de error.
+
+## Un detalle importante: el BFS se repite
+
+Aunque el BFS devuelve todas las celdas alcanzables de una vez, el código actual vuelve a calcularlo desde varios métodos. Durante la preparación de un nivel ocurre lo siguiente:
+
+1. `select_ghost_spawns()` llama a `corner_zone_reachability()`, que ejecuta un BFS.
+2. `select_super_pacgum_spawns()` vuelve a llamar a `corner_zone_reachability()` y ejecuta otro BFS.
+3. `App._start_level()` llama directamente a `reachable_cells()` y ejecuta otro BFS.
+4. Después, `App._start_level()` llama otra vez a `corner_zone_reachability()`, que ejecuta un cuarto BFS.
+
+Por tanto, con el código actual se hacen cuatro recorridos por nivel. Además, en `App._start_level()` las variables `reachable`, `zones` y `reachability` reciben resultados que luego no se usan. Es una posible mejora pendiente: calcular las celdas alcanzables una vez y reutilizar ese resultado para seleccionar las posiciones.
+
+## Qué está hecho y qué queda para después
+
+En el código revisado ya se genera el mapa y se calculan las posiciones iniciales de Pac-Man, los fantasmas y las super-pacgums. En `App._start_level()` todavía se imprimen esas posiciones como información de prueba.
+
+En esta parte del código aún no se reparten las pacgums normales ni se implementan el movimiento, la recogida de objetos, la puntuación o el bucle de juego. Esos pasos pertenecen a la lógica que se añadirá después.
+
+Las pruebas concretas de conectividad o de resultados para varios tamaños deberían anotarse junto con el archivo de configuración o el test usado para hacerlas. Así podemos volver a ejecutarlas y confirmar el resultado en lugar de dejar una afirmación difícil de reproducir.
 
 
-La semilla: nivel 1 fijo, resto aleatorio
-Config.seed (42) se guarda como semilla base y solo se usa para el nivel 1. Del 2 en adelante se
-genera con seed=0, que en el paquete significa aleatorio. Así el primer nivel es siempre el mismo
-y el resto cambian en cada partida.
-
-Comprobación hecha
-Dos ejecuciones seguidas de make run, comparadas a mano: el nivel 1 sale idéntico entre
-ejecuciones (misma semilla → mismo mapa) y los niveles 2-10 salen distintos entre ejecuciones y
-dentro de una misma ejecución.
 
 
 
 
 
 
-
-## Extracción del mapa - paquete mazegenerator-00001.whl
-Es el paquete A-Maze-ing que exige el subject como generador de laberintos. La versión que os han dado es la 2.1.0
-
-Qué se puede y qué no se puede hacer con él;
-
-SI   Usarlo tal cual - el subject dice explícitamente que no está permitido escribir un generador propio y que el paquete se usa sin modificar. Vuestro cargador debe adaptarse a la interfaz de A-Maze-ing, no al revés.
-SI   perfect=False - el subject ordena poner perfect a False para que salgan pasillos compatibles con Pac-Man (sin callejones sin salida donde quedes atrapado). De hecho, el propio constructor ya lo trae por defecto a False, y el método _braid() es el que elimina los callejones.
-SI   Semilla - seed se puede fijar (por defecto 0 = aleatorio). El subject dice: primer nivel con semilla fija (ej. 42), siguientes niveles aleatorios.           Esto confirma una teoría, tras realizar el config el otro día propuse crear el objeto como un iterador, no se si se podrá, pero en princpio según esto el primer mapa es el mismo y el resto aleatorio, es decir llamarlo con la semilla mas un número aleatorio y listo, elprimer nivel siempre es el mismo, pero el resto de niveles los mapas aleatorios, no se si decir que está bien o que está mal, proque realmente le quitas la gracia de él videojuego no??? el ranking de puntos compite con puntos ganados de la misma manera, una aleatoriedad puede favorecer o perjudicar a otro, no? nose, puede ser un buen pequeño debate jajaja
-SI   Entrada/salida - entry_cell y exit_cell configurable. Por defecto entrada (0,0) y salida (-1,-1 que se convierte a la última celda).
-SI   Camino más corto - el paquete te da shortest_path (un string con N/E/S/W) de la entrada a la salida. Eso te puede servir de referencia.
-No modificar el paquete - es lo que dice el subject, y además en la revisión por pares se reinstala, así que si le tocas el código se os romperá.
-No generar mapa a mano - todo el mapa (muros y pasillos) sale de este generador.
-
-El patrón "42" - el generador inserta un patrón "42" oculto en el centro del laberinto (será un bloque de celdas valladas que os puede servir de pista/punto de referencia). Si el mapa es muy pequeño no cabe y lo avisa solo.
-
-## *************ATENCIÓN*******************
-Verificado contra el código fuente del .whl (lo acabo de desempaquetar y leer). Tres confirmaciones que afectan directo a maze.py:
-
-    - El constructor genera el mapa solo: en __init__ hace self.generate(self._seed). Por eso no hay que llamar a ningún método tras crear el objeto: crear el MazeGenerator es generar el nivel.
-
-    - maze_entry/maze_exit devuelven (x, y) = (columna, fila): el código hace return self._entryx, self._entryy, y el grid se indexa como maze[y][x]. O sea, el README de nuevo miente (dice (row, col)). Para coger la entrada sería grid[entry[1]][entry[0]]. Trampa apuntada.
-
-    - Semilla: random.seed(seed) if seed > 0 else random.seed() — con semilla > 0 el mapa es reproducible; con 0 (o negativa), aleatorio total. Tu seed: 88 del config funcionará tal cual.
 
 
 

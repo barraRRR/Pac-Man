@@ -89,28 +89,23 @@ class Maze:
     #         (width - 1, height - 1),
     #     ]
 
-    def select_ghost_spawns(self, start: tuple[int, int]) -> list[tuple[int, int]]:
+    def select_ghost_spawns(
+        self,
+        reachable: set[tuple[int, int]],
+    ) -> list[tuple[int, int]]:
         """Elige al azar una casilla alcanzable de cada zona de esquina.
 
         El orden es el mismo que corner_zone_cells: arriba-izquierda,
         arriba-derecha, abajo-izquierda y abajo-derecha.
 
         Args:
-            start: posición del comecocos, (x, y), desde la que se
-                comprueba la accesibilidad.
+            reachable: celdas alcanzables desde Pac-Man, calculadas una
+                sola vez por nivel y reutilizadas en todas las selecciones.
         """
-        zones = self.corner_zone_cells()
-        reachability = self.corner_zone_reachability(start)
-
         ghost_spawns: list[tuple[int, int]] = []
 
-        for zone, flags in zip(zones, reachability):
-            # Nos quedamos solo con las casillas con camino hasta el comecocos.
-            candidates = [
-                cell
-                for cell, is_reachable in zip(zone, flags)
-                if is_reachable
-            ]
+        for zone in self.corner_zone_cells():
+            candidates = [cell for cell in zone if cell in reachable]
 
             if not candidates:
                 raise ValueError("No reachable cell in a ghost corner zone.")
@@ -217,36 +212,26 @@ class Maze:
         return [top_left, top_right, bottom_left, bottom_right]
 
 
-    def corner_zone_reachability(
-        self,
-        start: tuple[int, int],
-    ) -> list[list[bool]]:
-        """Indica qué casillas de cada zona son alcanzables desde start."""
-        zones = self.corner_zone_cells()
-        reachable = self.reachable_cells(start)
-
-        return [
-            [cell in reachable for cell in zone]
-            for zone in zones
-        ]
-
     def select_super_pacgum_spawns(
         self,
-        start: tuple[int, int],
+        reachable: set[tuple[int, int]],
         ghost_spawns: list[tuple[int, int]],
     ) -> list[tuple[int, int]]:
-        """Elige una super-pacgum alcanzable por cada zona de esquina."""
-        zones = self.corner_zone_cells()
-        reachability = self.corner_zone_reachability(start)
-        ghost_positions = set(ghost_spawns)
+        """Elige una super-pacgum alcanzable por zona, sin pisar a los fantasmas.
 
+        Args:
+            reachable: celdas alcanzables desde Pac-Man, calculadas una
+                sola vez por nivel y reutilizadas en todas las selecciones.
+            ghost_spawns: posiciones ya ocupadas por los fantasmas.
+        """
+        ghost_positions = set(ghost_spawns)
         super_pacgum_spawns: list[tuple[int, int]] = []
 
-        for zone, flags in zip(zones, reachability):
+        for zone in self.corner_zone_cells():
             candidates = [
                 cell
-                for cell, is_reachable in zip(zone, flags)
-                if is_reachable and cell not in ghost_positions
+                for cell in zone
+                if cell in reachable and cell not in ghost_positions
             ]
 
             if not candidates:

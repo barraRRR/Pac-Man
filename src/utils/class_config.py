@@ -3,7 +3,6 @@ from pydantic import BaseModel, Field, ValidationError, ValidationInfo, field_va
 import json
 import re
 import sys
-import random
 
 
 class Level(BaseModel):
@@ -130,9 +129,3 @@ class Config(BaseModel):
         # Proteger json.loads() con try-except
 
         return cls(**config_dict)
-
-    def random_seed(self) -> None:
-        '''
-        Ponemos aleatorio la semilla para crear el mapa, reglla del subject, el primer mapa es la semilla, el resto es aleatorio
-        '''
-        self.seed = random.seed(0)
