@@ -25,7 +25,7 @@ class App:
             # self._spawn_entities() # Momento 2: colocar Pac-Man y fantasmas (aún no existe)
             # self._game_loop()      # Momento 3: mover, comer, morir (aún no existe)
             # self._end_game()       # Momento 4: guardar puntuación, despedida
-            return 0
+        return 0
 
     def _start_level(self, number: int, level: Level) -> None:
         """Prepara el nivel actual: genera el mapa y deja el estado listo."""
@@ -34,11 +34,12 @@ class App:
             width=level.width,
             height=level.height,
         )
-        self.pacman_start = self.maze.center_cell()
-        print(f"Level {number}: Pac-Man starts at {self.pacman_start}")
         # print()           #print de prueba para impresion mapa, imprime los 10, el primero semilla resto aleatorio
         # for row in self.maze.grid:
         #     print(row)
+
+        self.pacman_start = self.maze.player_center()
+        # print(f"Level {number}: Pac-Man starts at {self.pacman_start}")
 
 
 
