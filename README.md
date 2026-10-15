@@ -7,30 +7,40 @@
 
 ```
 .
-├── .gitignore                         # Files and folders that Git should ignore
-├── Makefile                           # Shortcuts for installing, running, debugging and checking the project
-├── README.md                          # Project overview, setup instructions and documentation
-├── assets/
-│   └── .gitkeep                       # Keeps this currently empty directory in Git
-├── config.json                        # Default game configuration
-├── en.subject.pdf                     # Project requirements and evaluation subject
-├── pac-man.py                         # Root script used to launch the game
-├── pyproject.toml                     # Project metadata and Python dependencies
-├── scripts/
-│   └── .gitkeep                       # Keeps this currently empty directory in Git
-├── src/
-│   ├── __init__.py                    # Marks src as a Python package
-│   ├── __main__.py                    # Allows the application to be launched as a Python module
-│   ├── core/
-│   │   └── app.py                     # App class, which currently stores the game configuration
-│   ├── main.py                        # Checks command-line arguments and starts the application
-│   └── utils/
-│       └── class_config.py            # Level and Config classes, including configuration loading and validation
-├── tests/
-│   └── .gitkeep                       # Keeps this currently empty directory in Git
-├── uv.lock                            # Locked dependency versions for reproducible installations
-└── wheels/
-    └── mazegenerator-2.1.0-py3-none-any.whl  # Assigned A-Maze-ing package wheel
+├── Makefile
+├── README.md
+├── assets
+│   ├── seleccion fantasma y pops de pollo , su posicion de inicio.png
+│   ├── visualization.png
+│   └── visualization.png:Zone.Identifier
+├── config.json
+├── en.subject.pdf
+├── pac-man.py
+├── pyproject.toml
+├── scripts
+├── src
+│   ├── __init__.py
+│   ├── __main__.py
+│   ├── core
+│   │   └── app.py
+│   ├── main.py
+│   └── utils
+│       ├── class_config.py
+│       └── class_maze.py
+├── tests
+├── uv.lock
+├── visualization.png:Zone.Identifier
+└── wheels
+    ├── mazegenerator-2.1.0-py3-none-any - copia
+    │   ├── mazegenerator
+    │   │   ├── __init__.py
+    │   │   └── mazegenerator.py
+    │   └── mazegenerator-2.1.0.dist-info
+    │       ├── METADATA
+    │       ├── RECORD
+    │       ├── WHEEL
+    │       └── top_level.txt
+    └── mazegenerator-2.1.0-py3-none-any.whl
 ```
 tree -I '.venv|.git'
 
@@ -201,43 +211,24 @@ Una celda con valor `15` tiene activados los cuatro bits de pared. Por eso no se
 
 El método devuelve un conjunto de coordenadas `(x, y)` alcanzables. No guarda distancias ni números de oleada. Los números que aparecen en el dibujo explicativo muestran el orden aproximado en que se van descubriendo las celdas; no son un resultado que el método almacene.
 
-## Elección de posiciones para fantasmas y super-pacgums
+## Elección de posiciones para fantasmas, super-pacgums y pacgums
 
-`select_ghost_spawns(start)` obtiene las cuatro zonas, comprueba qué celdas son alcanzables desde Pac-Man y escoge al azar una candidata de cada zona. Devuelve las posiciones en el mismo orden fijo de las zonas.
+App._start_level() calcula una vez las celdas alcanzables desde la posición inicial de Pac-Man y reutiliza ese resultado en las selecciones del nivel.
 
-`select_super_pacgum_spawns(start, ghost_spawns)` hace algo parecido: busca una candidata alcanzable por zona, pero excluye las celdas que ya ocupan los fantasmas. De este modo una super-pacgum no comparte casilla con un fantasma.
+select_ghost_spawns(reachable) elige una celda alcanzable de cada zona de esquina para colocar los cuatro fantasmas.
 
-Si en alguna zona no hay una casilla alcanzable adecuada, el método lanza una excepción. En el código actual no se agranda la zona para intentar encontrar otra; `App.run()` captura el error al preparar el nivel y devuelve un código de error.
+select_super_pacgum_spawns(reachable, ghost_spawns) elige una celda alcanzable de cada zona de esquina para las cuatro super-pacgums. Descarta las posiciones ocupadas por los fantasmas.
 
-## Un detalle importante: el BFS se repite
+select_pacgum_spawns(reachable, pacman_start, ghost_spawns, super_pacgum_spawns, requested) elige las posiciones de las pacgums normales. Solo selecciona celdas alcanzables y libres; excluye la posición de Pac-Man, las de los fantasmas y las de las super-pacgums. Las posiciones se eligen al azar y no se repiten.
 
-Aunque el BFS devuelve todas las celdas alcanzables de una vez, el código actual vuelve a calcularlo desde varios métodos. Durante la preparación de un nivel ocurre lo siguiente:
+## Qué pasa si no caben todas las pacgums
+La cantidad solicitada se configura con pacgum. Su mínimo es 0 y no tiene un máximo fijo en la configuración, porque la cantidad que cabe depende del mapa generado.
 
-1. `select_ghost_spawns()` llama a `corner_zone_reachability()`, que ejecuta un BFS.
-2. `select_super_pacgum_spawns()` vuelve a llamar a `corner_zone_reachability()` y ejecuta otro BFS.
-3. `App._start_level()` llama directamente a `reachable_cells()` y ejecuta otro BFS.
-4. Después, `App._start_level()` llama otra vez a `corner_zone_reachability()`, que ejecuta un cuarto BFS.
+Para calcular las posiciones posibles, el método parte de las celdas alcanzables y quita las que ya están ocupadas. Así no se basa únicamente en width × height: también tiene en cuenta las celdas no alcanzables y las posiciones de las demás entidades.
 
-Por tanto, con el código actual se hacen cuatro recorridos por nivel. Además, en `App._start_level()` las variables `reachable`, `zones` y `reachability` reciben resultados que luego no se usan. Es una posible mejora pendiente: calcular las celdas alcanzables una vez y reutilizar ese resultado para seleccionar las posiciones.
+Si se solicitan más pacgums de las que caben, el programa coloca todas las que puede y escribe un mensaje de error en inglés en stderr. No se detiene ni reduce la cantidad sin avisar. El aviso lo emite Maze.select_pacgum_spawns(), que también realiza la selección.
 
-## Qué está hecho y qué queda para después
+## El BFS se calcula una vez por nivel
+App._start_level() llama una vez a reachable_cells(self.pacman_start) y guarda el resultado en reachable. Después pasa ese conjunto a los métodos que necesitan comprobar qué celdas son alcanzables.
 
-En el código revisado ya se genera el mapa y se calculan las posiciones iniciales de Pac-Man, los fantasmas y las super-pacgums. En `App._start_level()` todavía se imprimen esas posiciones como información de prueba.
-
-En esta parte del código aún no se reparten las pacgums normales ni se implementan el movimiento, la recogida de objetos, la puntuación o el bucle de juego. Esos pasos pertenecen a la lógica que se añadirá después.
-
-Las pruebas concretas de conectividad o de resultados para varios tamaños deberían anotarse junto con el archivo de configuración o el test usado para hacerlas. Así podemos volver a ejecutarlas y confirmar el resultado en lugar de dejar una afirmación difícil de reproducir.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+Así se evita repetir el recorrido BFS al seleccionar fantasmas, super-pacgums y pacgums normales.
