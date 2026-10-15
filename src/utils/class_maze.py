@@ -56,19 +56,42 @@ class Maze:
         center_y = height_map // 2
 
         best: tuple[int, int] | None = None
-        best_best: int | None = None
+        best_dist: int | None = None
 
         for y in range(height_map):
             for x in range(width):
                 if self._grid[y][x] == 15: #El 15 SOn los bloques del 42
                     continue
                 dist = (x - center_x) ** 2 + (y - center_y) ** 2
-                if best_best is None or dist < best_best:
+                if best_dist is None or dist < best_dist:
                     best = (x, y)
-                    best_best = dist
+                    best_dist = dist
         if best is None:
             raise ValueError("Maze has no walkable cells.")
         # print(best)
         return best
+
+    def ghost_corners(self) -> list[tuple[int, int]]:
+        """Devuelve las cuatro esquinas del laberinto como (x, y).
+
+        El orden es: arriba-izquierda, arriba-derecha,
+        abajo-izquierda y abajo-derecha.
+        """
+        height = len(self._grid)
+        width = len(self._grid[0])
+
+        return [
+            (0, 0),
+            (width - 1, 0),
+            (0, height - 1),
+            (width - 1, height - 1),
+        ]
+
+
+
+
+
+
+
 
 

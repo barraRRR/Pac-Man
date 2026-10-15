@@ -10,6 +10,7 @@ class App:
         self.config = config
         self.maze = Maze(config.seed)
         self.pacman_start: tuple[int, int] | None = None
+        self.ghost_spawns: list[tuple[int, int]] = []
 
     def run(self) -> None:
         """Recorre los niveles en orden y ejecuta los momentos del juego."""
@@ -39,7 +40,8 @@ class App:
         #     print(row)
 
         self.pacman_start = self.maze.center_comecocos()
-        print(f"Level {number}: Pac-Man starts at {self.pacman_start}")
+        self.ghost_spawns = self.maze.ghost_corners()
+        print(f"Level {number}: Pac-Man starts at {self.pacman_start} - Ghosts start at {self.ghost_spawns}")
 
 
 
