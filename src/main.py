@@ -21,7 +21,7 @@ def main() -> int:
         print(f"Error loading config: {e}", file=sys.stderr)
         return 1
 
-    app.engine.run()
+    app.run()
 
     
     # ——— test suite ———
