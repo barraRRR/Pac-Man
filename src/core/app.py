@@ -12,6 +12,7 @@ class App:
         self.maze = Maze(config.seed)
         self.pacman_start: tuple[int, int] | None = None
         self.ghost_spawns: list[tuple[int, int]] = []
+        self.super_pacgum_spawns: list[tuple[int, int]] = []
 
     def run(self) -> None:
         """Recorre los niveles en orden y ejecuta los momentos del juego."""
@@ -43,10 +44,11 @@ class App:
         self.pacman_start = self.maze.center_comecocos()
         # self.ghost_spawns = self.maze.ghost_corners()
         self.ghost_spawns = self.maze.select_ghost_spawns(self.pacman_start)
+        self.super_pacgum_spawns = self.maze.select_super_pacgum_spawns(self.pacman_start, self.ghost_spawns)
         # print(f"Level {number}: Pac-Man starts at {self.pacman_start} - Ghosts start at {self.ghost_spawns}")
         reachable = self.maze.reachable_cells(self.pacman_start)
         # print(f"Level {number}: reachable cells: {len(reachable)}")
-        print(f"Level {number}: Ghosts start at {self.ghost_spawns}")
+        # print(f"Level {number}: Ghosts start at {self.ghost_spawns}")
         zones = self.maze.corner_zone_cells()
         reachability = self.maze.corner_zone_reachability(self.pacman_start)
 

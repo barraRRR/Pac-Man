@@ -230,7 +230,33 @@ class Maze:
             for zone in zones
         ]
 
+    def select_super_pacgum_spawns(
+        self,
+        start: tuple[int, int],
+        ghost_spawns: list[tuple[int, int]],
+    ) -> list[tuple[int, int]]:
+        """Elige una super-pacgum alcanzable por cada zona de esquina."""
+        zones = self.corner_zone_cells()
+        reachability = self.corner_zone_reachability(start)
+        ghost_positions = set(ghost_spawns)
 
+        super_pacgum_spawns: list[tuple[int, int]] = []
+
+        for zone, flags in zip(zones, reachability):
+            candidates = [
+                cell
+                for cell, is_reachable in zip(zone, flags)
+                if is_reachable and cell not in ghost_positions
+            ]
+
+            if not candidates:
+                raise ValueError(
+                    "No available reachable cell for a super-pacgum."
+                )
+
+            super_pacgum_spawns.append(random.choice(candidates))
+
+        return super_pacgum_spawns
 
     
 
