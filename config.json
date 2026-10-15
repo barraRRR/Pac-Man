@@ -1,16 +1,12 @@
 {
     "highscore_filename": "highscore.csv",
     "level": [
+        { "width": 21, "height": 15 },
+        { "width": 9,  "height": 7  },
         { "width": 15, "height": 15 },
-        { "width": 15, "height": 15 },
-        { "width": 15, "height": 15 },
-        { "width": 15, "height": 15 },
-        { "width": 15, "height": 15 },
-        { "width": 15, "height": 15 },
-        { "width": 15, "height": 15 },
-        { "width": 15, "height": 15 },
-        { "width": 15, "height": 15 },
-        { "width": 15, "height": 15 }
+        { "width": 5,  "height": 5  },
+        { "width": 25, "height": 21 },
+        { "width": 11, "height": 13 }
     ],
     "lives": 3,
     "pacgum": 42,
@@ -20,6 +16,29 @@
     "seed": 42,
     "level_max_time": 90
 }
+
+// {
+//     "highscore_filename": "highscore.csv",
+//     "level": [
+//         { "width": 15, "height": 15 },
+//         { "width": 15, "height": 15 },
+//         { "width": 15, "height": 15 },
+//         { "width": 15, "height": 15 },
+//         { "width": 15, "height": 15 },
+//         { "width": 15, "height": 15 },
+//         { "width": 15, "height": 15 },
+//         { "width": 15, "height": 15 },
+//         { "width": 15, "height": 15 },
+//         { "width": 15, "height": 15 }
+//     ],
+//     "lives": 3,
+//     "pacgum": 42,
+//     "points_per_pacgum": 10,
+//     "points_per_super_pacgum": 50,
+//     "points_per_ghost": 200,
+//     "seed": 42,
+//     "level_max_time": 90
+// }
 // {
 //     "highscore_filename": "highscore.csv",
 //     "level": 10, # Ni idea de qué es esto

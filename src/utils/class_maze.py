@@ -43,7 +43,7 @@ class Maze:
         return self._grid
 
 
-    def player_center(self) -> tuple[int, int]:
+    def center_comecocos(self) -> tuple[int, int]:
         """
         Devuelve la celda transitable más cercana al centro, como (x, y).
 
@@ -62,13 +62,13 @@ class Maze:
             for x in range(width):
                 if self._grid[y][x] == 15: #El 15 SOn los bloques del 42
                     continue
-                dist = (x - center_x) ** 2 + (y -center_y) ** 2
+                dist = (x - center_x) ** 2 + (y - center_y) ** 2
                 if best_best is None or dist < best_best:
                     best = (x, y)
                     best_best = dist
         if best is None:
             raise ValueError("Maze has no walkable cells.")
-        print(best)
+        # print(best)
         return best
 
 

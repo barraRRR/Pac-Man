@@ -38,8 +38,8 @@ class App:
         # for row in self.maze.grid:
         #     print(row)
 
-        self.pacman_start = self.maze.player_center()
-        # print(f"Level {number}: Pac-Man starts at {self.pacman_start}")
+        self.pacman_start = self.maze.center_comecocos()
+        print(f"Level {number}: Pac-Man starts at {self.pacman_start}")
 
 
 
