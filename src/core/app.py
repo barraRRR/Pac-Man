@@ -1,5 +1,6 @@
 from src.utils.class_config import Config
-from src.core.engine import Engine
+from src.core.engine import Engine, _PADDING
+from typing import List
 import pygame
 
 
@@ -24,10 +25,12 @@ class App:
         pygame.init()
         window = self._engine.put_window()
         running = True
+        map = self._engine.put_map(self.test_maze_generator())
 
         # mantiene el programa en ejecución hasta que haya un evento de cierre
         while running:
             window.blit(self._engine.put_background(), (0, 0))
+            window.blit(map, (_PADDING, _PADDING))
             for event in pygame.event.get():
                 # pulsar el boton X con el raton
                 if event.type == pygame.QUIT:
@@ -41,3 +44,10 @@ class App:
 
         # cierra el programa
         pygame.quit()
+
+    # metodo provisional para probar el mapa
+    def test_maze_generator(self) -> List[List[int]]:
+        from tests.generator import MazeGenerator
+        generator = MazeGenerator(15, 15, (0, 0), (14, 14))
+        generator.generate(is_perfect=False)
+        return generator.grid

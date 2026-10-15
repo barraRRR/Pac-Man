@@ -1,6 +1,6 @@
 import pygame
 from pygame import Surface
-from typing import Tuple
+from typing import Tuple, List
 
 """
 
@@ -20,15 +20,13 @@ mlx_destroy_window()	    pygame.display.quit()	            Destruye el contexto 
 
 """
 
-
-
 # Valores provisionales
 _MAX_SCREEN_W = 1200
 _MAX_SCREEN_H = 800
 _MIN_SCREEN_W = 400
 # MIN_SCREEN_H = 400
 
-_TEST_WINDOWN_WIDTH = 600
+_TEST_WINDOW_WIDTH = 600
 _TEST_WINDOW_HEIGHT = 800
 
 _PADDING = 30
@@ -39,8 +37,110 @@ _MIN_TILE_SIZE = 10
 _STD_TILE_SIZE = 20
 _MAX_TILE_SIZE = 45
 
-_TEST_BACKGROUND_COLOR = 0xFFDB58
+_TEST_BACKGROUND_COLOR = (255, 219, 88)
+_TEST_WALL_COLOR = (0, 0, 0)
 
+
+class Painter:
+    """
+    Pinta pixeles en display y superficies.
+    """
+    def __init__(self) -> None:
+        self.tile_size: int = None
+        self.map_px: Tuple[int, int] = None
+        self.line: int = None
+        
+    def update(
+            self,
+            tile_size: int,
+            map_px: Tuple[int, int],
+            line: int
+        ) -> None:
+        self.tile_size: int = tile_size
+        self.map_px: Tuple[int, int] = map_px
+        self.line: int = line
+        
+
+    def _put_pixel(
+            self,
+            surface: Surface,
+            coord: Tuple[int, int],
+            color: int = _TEST_WALL_COLOR
+        ) -> None:
+        """
+        """
+        # quita posibles coordenadas fuera de la ventana
+        if (coord[0] < 0 or coord[0] >= surface.get_width() or
+            coord[1] < 0 or coord[1] >= surface.get_height()):
+            return
+
+        # coloca el pixel en la superficie
+        surface.set_at(coord, color)
+
+    def _render_cell(
+            self,
+            surface: Surface,
+            coord: Tuple[int, int],
+            value: int,
+            color: int
+        ) -> None:
+        """
+        Draw a tile at the specified grid coordinates.
+
+        Renders a square tile of size tile_size×tile_size pixels at the given
+        grid position. Each pixel in the tile is set to the specified color.
+        Colors are automatically extended with alpha channel if needed.
+
+        Args:
+            coord: X coordinates in the grid
+            value: Tile Value in the maze grid
+            color: Color value in hexadecimal format (RGB or ARGB)
+        """
+        x = coord[0] * self.tile_size
+        y = coord[1] * self.tile_size
+
+        # Draw walls based on bits
+        if value & 1:  # NORTH
+            for i in range(self.tile_size):
+                for t in range(self.line):
+                    self._put_pixel(surface, (x + i, y + t), color)
+
+        if value & 2:  # EAST
+            for i in range(self.tile_size):
+                for t in range(self.line):
+                    self._put_pixel(surface, (x + self.tile_size - 1 - t, y + i), color)
+
+        if value & 4:  # SOUTH
+            for i in range(self.tile_size):
+                for t in range(self.line):
+                    self._put_pixel(surface, (x + i, y + self.tile_size - 1 - t), color)
+
+        if value & 8:  # WEST
+            for i in range(self.tile_size):
+                for t in range(self.line):
+                    self._put_pixel(surface, (x + t, y + i), color)
+
+    def _render_map(
+            self,
+            map_surface: Surface,
+            bit_map: List[List[int]],
+            color: Tuple[int, int, int, int] = (0, 0, 0, 0)
+        ) -> None:
+        """
+        Render a maze grid to the screen.
+
+        Iterates through the maze 2D array and renders each cell as a tile.
+        Cells with value > 0 are drawn in white, others in background color.
+        Does not automatically flush the image; call flush_image() to display.
+
+        Args:
+            maze: 2D list where each element is an int representing a cell.
+        """
+
+        for y, row in enumerate(bit_map):
+            for x, cell_value in enumerate(row):
+                self._render_cell(map_surface, (x, y), cell_value, color)
+        
 
 class Engine():
     """
@@ -52,10 +152,11 @@ class Engine():
         self.line: int = None
         self.map_px: Tuple[int, int] = None
         self.win_px: Tuple[int, int] = None
+        self.paint: Painter = Painter()
 
     def _update_size(self, size: Tuple[int, int]) -> None:
         """
-        Fija el tamaño de la v
+        Fija el tamaño del mapa
         """
         self.map_size: Tuple[int, int] = size
 
@@ -63,7 +164,7 @@ class Engine():
         """
         """
         # calculamos el tamaño que va a tener cada celda (tile) según los tamaños máximos y mínimos de pantalla que configuremos
-        self.tile_size: int = self._calculate_dynamic_tile_size()
+        self._calculate_dynamic_tile_size()
         # calculamos en una tupla el tamaño que debe tener el maze (suma de todas las celdas) | ancho x alto
         self.map_px: Tuple[int, int] = ((self.map_size[0] * self.tile_size), (self.map_size[1] * self.tile_size))
     
@@ -76,7 +177,7 @@ class Engine():
             (self.map_px[1] + (_PADDING * 2))
         )
 
-    def _calculate_dynamic_tile_size(self) -> int:
+    def _calculate_dynamic_tile_size(self) -> None:
         """Calculate optimal tile size based on window and maze dimensions.
 
         Returns:
@@ -91,8 +192,11 @@ class Engine():
         ideal_tile_h: int = safe_h // self.map_size[1]
 
         tile_size: int = min(ideal_tile_w, ideal_tile_h)
-
-        return max(_MIN_TILE_SIZE, min(tile_size, _MAX_TILE_SIZE))
+        self.tile_size: int = max(
+            _MIN_TILE_SIZE, min(tile_size, _MAX_TILE_SIZE)
+        )
+        # Establecemos el grosor de la línea según el tamaño de la celda
+        self.line = _LINE if self.tile_size >= _STD_TILE_SIZE else _SAFE_LINE
 
     def _px_with_padding(self, x_px: int, y_px: int) -> Tuple[int, int]:
         """Convert pixel coordinates with padding offset.
@@ -106,7 +210,7 @@ class Engine():
         """
 
         # Esto es para poner pixeles calculando los margenes que dejamos por los bordes del mapa
-        extra_x = (self.win_px[0] - self.maze_px[0]) // 2
+        extra_x = (self.win_px[0] - self.map_px[0]) // 2
         return (x_px + extra_x, y_px + _PADDING)
 
     def put_window(self) -> Surface:
@@ -115,10 +219,6 @@ class Engine():
         # Imprime la ventana entera en pantalla
         return pygame.display.set_mode(self.win_px)
 
-    def put_pixel(self, surface: Surface) -> None:
-        """
-        """
-
     def put_background(self) -> Surface:
         """
         """
@@ -126,9 +226,19 @@ class Engine():
         background = Surface(self.win_px)
         background.fill(_TEST_BACKGROUND_COLOR)
         return background
-    
-    def put_map(self, size: Tuple[int, int]) -> None:
+
+    def put_map(
+            self,
+            bit_map: List[List[int]],
+            color: Tuple[int, int, int, int] = _TEST_WALL_COLOR
+        ) -> Surface:
         """
         """
-        ...
+        self.paint.update(self.tile_size, self.map_px, self.line)
+        map_surface = Surface(self.map_px, pygame.SRCALPHA)
+        map_surface.fill((0, 0, 0, 0)) 
+        self.paint._render_map(map_surface, bit_map, color)
+        # Imprime la ventana entera en pantalla
+        return map_surface
+
     
