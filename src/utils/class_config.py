@@ -131,7 +131,7 @@ class Config(BaseModel):
 
         return cls(**config_dict)
 
-    def random_sed(self) -> None:
+    def random_seed(self) -> None:
         '''
         Ponemos aleatorio la semilla para crear el mapa, reglla del subject, el primer mapa es la semilla, el resto es aleatorio
         '''
