@@ -21,12 +21,11 @@ def main() -> int:
         print(f"Error loading config: {e}", file=sys.stderr)
         return 1
 
-    app.engine.run()
+    app.run()
 
-    
     # ——— test suite ———
     # print(parser._config_clean) #Documento
-    print(app.config.model_dump_json(indent=4)) #Objeto Config creado
+    # print(app._config.model_dump_json(indent=4)) #Objeto Config creado
     return 0
 
 
