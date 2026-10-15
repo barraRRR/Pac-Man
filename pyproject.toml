@@ -2,10 +2,10 @@
 name = "Pac_Man"
 description= "The mighty arcade game, now in Python. Wacka! Wacka!."
 version = "v1.0.0"
-requires-python = ">=3.10"
+requires-python = "==3.10.*"
 dependencies = [
     "flake8",
     "mypy",
     "pydantic",
-    "pygame"
+    "pygame==2.6.1"
 ]

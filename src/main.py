@@ -20,6 +20,9 @@ def main() -> int:
     except (OSError, FileNotFoundError, json.JSONDecodeError) as e:
         print(f"Error loading config: {e}", file=sys.stderr)
         return 1
+
+    app.engine.run()
+
     
     # ——— test suite ———
     # print(parser._config_clean) #Documento
