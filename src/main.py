@@ -1,4 +1,4 @@
-from src.utils.class_config import json_parser, Config
+from src.utils.class_config import Config
 from src.core.app import App
 import json
 import sys
@@ -16,7 +16,7 @@ def main() -> int:
 
     # Aquí hay try-excepts que pusiste Aitor, pero el flujo lo manejamos dentro de la clase? ya que el programa se sigue ejecutando aunque el file de config esté mal. Si el path es incorrecto podemos promptear para que el usuario decida si prefiere poner otra ruta o cargar valores por defecto.
     try:
-        app = App(json_parser(sys.argv[1]))
+        app = App(Config.json_parser(sys.argv[1]))
     except (OSError, FileNotFoundError, json.JSONDecodeError) as e:
         print(f"Error loading config: {e}", file=sys.stderr)
         return 1

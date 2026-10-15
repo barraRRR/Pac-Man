@@ -6,25 +6,31 @@
 
 
 ```
-pacman/
-├── assets/                  # Sprites, mapas, sonidos
-├── src/                     # Código fuente directo
-│   ├── __init__.py
-│   ├── __main__.py          # Opcional: para `python3 -m src config.json`
-│   ├── main.py              # Función main() principal
-│   ├── core/                # Engine, game loop, estados
-│   │   ├── engine.py
-│   │   └── states.py
-│   ├── entities/            # Pacman, fantasmas, pellets
-│   │   ├── player.py
-│   │   └── ghost.py
-│   ├── map/                 # Carga de mapas y grid
-│   └── utils/               # Rutas, config.json parser
-├── tests/                   # Batería de tests con pytest
-├── pac-man.py               # Script lanzador raíz
-├── config.json              # Config file
-├── Makefile
-└── requirements.txt
+.
+├── .gitignore                         # Files and folders that Git should ignore
+├── Makefile                           # Shortcuts for installing, running, debugging and checking the project
+├── README.md                          # Project overview, setup instructions and documentation
+├── assets/
+│   └── .gitkeep                       # Keeps this currently empty directory in Git
+├── config.json                        # Default game configuration
+├── en.subject.pdf                     # Project requirements and evaluation subject
+├── pac-man.py                         # Root script used to launch the game
+├── pyproject.toml                     # Project metadata and Python dependencies
+├── scripts/
+│   └── .gitkeep                       # Keeps this currently empty directory in Git
+├── src/
+│   ├── __init__.py                    # Marks src as a Python package
+│   ├── __main__.py                    # Allows the application to be launched as a Python module
+│   ├── core/
+│   │   └── app.py                     # App class, which currently stores the game configuration
+│   ├── main.py                        # Checks command-line arguments and starts the application
+│   └── utils/
+│       └── class_config.py            # Level and Config classes, including configuration loading and validation
+├── tests/
+│   └── .gitkeep                       # Keeps this currently empty directory in Git
+├── uv.lock                            # Locked dependency versions for reproducible installations
+└── wheels/
+    └── mazegenerator-2.1.0-py3-none-any.whl  # Assigned A-Maze-ing package wheel
 ```
 
 

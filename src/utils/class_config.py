@@ -3,6 +3,7 @@ from pydantic import BaseModel, Field, ValidationError, ValidationInfo, field_va
 import json
 import re
 import sys
+import random
 
 
 class Level(BaseModel):
@@ -106,27 +107,32 @@ class Config(BaseModel):
             datos["level"] = niveles + [{} for _ in range(10 - len(niveles))]
         return datos
 
+    @classmethod
+    def json_parser(cls, config_file_path: str) -> "Config":
+        """Lee un archivo JSON (con comentarios) y construye la Config."""
+        with open(config_file_path, "r", encoding="utf-8") as file:
+            config_raw: str = file.read()
+        # Proteger read() con try-except (o hacerlo desde la llamada??
+            
+        # TEAM NOTE: antes de procesar y parsear el json, le quitamos los comentarios para evitar un JSONError al cargarlo.
+        # Este patrón lo vemos juntos mejor. Básicamente crea 4 grupos. El primero recoje todo lo válido y los otros son grupos que incluyen los comentarios
+        pattern = r'("(?:\\.|[^"\\])*")|//.*|/\*[\s\S]*?\*/|#.*'
 
-def json_parser(config_file_path: str) -> Config:
-    """
-    """
-    with open(config_file_path, "r", encoding="utf-8") as file:
-        config_raw: str = file.read()
-    # Proteger read() con try-except (o hacerlo desde la llamada??
-        
-    # TEAM NOTE: antes de procesar y parsear el json, le quitamos los comentarios para evitar un JSONError al cargarlo.
-    # Este patrón lo vemos juntos mejor. Básicamente crea 4 grupos. El primero recoje todo lo válido y los otros son grupos que incluyen los comentarios
-    pattern = r'("(?:\\.|[^"\\])*")|//.*|/\*[\s\S]*?\*/|#.*'
+        # Creamos una función que recibe un objeto Match y comprobamos si hay coincidencia con el primer grupo de paréntesis
+        def replacer(match: re.Match):
+            if match.group(1):
+                return match.group(1)
+            return ""
 
-    # Creamos una función que recibe un objeto Match y comprobamos si hay coincidencia con el primer grupo de paréntesis
-    def replacer(match: re.Match):
-        if match.group(1):
-            return match.group(1)
-        return ""
+        # Aquí re.sub() actúa como función de orden superior para ejectura replacer
+        config_clean: str = re.sub(pattern, replacer, config_raw)
+        config_dict: Dict[str, Any] = json.loads(config_clean)
+        # Proteger json.loads() con try-except
 
-    # Aquí re.sub() actúa como función de orden superior para ejectura replacer
-    config_clean: str = re.sub(pattern, replacer, config_raw)
-    config_dict: Dict[str, Any] = json.loads(config_clean)
-    # Proteger json.loads() con try-except
+        return cls(**config_dict)
 
-    return Config(**config_dict)
+    def random_sed(self) -> None:
+        '''
+        Ponemos aleatorio la semilla para crear el mapa, reglla del subject, el primer mapa es la semilla, el resto es aleatorio
+        '''
+        self.seed = random.seed(0)
