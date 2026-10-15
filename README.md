@@ -100,3 +100,28 @@ El adaptador del proyecto debe ajustarse a la interfaz del paquete.
 El parámetro PERFECT debe configurarse como False.
 Si el generador falla, el error debe gestionarse limpiamente.
 La integración del generador y el uso efectivo de la semilla deben documentarse cuando estén implementados y comprobados. No se afirma aquí que ya estén terminados.
+
+
+
+## Extracción del mapa - paquete mazegenerator-00001.whl
+Es el paquete A-Maze-ing que exige el subject como generador de laberintos. La versión que os han dado es la 2.1.0
+
+Qué se puede y qué no se puede hacer con él;
+
+SI   Usarlo tal cual - el subject dice explícitamente que no está permitido escribir un generador propio y que el paquete se usa sin modificar. Vuestro cargador debe adaptarse a la interfaz de A-Maze-ing, no al revés.
+SI   perfect=False - el subject ordena poner perfect a False para que salgan pasillos compatibles con Pac-Man (sin callejones sin salida donde quedes atrapado). De hecho, el propio constructor ya lo trae por defecto a False, y el método _braid() es el que elimina los callejones.
+SI   Semilla - seed se puede fijar (por defecto 0 = aleatorio). El subject dice: primer nivel con semilla fija (ej. 42), siguientes niveles aleatorios.           Esto confirma una teoría, tras realizar el config el otro día propuse crear el objeto como un iterador, no se si se podrá, pero en princpio según esto el primer mapa es el mismo y el resto aleatorio, es decir llamarlo con la semilla mas un número aleatorio y listo, elprimer nivel siempre es el mismo, pero el resto de niveles los mapas aleatorios, no se si decir que está bien o que está mal, proque realmente le quitas la gracia de él videojuego no??? el ranking de puntos compite con puntos ganados de la misma manera, una aleatoriedad puede favorecer o perjudicar a otro, no? nose, puede ser un buen pequeño debate jajaja
+SI   Entrada/salida - entry_cell y exit_cell configurable. Por defecto entrada (0,0) y salida (-1,-1 que se convierte a la última celda).
+SI   Camino más corto - el paquete te da shortest_path (un string con N/E/S/W) de la entrada a la salida. Eso te puede servir de referencia.
+No modificar el paquete - es lo que dice el subject, y además en la revisión por pares se reinstala, así que si le tocas el código se os romperá.
+No generar mapa a mano - todo el mapa (muros y pasillos) sale de este generador.
+
+El patrón "42" - el generador inserta un patrón "42" oculto en el centro del laberinto (será un bloque de celdas valladas que os puede servir de pista/punto de referencia). Si el mapa es muy pequeño no cabe y lo avisa solo.
+
+
+
+
+
+
+
+
