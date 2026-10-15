@@ -1,7 +1,7 @@
 from mazegenerator import MazeGenerator
 from collections import deque
 import random
-
+import sys
 
 class Maze:
     """Adaptador del laberinto: envuelve el paquete mazegenerator.
@@ -243,8 +243,36 @@ class Maze:
 
         return super_pacgum_spawns
 
-    
+    def select_pacgum_spawns(
+        self,
+        reachable: set[tuple[int, int]],
+        pacman_start: tuple[int, int],
+        ghost_spawns: list[tuple[int, int]],
+        super_pacgum_spawns: list[tuple[int, int]],
+        requested: int,
+    ) -> list[tuple[int, int]]:
+        """Elige casillas libres y alcanzables para las pacgums normales.
 
+        Descarta las celdas ocupadas por Pac-Man, fantasmas y
+        super-pacgums, y no repite casilla. Si no caben todas las
+        solicitadas, avisa y coloca solo las que quepan.
+        """
+        if requested <= 0:
+            return []
+
+        occupied = {pacman_start, *ghost_spawns, *super_pacgum_spawns}
+        candidates = sorted(reachable - occupied)
+        placed = random.sample(candidates, min(requested, len(candidates)))
+
+        if len(placed) < requested:
+            print(
+                f"Error: requested {requested} pacgums, "
+                f"only {len(placed)} free cells, "
+                f"using {len(placed)}.",
+                file=sys.stderr,
+            )
+
+        return placed
 
 
 
