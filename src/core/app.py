@@ -58,6 +58,10 @@ class App:
             "Bottom-left",
             "Bottom-right",
         )
+        print(f"Level {number}:")
+        print(f"  Pac-Man: {self.pacman_start}")
+        print(f"  Ghosts: {self.ghost_spawns}")
+        print(f"  Super-pacgums: {self.super_pacgum_spawns}")
         print()
 
 
