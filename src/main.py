@@ -24,8 +24,11 @@ def main() -> int:
     # ——— test suite ———
     # print(parser._config_clean) #Documento
     print(app.config.model_dump_json(indent=4)) #Objeto Config creado
-    app.run()
-    return 0
+
+    return app.run()
+
+
+
 
 
 if __name__ == "__main__":
