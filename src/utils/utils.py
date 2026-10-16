@@ -19,7 +19,6 @@ class Coord:
         self.x, self.y = xy
         
 
-
 class Color:
     """
     """
