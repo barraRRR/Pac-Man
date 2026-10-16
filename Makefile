@@ -29,8 +29,8 @@ run:
 	@echo "|__| /__/   \__\_____|       |__|  |__/__/   \__\__| \__|"
 	@echo "\033[0m"
 	-@uv run python pac-man.py $(RUN_ARGS)
-	@echo "\033[1;31m"
-	@echo "\nEND OF PROGRAM - SEE YOU SOON!"
+# 	@echo "\033[1;31m"
+# 	@echo "\nEND OF PROGRAM - SEE YOU SOON!"
 	@echo "\033[0m"
 	@$(MAKE) clean --no-print-directory
 
