@@ -1,4 +1,5 @@
 from mazegenerator import MazeGenerator
+from src.maze.bitmap import BitMap
 from collections import deque
 import random
 import sys
@@ -16,9 +17,13 @@ class Maze:
         Args:
             seed: semilla de la configuración, usada solo para el nivel 1.
         """
-        self._seed = seed                  # Semilla base (solo nivel 1).
-        self._grid: list = []              # Grid [fila][columna] del nivel actual ([] = sin nivel).
+        self._seed = seed                             # Semilla base (solo nivel 1).
+        self._bitmap: BitMap = BitMap()              # Grid [fila][columna] del nivel actual ([] = sin nivel).
 
+    @property
+    def grid(self) -> list[list[int]]:
+        """Devuelve la cuadrícula del nivel actual (solo lectura)."""
+        return self._bitmap.grid
 
     def generate_level(self, number:int, width: int, height:int) -> None:
         """Genera el mapa de un nivel y guarda sus cuadrícula.
@@ -33,17 +38,12 @@ class Maze:
         # Crear el generador ES generar el mapa (su __init__ ya llama a generate()).
         generator_map = MazeGenerator(size=(width, height), perfect=False, seed=semilla)
 
-        self._grid = generator_map.maze #Lee el mapa ya creado contiene Una lista de listas de enteros (list[list[int]]
+        self._bitmap.grid.clear()
+        self._bitmap.grid.extend(generator_map.maze)        #Lee el mapa ya creado contiene Una lista de listas de enteros (list[list[int]]
         # print(self._grid)
         # print('\n')
         # for row in self._grid:
         #     print(row)
-
-    @property
-    def grid(self) -> list[list[int]]:
-        """Devuelve la cuadrícula del nivel actual (solo lectura)."""
-        return self._grid
-
 
     def center_comecocos(self) -> tuple[int, int]:
         """
@@ -53,7 +53,7 @@ class Maze:
         bloque sólido (15), la que menos distancia tiene al centro.
         """
         height_map = len(self.grid)
-        width = len(self._grid[0])
+        width = len(self.grid[0])
         center_x = width // 2
         center_y = height_map // 2
 
@@ -62,7 +62,7 @@ class Maze:
 
         for y in range(height_map):
             for x in range(width):
-                if self._grid[y][x] == 15: #El 15 SOn los bloques del 42
+                if self.grid[y][x] == 15: #El 15 SOn los bloques del 42
                     continue
                 dist = (x - center_x) ** 2 + (y - center_y) ** 2
                 if best_dist is None or dist < best_dist:
@@ -100,11 +100,11 @@ class Maze:
 
     def reachable_cells(self, start: tuple[int, int]) -> set[tuple[int, int]]:
         """Devuelve las celdas con camino desde start, en coordenadas (x, y)."""
-        if not self._grid:
+        if not self.grid:
             raise ValueError("Maze has not been generated.")
 
-        height = len(self._grid)
-        width = len(self._grid[0])
+        height = len(self.grid)
+        width = len(self.grid[0])
         start_x, start_y = start
 
         if not (0 <= start_x < width and 0 <= start_y < height):
@@ -126,7 +126,7 @@ class Maze:
 
         while pending:
             x, y = pending.popleft()
-            current_cell = self._grid[y][x]
+            current_cell = self.grid[y][x]
 
             for dx, dy, wall, opposite_wall in directions:
                 next_x = x + dx
@@ -142,7 +142,7 @@ class Maze:
                 if next_position in visited:
                     continue
 
-                next_cell = self._grid[next_y][next_x]
+                next_cell = self.grid[next_y][next_x]
 
                 # Solo se puede pasar si no hay pared en ninguno de los dos lados.
                 if current_cell & wall or next_cell & opposite_wall:
@@ -257,11 +257,3 @@ class Maze:
             )
 
         return placed
-
-
-
-
-
-
-
-
