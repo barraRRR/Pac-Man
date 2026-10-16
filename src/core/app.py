@@ -83,6 +83,8 @@ class App:
             width=level.width,
             height=level.height,
         )
+        print(f"\nLevel {number}:")
+
         # Apunto qué nivel estamos preparando (para el HUD, errores y highscore).
         self.current_level = number
 
@@ -104,13 +106,8 @@ class App:
         # 3º pacgums normales, al final porque no pueden pisar a nadie de lo de arriba.
         self.pacgum_spawns = self.maze.select_pacgum_spawns(reachable, self.pacman_start, self.ghost_spawns, self.super_pacgum_spawns, self.config.pacgum)
 
-        print(f"Level {number}:")
-        print(f"  Pac-Man: {self.pacman_start}")
-        print(f"  Ghosts: {self.ghost_spawns}")
-        print(f"  Super-pacgums: {self.super_pacgum_spawns}")
-        # print(f"  Pacgums: {self.pacgum_spawns}")
-        print(f"  Pacgums: {len(self.pacgum_spawns)} placed")
-        print()
+        print(f"  Pac-Man: {self.pacman_start}  Ghosts: {self.ghost_spawns}  Super-pacgums: {self.super_pacgum_spawns}  Pacgums: {len(self.pacgum_spawns)} placed")
+
 
     def _spawn_entities(self) -> None:
         """
