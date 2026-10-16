@@ -41,7 +41,7 @@ _TEST_BACKGROUND_COLOR = (255, 219, 88)
 _TEST_WALL_COLOR = (0, 0, 0)
 
 
-class Painter:
+class ImageRender:
     """
     Pinta pixeles en display y superficies.
     """
@@ -142,7 +142,7 @@ class Painter:
                 self._render_cell(map_surface, (x, y), cell_value, color)
         
 
-class Engine():
+class GraphicEngine():
     """
     """
     def __init__(self) -> None:
@@ -152,7 +152,7 @@ class Engine():
         self.line: int = None
         self.map_px: Tuple[int, int] = None
         self.win_px: Tuple[int, int] = None
-        self.paint: Painter = Painter()
+        self.paint: ImageRender = ImageRender()
 
     def _update_size(self, size: Tuple[int, int]) -> None:
         """

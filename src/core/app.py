@@ -1,10 +1,15 @@
 from src.utils.class_config import Config, Level
 from src.utils.class_maze import Maze
-import sys
 from src.utils.class_config import Config
-from src.core.engine import Engine, _PADDING
-from typing import List
+from src.core.player import Player, PState
+from src.core.ghost import Ghost, Blinky, Pinky, Inky, Clyde, GState
+from src.core.pacgum import PacGum, PGType
+from src.core.engine import GraphicEngine, _PADDING
+from src.utils.utils import Coord, Color
+from typing import List, Dict
+import sys
 import pygame
+import random
 
 
 class App:
@@ -22,22 +27,51 @@ class App:
         self.lives: int = config.lives                        # Vidas restantes; el game loop las gasta.
         self.score: int = 0                                   # Puntos acumulados; sube al comer.
 
-        self._engine = Engine()
+        # Graphic Engine
+        self._engine: GraphicEngine = GraphicEngine()
+
+        # Entity instancies
+        self.player: Player = Player()
+        self.ghosts: Dict[str, Ghost] = {
+            "blinky": Blinky(),
+            "pinky": Pinky(),
+            "inky": Inky(),
+            "clyde": Clyde()
+        }
+        self.pacgum: List[PacGum] = []
+
+    @property
+    def blinky(self) -> Blinky:
+        return self.ghosts["blinky"]
+
+    @property
+    def pinky(self) -> Pinky:
+        return self.ghosts["pinky"]
+
+    @property
+    def inky(self) -> Inky:
+        return self.ghosts["inky"]
+
+    @property
+    def clyde(self) -> Clyde:
+        return self.ghosts["clyde"]
 
     def run(self) -> int:
         """Recorre los niveles en orden y ejecuta los momentos del juego."""
         for number, level in enumerate(self.config.level, start=1):
-            try:
-                self._start_level(number, level)   # Momento 1: preparar el nivel (mapa)
-                # self._spawn_entities() # Momento 2: colocar Pac-Man y fantasmas (aún no existe)
-                # self._game_loop()      # Momento 3: mover, comer, morir (aún no existe)
-                # self._end_game()       # Momento 4: guardar puntuación, despedida
+            # try:
+            self._start_level(number, level)   # Momento 1: preparar el nivel (mapa)
+            self._spawn_entities() # Momento 2: colocar Pac-Man y fantasmas (aún no existe)
+            # self._game_loop()      # Momento 3: mover, comer, morir (aún no existe)
+            # self._end_game()       # Momento 4: guardar puntuación, despedida
+            """
             except Exception:
                 print(
                     f"Error: Could not generate level {number}.",
                     file=sys.stderr,
                 )
                 return 1
+            """
 
         return 0
 
@@ -77,9 +111,30 @@ class App:
         # print(f"  Pacgums: {self.pacgum_spawns}")
         print(f"  Pacgums: {len(self.pacgum_spawns)} placed")
         print()
-        
-    """
-    def run(self):
+
+    def _spawn_entities(self) -> None:
+        """
+        Momento 2: colocar Pac-Man y fantasmas (aún no existe)
+        """
+        # colocamos al player
+        self.player.pos.set_at(self.pacman_start)
+
+        # colocamos a los fantasmas cogiendo los puntos aleatoriamente
+        random_ghost_spawn = random.sample(self.ghost_spawns, 4)
+        for ghost, spawn in zip(self.ghosts.values(), random_ghost_spawn):
+            ghost.pos.set_at(spawn)
+
+        #colocamos los gums
+        for spawn in self.super_pacgum_spawns:
+            self.pacgum.append(PacGum(pg_type=PGType.SUPER, pos=Coord(spawn)))
+        for spawn in self.pacgum_spawns:
+            self.pacgum.append(PacGum(pg_type=PGType.NORMAL, pos=Coord(spawn)))
+
+    
+    def _game_loop(self):
+        """
+        TO-DO
+        """
         self._engine._update_size(
             (self._test_level.width, self._test_level.height)
         )
@@ -106,13 +161,9 @@ class App:
             # actualiza frame
             pygame.display.flip()
 
+    def _end_game(self) -> None:
+        """
+        TO-DO
+        """
         # cierra el programa
         pygame.quit()
-
-    # metodo provisional para probar el mapa
-    def test_maze_generator(self) -> List[List[int]]:
-        from tests.generator import MazeGenerator
-        generator = MazeGenerator(15, 15, (0, 0), (14, 14))
-        generator.generate(is_perfect=False)
-        return generator.grid
-    """
