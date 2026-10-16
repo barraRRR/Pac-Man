@@ -1,3 +1,10 @@
+# uv env
+uv.lock
+
+# test files
+*generator.py
+*gui_engine.py
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
