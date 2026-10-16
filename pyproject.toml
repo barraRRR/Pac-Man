@@ -8,7 +8,7 @@ dependencies = [
     "mazegenerator",
     "mypy",
     "pydantic",
-    "pygame==2.6.1"",
+    "pygame==2.6.1",
 ]
 
 [tool.uv.sources]
