@@ -1,18 +1,6 @@
 from enum import Enum
-from src.utils.utils import Coord, Color
-from src.core.pacgum import PacGum
-
-
-PACGUM_COLOR = (0, 0, 0, 0)
-SUPER_COLOR = (0, 0, 0, 0)
-
-
-class PGType(Enum):
-    """
-    """
-    NORMAL = "normal"
-    SUPER = "super"
-    EATEN = "eaten"
+from src.utils.utils import Coord, Color, PACGUM_COLOR, SUPER_COLOR
+from src.core.pacgum import PacGum, PGType
 
 
 class SuperPacGum(PacGum):
