@@ -33,7 +33,7 @@ class Blinky(Ghost):
     """
     def __init__(self) -> None:
         super().__init__(name="Blinky")
-        self.color: Color = Color(BLINKY_COLOR)
+        self.color: Color = Color(*BLINKY_COLOR)
 
 
 class Pinky(Ghost):
@@ -42,7 +42,7 @@ class Pinky(Ghost):
     """
     def __init__(self) -> None:
         super().__init__(name="Pinky")
-        self.color: Color = Color(PINKY_COLOR)
+        self.color: Color = Color(*PINKY_COLOR)
 
 
 class Inky(Ghost):
@@ -51,7 +51,7 @@ class Inky(Ghost):
     """
     def __init__(self) -> None:
         super().__init__(name="Inky")
-        self.color: Color = Color(INKY_COLOR)
+        self.color: Color = Color(*INKY_COLOR)
 
 
 class Clyde(Ghost):
@@ -60,5 +60,5 @@ class Clyde(Ghost):
     """
     def __init__(self) -> None:
         super().__init__(name="Clyde")
-        self.color: Color = Color(CLYDE_COLOR)
+        self.color: Color = Color(*CLYDE_COLOR)
 

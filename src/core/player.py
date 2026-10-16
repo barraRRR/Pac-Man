@@ -20,4 +20,4 @@ class Player:
     def __init__(self) -> None:
         self.state: PState = PState.PAUSE
         self.pos: Coord = Coord()
-        self.color: Color = Color(PLAYER_COLOR)
+        self.color: Color = Color(*PLAYER_COLOR)

@@ -4,14 +4,20 @@ from typing import Tuple
 class Coord:
     """
     """
-    def __init__(self, x: int = None, y: int = None) -> None:
-        self.x: int = x
-        self.y: int = y
+    def __init__(self, xy: Tuple[int, int] = None) -> None:
+        self.x: int = xy[0] if xy else None
+        self.y: int = xy[1] if xy else None
 
     def get(self) -> Tuple[int, int]:
         """
         """
         return (self.x, self.y)
+
+    def set_at(self, xy: Tuple[int, int]) -> None:
+        """
+        """
+        self.x, self.y = xy
+        
 
 
 class Color:
