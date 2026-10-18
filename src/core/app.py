@@ -130,7 +130,6 @@ class App:
         for spawn in self.pacgum_spawns:
             self.pacgum.append(PacGum(pg_type=PGType.NORMAL, pos=Coord(spawn)))
 
-    
     def _game_loop(self):
         """
         TO-DO

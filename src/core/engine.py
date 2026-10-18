@@ -1,7 +1,10 @@
 import pygame
 from pygame import Surface
-from typing import Tuple, List
+from typing import Tuple, List, Dict
 from src.maze.bitmap import BitMap
+from src.core.player import Player, PState
+from src.core.ghost import Ghost, Blinky, Pinky, Inky, Clyde, GState
+from src.core.pacgum import PacGum, PGType
 from src.utils.utils import Coord, Color
 
 """
@@ -41,9 +44,76 @@ _MAX_TILE_SIZE = 45
 
 _TEST_BACKGROUND_COLOR = (255, 219, 88, 255)
 _TEST_WALL_COLOR = (0, 0, 0, 255)
+_TEST_COLOR = (0, 0, 0, 255)
 
 
-class ImageRender:
+class SizeCalculator:
+    """
+    """
+    @staticmethod
+    def _calculate_dynamic_tile_size(maze_size: Coord) -> int:
+        """Calculate optimal tile size based on window and maze dimensions.
+
+        Returns:
+            Tile size in pixels (10-45 range).
+        """
+        # Esto son operaciones para que el tamaño de las celdas se ajuste al tamaño de la pantalla
+        safe_w: int = _MAX_SCREEN_W - (_PADDING * 2)
+        safe_h: int = _MAX_SCREEN_H - (_PADDING * 2)
+
+        ideal_tile_w: int = safe_w // maze_size.x
+        ideal_tile_h: int = safe_h // maze_size.y
+
+        tile_size: int = min(ideal_tile_w, ideal_tile_h)
+
+        return max(_MIN_TILE_SIZE, min(tile_size, _MAX_TILE_SIZE))
+
+    @staticmethod
+    def _calculate_line_px(tile_size: int) -> int:
+        """
+        """
+        # Establecemos el grosor de la línea según el tamaño de la celda
+        line: int = _LINE if tile_size >= _STD_TILE_SIZE else _SAFE_LINE
+        return line
+
+    @staticmethod
+    def _calculate_maze_size_px(maze_size: Coord) -> Tuple[int, int]:
+        """
+        """
+        # calculamos el tamaño que va a tener cada celda (tile) según los tamaños máximos y mínimos de pantalla que configuremos
+        tile_size: int = SizeCalculator._calculate_dynamic_tile_size(maze_size)
+        # calculamos en una tupla el tamaño que debe tener el maze (suma de todas las celdas) | ancho x alto
+        return (maze_size.x * tile_size), (maze_size.y * tile_size)
+
+    @staticmethod
+    def _calculate_window_size_px(maze_px: Coord) -> Tuple[int, int]:
+        """
+        """
+        # calculamos el tamaño que debe tener la ventana del programa, de primeras será lo que ocupe el maze + margen (padding) | ancho x alto
+        return(max(_MIN_SCREEN_W, (maze_px.x + (_PADDING * 2)))), (maze_px.y + (_PADDING * 2))
+
+    @staticmethod
+    def _px_with_padding(
+        win_px: Coord,
+        maze_px: Coord,
+        x_px: int,
+        y_px: int
+        ) -> Coord:
+        """Convert pixel coordinates with padding offset.
+
+        Args:
+            x_px: X pixel coordinate.
+            y_px: Y pixel coordinate.
+
+        Returns:
+            Adjusted (x, y) coordinates.
+        """
+        # Esto es para poner pixeles calculando los margenes que dejamos por los bordes del mapa
+        extra_x = (win_px.x - maze_px.x) // 2
+        return Coord((x_px + extra_x, y_px + _PADDING))
+
+
+class PixelRender:
     """
     Pinta pixeles en display y superficies.
     """
@@ -124,7 +194,7 @@ class ImageRender:
                 for t in range(self.line):
                     self._put_pixel(surface, (x + t, y + i), color)
 
-    def _render_map(
+    def _render_maze(
             self,
             map_surface: Surface,
             bitmap: BitMap,
@@ -140,86 +210,40 @@ class ImageRender:
         Args:
             maze: 2D list where each element is an int representing a cell.
         """
-
         if not color:
             color = Color((0, 0, 0, 0))
 
         for y, row in enumerate(bitmap.grid):
             for x, cell_value in enumerate(row):
                 self._render_cell(map_surface, (x, y), cell_value, color)
-        
+
 
 class GraphicEngine():
     """
     """
-    def __init__(self) -> None:
-        # size = (col, row)
+    def __init__(
+            self,
+            player: Player,
+            ghosts: Dict[Ghost],
+            pacgum: List[PacGum]) -> None:
+        # size = (col, row) / px = pixeles
         self.map_size: Coord = Coord()
         self.tile_size: int = None
         self.line: int = None
         self.map_px: Coord = Coord()
         self.win_px: Coord = Coord()
-        self.paint: ImageRender = ImageRender()
+
+        self.render: PixelRender = PixelRender()
+
+
+        # 
 
     def _update_size(self, size: Coord) -> None:
         """
         Fija el tamaño del mapa
         """
         self.map_size.set_at(size.get())
-
-    def _calculate_map_size_px(self) -> None:
-        """
-        """
-        # calculamos el tamaño que va a tener cada celda (tile) según los tamaños máximos y mínimos de pantalla que configuremos
-        self._calculate_dynamic_tile_size()
-        # calculamos en una tupla el tamaño que debe tener el maze (suma de todas las celdas) | ancho x alto
-        self.map_px.set_at((self.map_size[0] * self.tile_size), (self.map_size[1] * self.tile_size))
     
-    def _calculate_window_size_px(self) -> None:
-        """
-        """
-        # calculamos el tamaño que debe tener la ventana del programa, de primeras será lo que ocupe el maze + margen (padding) | ancho x alto
-        self.win_px.set_at(
-            (max(_MIN_SCREEN_W, (self.map_px[0] + (_PADDING * 2)))),
-            (self.map_px[1] + (_PADDING * 2))
-        )
-
-    def _calculate_dynamic_tile_size(self) -> None:
-        """Calculate optimal tile size based on window and maze dimensions.
-
-        Returns:
-            Tile size in pixels (10-45 range).
-        """
-
-        # Esto son operaciones para que el tamaño de las celdas se ajuste al tamaño de la pantalla
-        safe_w: int = _MAX_SCREEN_W - (_PADDING * 2)
-        safe_h: int = _MAX_SCREEN_H - (_PADDING * 2)
-
-        ideal_tile_w: int = safe_w // self.map_size[0]
-        ideal_tile_h: int = safe_h // self.map_size[1]
-
-        tile_size: int = min(ideal_tile_w, ideal_tile_h)
-        self.tile_size: int = max(
-            _MIN_TILE_SIZE, min(tile_size, _MAX_TILE_SIZE)
-        )
-        # Establecemos el grosor de la línea según el tamaño de la celda
-        self.line = _LINE if self.tile_size >= _STD_TILE_SIZE else _SAFE_LINE
-
-    def _px_with_padding(self, x_px: int, y_px: int) -> Coord:
-        """Convert pixel coordinates with padding offset.
-
-        Args:
-            x_px: X pixel coordinate.
-            y_px: Y pixel coordinate.
-
-        Returns:
-            Adjusted (x, y) coordinates.
-        """
-
-        # Esto es para poner pixeles calculando los margenes que dejamos por los bordes del mapa
-        extra_x = (self.win_px.x - self.map_px.x) // 2
-        return Coord((x_px + extra_x, y_px + _PADDING))
-
     def put_window(self) -> Surface:
         """
         """
