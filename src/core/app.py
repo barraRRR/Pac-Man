@@ -1,8 +1,8 @@
 from src.utils.class_config import Config, Level
 from src.utils.class_maze import Maze
 from src.utils.class_config import Config
-from src.core.player import Player, PState
-from src.core.ghost import Ghost, Blinky, Pinky, Inky, Clyde, GState
+from src.core.player import Player
+from src.core.ghost import Ghost, Blinky, Pinky, Inky, Clyde
 from src.core.pacgum import PacGum, PGType
 from src.core.engine import GraphicEngine, _PADDING
 from src.utils.utils import Coord, Color
@@ -27,9 +27,6 @@ class App:
         self.lives: int = config.lives                        # Vidas restantes; el game loop las gasta.
         self.score: int = 0                                   # Puntos acumulados; sube al comer.
 
-        # Graphic Engine
-        self._engine: GraphicEngine = GraphicEngine()
-
         # Entity instancies
         self.player: Player = Player()
         self.ghosts: Dict[str, Ghost] = {
@@ -39,6 +36,13 @@ class App:
             "clyde": Clyde()
         }
         self.pacgum: List[PacGum] = []
+
+        # Graphic Engine
+        self._engine: GraphicEngine = GraphicEngine(
+            player=self.player,
+            ghosts=self.ghosts,
+            pacgum=self.pacgum
+        )
 
     @property
     def blinky(self) -> Blinky:
@@ -62,7 +66,7 @@ class App:
             # try:
             self._start_level(number, level)   # Momento 1: preparar el nivel (mapa)
             self._spawn_entities() # Momento 2: colocar Pac-Man y fantasmas (aún no existe)
-            # self._game_loop()      # Momento 3: mover, comer, morir (aún no existe)
+            self._game_loop()      # Momento 3: mover, comer, morir (aún no existe)
             # self._end_game()       # Momento 4: guardar puntuación, despedida
             """
             except Exception:
@@ -134,21 +138,25 @@ class App:
         """
         TO-DO
         """
-        self._engine._update_size(
-            (self._test_level.width, self._test_level.height)
-        )
-        self._engine._calculate_map_size_px()
-        self._engine._calculate_window_size_px()
+        self._engine._update_size(self.maze)
 
         pygame.init()
         window = self._engine.put_window()
         running = True
-        map = self._engine.put_map(self.test_maze_generator())
-
+        
+        # render de surfaces
+        map = self._engine.put_maze(self.maze._bitmap)
+        self._engine._put_entities()
+        
         # mantiene el programa en ejecución hasta que haya un evento de cierre
         while running:
             window.blit(self._engine.put_background(), (0, 0))
             window.blit(map, (_PADDING, _PADDING))
+            for pacgum in self.pacgum:
+                window.blit(pacgum.sur, pacgum.pos.off_get(self._engine.tile_size))
+            for ghost in self.ghosts.values():
+                window.blit(ghost.sur, ghost.pos.off_get(self._engine.tile_size))
+            window.blit(self.player.sur, self.player.pos.off_get(self._engine.tile_size))
             for event in pygame.event.get():
                 # pulsar el boton X con el raton
                 if event.type == pygame.QUIT:

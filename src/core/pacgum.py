@@ -1,9 +1,10 @@
 from enum import Enum
 from src.utils.utils import Coord, Color
+from src.core.entity import Entity
 
 
-PACGUM_COLOR = (0, 0, 0, 0)
-SUPER_COLOR = (0, 0, 0, 0)
+PACGUM_COLOR = (255, 255, 255, 255)
+SUPER_COLOR = (173, 216, 230, 255)
 
 
 class PGType(Enum):
@@ -14,10 +15,10 @@ class PGType(Enum):
     EATEN = "eaten"
 
 
-class PacGum:
+class PacGum(Entity):
     """
     """
     def __init__(self, pg_type: PGType, pos: Coord) -> None:
+        super().__init__()
         self.pg_type: PGType = pg_type
-        self.pos: Coord = pos
-        self.color: Color = Color(*(SUPER_COLOR if pg_type == PGType.SUPER else PACGUM_COLOR))
+        self.color.set(SUPER_COLOR if pg_type == PGType.SUPER else PACGUM_COLOR)

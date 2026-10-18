@@ -1,30 +1,20 @@
 from enum import Enum
 from src.utils.utils import Coord, Color
+from src.core.entity import Entity, State
 
 
-BLINKY_COLOR = (0, 0, 0, 0)
-PINKY_COLOR = (0, 0, 0, 0)
-INKY_COLOR = (0, 0, 0, 0)
-CLYDE_COLOR = (0, 0, 0, 0)
+BLINKY_COLOR = (255, 105, 180, 255)
+PINKY_COLOR = (255, 192, 203, 255)
+INKY_COLOR = (173, 216, 230, 255)
+CLYDE_COLOR = (255, 255, 0, 255)
 
 
-class GState(Enum):
-    """
-    """
-    NORMAL = "normal"
-    HUNT = "hunt"
-    FLEE = "flee"
-    DEAD = "dead"
-    PAUSE = "pause"
-
-
-class Ghost:
+class Ghost(Entity):
     """
     """
     def __init__(self, name: str) -> None:
-        self.name: str = ""
-        self.state: GState = GState.PAUSE
-        self.pos: Coord = Coord()
+        super().__init__()
+        self.name: str = name
 
 
 class Blinky(Ghost):
@@ -33,7 +23,7 @@ class Blinky(Ghost):
     """
     def __init__(self) -> None:
         super().__init__(name="Blinky")
-        self.color: Color = Color(*BLINKY_COLOR)
+        self.color.set(BLINKY_COLOR)
 
 
 class Pinky(Ghost):
@@ -42,7 +32,7 @@ class Pinky(Ghost):
     """
     def __init__(self) -> None:
         super().__init__(name="Pinky")
-        self.color: Color = Color(*PINKY_COLOR)
+        self.color.set(PINKY_COLOR)
 
 
 class Inky(Ghost):
@@ -51,7 +41,7 @@ class Inky(Ghost):
     """
     def __init__(self) -> None:
         super().__init__(name="Inky")
-        self.color: Color = Color(*INKY_COLOR)
+        self.color.set(INKY_COLOR)
 
 
 class Clyde(Ghost):
@@ -60,5 +50,5 @@ class Clyde(Ghost):
     """
     def __init__(self) -> None:
         super().__init__(name="Clyde")
-        self.color: Color = Color(*CLYDE_COLOR)
+        self.color.set(CLYDE_COLOR)
 

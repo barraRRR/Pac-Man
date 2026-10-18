@@ -2,10 +2,12 @@ import pygame
 from pygame import Surface
 from typing import Tuple, List, Dict
 from src.maze.bitmap import BitMap
-from src.core.player import Player, PState
-from src.core.ghost import Ghost, Blinky, Pinky, Inky, Clyde, GState
+from src.core.entity import Entity
+from src.core.player import Player
+from src.core.ghost import Ghost, Blinky, Pinky, Inky, Clyde
 from src.core.pacgum import PacGum, PGType
 from src.utils.utils import Coord, Color
+from src.utils.class_maze import Maze
 
 """
 
@@ -42,8 +44,8 @@ _MIN_TILE_SIZE = 10
 _STD_TILE_SIZE = 20
 _MAX_TILE_SIZE = 45
 
-_TEST_BACKGROUND_COLOR = (255, 219, 88, 255)
-_TEST_WALL_COLOR = (0, 0, 0, 255)
+_BACKGROUND_COLOR = (0, 0, 0, 255)
+_WALL_COLOR = (128, 128, 128, 255)
 _TEST_COLOR = (0, 0, 0, 255)
 
 
@@ -119,37 +121,34 @@ class PixelRender:
     """
     def __init__(self) -> None:
         self.tile_size: int = None
-        self.map_px: Coord = Coord()
+        self.maze_px: Coord = Coord()
         self.line: int = None
         
     def update(
             self,
             tile_size: int,
-            map_px: Coord,
+            maze_px: Coord,
             line: int
         ) -> None:
         self.tile_size: int = tile_size
-        self.map_px: Coord = map_px
+        self.maze_px: Coord = maze_px
         self.line: int = line
 
     def _put_pixel(
             self,
             surface: Surface,
             coord: Coord,
-            color: Color = None
+            color: Color
         ) -> None:
         """
+        coloca el pixel en la superficie
         """
-        if not color:
-            color = Color(*_TEST_WALL_COLOR)
 
-        # quita posibles coordenadas fuera de la ventana
-        if (coord.x < 0 or coord.x >= surface.get_width() or
-            coord.y < 0 or coord.y >= surface.get_height()):
-            return
+        try:
+            surface.set_at(coord.get(), color.get())
 
-        # coloca el pixel en la superficie
-        surface.set_at(coord.get(), color.get())
+        except Exception:   # buscar excepcion si la coord cae fuera de la ventana.
+            pass
 
     def _render_cell(
             self,
@@ -196,7 +195,7 @@ class PixelRender:
 
     def _render_maze(
             self,
-            map_surface: Surface,
+            maze_surface: Surface,
             bitmap: BitMap,
             color: Color
         ) -> None:
@@ -210,12 +209,21 @@ class PixelRender:
         Args:
             maze: 2D list where each element is an int representing a cell.
         """
-        if not color:
-            color = Color((0, 0, 0, 0))
-
         for y, row in enumerate(bitmap.grid):
             for x, cell_value in enumerate(row):
-                self._render_cell(map_surface, (x, y), cell_value, color)
+                self._render_cell(maze_surface, Coord((x, y)), cell_value, color)
+
+    def _render_entity_block(
+            self,
+            entity: Entity,
+            px: int = 0
+        ) -> None:
+        """
+        """
+        start_x, start_y = entity.pos.off_get(self.tile_size)
+        for i in range(self.tile_size - px):
+            for t in range(self.tile_size - px):
+                self._put_pixel(start_x + i + px, start_y + t + px, entity.color)
 
 
 class GraphicEngine():
@@ -224,26 +232,34 @@ class GraphicEngine():
     def __init__(
             self,
             player: Player,
-            ghosts: Dict[Ghost],
+            ghosts: Dict[str, Ghost],
             pacgum: List[PacGum]) -> None:
+        self.player: Player = player
+        self.ghosts: Dict[Ghost] = ghosts
+        self.pacgum: List[PacGum] = pacgum
+
         # size = (col, row) / px = pixeles
-        self.map_size: Coord = Coord()
+        self.maze_size: Coord = Coord()
         self.tile_size: int = None
         self.line: int = None
-        self.map_px: Coord = Coord()
+        self.maze_px: Coord = Coord()
         self.win_px: Coord = Coord()
 
         self.render: PixelRender = PixelRender()
+        self.resize: SizeCalculator = SizeCalculator()
 
-
-        # 
-
-    def _update_size(self, size: Coord) -> None:
+    def _update_size(self, maze: Maze) -> None:
         """
         Fija el tamaño del mapa
         """
-        self.map_size.set_at(size.get())
-    
+        w = len(maze.grid[0])
+        h = len(maze.grid)
+        self.maze_size.set_at((w, h))
+        self.tile_size = self.resize._calculate_dynamic_tile_size(self.maze_size)
+        self.line = self.resize._calculate_line_px(self.tile_size)
+        self.maze_px.set_at(self.resize._calculate_maze_size_px(self.maze_size))
+        self.win_px.set_at(self.resize._calculate_window_size_px(self.maze_size))
+
     def put_window(self) -> Surface:
         """
         """
@@ -255,21 +271,51 @@ class GraphicEngine():
         """
         # pone el fondo de pantalla sobre la pantalla
         background = Surface(self.win_px.get())
-        background.fill(_TEST_BACKGROUND_COLOR)
+        background.fill(_BACKGROUND_COLOR)
         return background
 
-    def put_map(
+    def put_maze(
             self,
             bitmap: BitMap,
-            color: Tuple[int, int, int, int] = _TEST_WALL_COLOR
+            color: Tuple[int, int, int, int] = _WALL_COLOR
         ) -> Surface:
         """
         """
-        self.paint.update(self.tile_size, self.map_px, self.line)
-        map_surface = Surface(self.map_px, pygame.SRCALPHA)
-        map_surface.fill((0, 0, 0, 0)) 
-        self.paint._render_map(map_surface, bitmap, color)
+        self.render.update(self.tile_size, self.maze_px, self.line)
+        maze_surface = Surface(self.maze_px.get(), pygame.SRCALPHA)
+        maze_surface.fill((0, 0, 0, 0)) 
+        self.render._render_maze(maze_surface, bitmap, color)
         # Imprime la ventana entera en pantalla
-        return map_surface
+        return maze_surface
 
+    def _init_entities(self) -> None:
+        """
+        Inicializa las entities en las posiciones iniciales del mapa
+        """
+        self.player._init_surface(self.player.pos, self.tile_size)
+        for ghost in self.ghosts.values():
+            ghost._init_surface(ghost.pos, self.tile_size)
+        for pacgum in self.pacgum:
+            pacgum._init_surface(pacgum.pos, self.tile_size)
+
+    def _free_entities(self) -> None:
+        """
+        Libera la memoria de las surfaces de las entities
+        """
+        self.player.sur.convert(self.player.sur, None)
+        for ghost in self.ghosts.values():
+            ghost.sur.convert(ghost.sur, None)
+        for pacgum in self.pacgum:
+            pacgum.sur.convert(pacgum.sur, None)
+
+    def _put_entities(self) -> None:
+        """
+        Dibuja las entities en el mapa
+        """
+        self._init_entities()
+        self.render._render_entity_block(self.player, px=2)
+        for ghost in self.ghosts.values():
+            self.render._render_entity_block(ghost, px=2)
+        for pacgum in self.pacgum:
+            self.render._render_entity_block(pacgum, px=4)
     
