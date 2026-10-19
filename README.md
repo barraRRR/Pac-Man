@@ -7,39 +7,36 @@
 
 ```
 .
-├── Makefile
-├── README.md
 ├── assets
 │   ├── seleccion fantasma y pops de pollo , su posicion de inicio.png
-│   ├── visualization.png
-│   └── visualization.png:Zone.Identifier
+│   └── visualization.png
 ├── config.json
 ├── en.subject.pdf
+├── Makefile
 ├── pac-man.py
 ├── pyproject.toml
+├── README.md
 ├── scripts
 ├── src
+│   ├── core
+│   │   ├── app.py
+│   │   ├── engine.py
+│   │   ├── ghost.py
+│   │   ├── pacgum.py
+│   │   ├── player.py
+│   │   └── SuperPacgum.py
 │   ├── __init__.py
 │   ├── __main__.py
-│   ├── core
-│   │   └── app.py
 │   ├── main.py
+│   ├── maze
+│   │   └── bitmap.py
 │   └── utils
 │       ├── class_config.py
-│       └── class_maze.py
-├── tests
+│       ├── class_maze.py
+│       └── utils.py
 ├── uv.lock
 ├── visualization.png:Zone.Identifier
 └── wheels
-    ├── mazegenerator-2.1.0-py3-none-any - copia
-    │   ├── mazegenerator
-    │   │   ├── __init__.py
-    │   │   └── mazegenerator.py
-    │   └── mazegenerator-2.1.0.dist-info
-    │       ├── METADATA
-    │       ├── RECORD
-    │       ├── WHEEL
-    │       └── top_level.txt
     └── mazegenerator-2.1.0-py3-none-any.whl
 ```
 tree -I '.venv|.git'
