@@ -306,3 +306,136 @@ def test_register_writes_the_obfuscated_file(
     assert (tmp_path / "highscore.csv").is_file()
     HighScore.scores = []
     assert HighScore.load() == [{"name": "Ana", "score": 10}]
+
+
+
+def test_real_registration_flow_creates_loads_and_keeps_top_ten() -> None:
+    """Prueba el registro real, la lectura y el límite del Top 10."""
+    path = pathlib.Path(HighScore.SCORES_FOLDER) / HighScore.filename
+
+    previous_file = path.read_bytes() if path.is_file() else None
+    previous_scores = [record.copy() for record in HighScore.scores]
+
+    try:
+        HighScore.scores = []
+
+        # Primer tramo: registrar cuatro puntuaciones y leer el archivo.
+        first_entries = [
+            ("Aitor", 40),
+            ("Luna", 100),
+            ("Marta", 70),
+            ("Nico", 25),
+        ]
+
+        for name, score in first_entries:
+            assert HighScore.register(name, score) is True
+
+        expected_first = [
+            {"name": "Luna", "score": 100},
+            {"name": "Marta", "score": 70},
+            {"name": "Aitor", "score": 40},
+            {"name": "Nico", "score": 25},
+        ]
+
+        assert path.is_file()
+        assert HighScore.scores == expected_first
+        assert HighScore.load() == expected_first
+
+        # Segundo tramo: añadir ocho registros; deben quedar los diez mejores.
+        more_entries = [
+            ("Olga", 110),
+            ("Paco", 30),
+            ("Rita", 95),
+            ("Sara", 180),
+            ("Teo", 60),
+            ("Uma", 130),
+            ("Vera", 200),
+            ("Walt", 50),
+        ]
+
+        for name, score in more_entries:
+            assert HighScore.register(name, score) is True
+
+        expected_top_ten = [
+            {"name": "Vera", "score": 200},
+            {"name": "Sara", "score": 180},
+            {"name": "Uma", "score": 130},
+            {"name": "Olga", "score": 110},
+            {"name": "Luna", "score": 100},
+            {"name": "Rita", "score": 95},
+            {"name": "Marta", "score": 70},
+            {"name": "Teo", "score": 60},
+            {"name": "Walt", "score": 50},
+            {"name": "Aitor", "score": 40},
+        ]
+
+        assert len(HighScore.scores) == 10
+        assert HighScore.scores == expected_top_ten
+        assert HighScore.load() == expected_top_ten
+
+    finally:
+        HighScore.scores = previous_scores
+        if previous_file is not None:
+            path.write_bytes(previous_file)
+
+def test_print_real_highscore_file() -> None:
+    """Lee el archivo real de puntuaciones y muestra el ranking descodificado."""
+    path = pathlib.Path(HighScore.SCORES_FOLDER) / HighScore.filename
+
+    assert path.is_file(), f"Highscore file not found: {path}"
+
+    ranking = HighScore.load()
+
+    print("\nDecoded highscore ranking:")
+    if not ranking:
+        print("No scores recorded.")
+        return
+
+    for position, record in enumerate(ranking, start=1):
+        print(f"{position}. {record['name']} - {record['score']}")
+
+
+
+                                                                                                    # EJECUTAR LUEGO
+# uv run python -m pytest -s tests/test_highscore.py::test_print_real_highscore_file -v
+
+
+
+def test_load_with_missing_file_starts_empty(
+    tmp_path: pathlib.Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """Si el archivo no existe, el ranking empieza vacío y sin quejas."""
+    monkeypatch.setattr(HighScore, "SCORES_FOLDER", str(tmp_path))
+    monkeypatch.setattr(
+        HighScore, "scores", [{"name": "Viejo", "score": 999}]
+    )
+
+    assert HighScore.load() == []
+    assert HighScore.scores == []
+    # Que no exista archivo es lo normal: ni un aviso por stderr.
+    assert capsys.readouterr().err == ""
+
+def test_register_keeps_duplicate_names(
+    tmp_path: pathlib.Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Dos jugadores con el mismo nombre conviven: no se deduplica."""
+    monkeypatch.setattr(HighScore, "SCORES_FOLDER", str(tmp_path))
+    monkeypatch.setattr(HighScore, "scores", [])
+
+    assert HighScore.register("Aitor", 100) is True
+    assert HighScore.register("Aitor", 250) is True
+    assert HighScore.register("Aitor", 40) is True
+
+    expected = [
+        {"name": "Aitor", "score": 250},
+        {"name": "Aitor", "score": 100},
+        {"name": "Aitor", "score": 40},
+    ]
+    assert HighScore.scores == expected
+
+    # Los duplicados también sobreviven al archivo: guardar y volver a leer.
+    HighScore.scores = []
+    assert HighScore.load() == expected
