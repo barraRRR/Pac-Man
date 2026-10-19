@@ -1,4 +1,4 @@
-.PHONY: install run debug clean lint lint-strict help
+.PHONY: install run debug test clean lint lint-strict help
 
 UV := $(shell command -v uv 2>/dev/null || echo "$(HOME)/.local/bin/uv")
 
@@ -54,12 +54,25 @@ lint-strict:
 	@uv run mypy . --strict --exclude "(.venv|data)"
 	@$(MAKE) clean --no-print-directory
 
+clean_venv: clean
+	@rm -rf .venv
+	@echo "\033[1;32mEntorno y cachés eliminados. Ejecuta 'make install' para reconstruir.\033[0m"
+
+test:
+	@uv run python -m pytest tests/ -v
+	@$(MAKE) clean --no-print-directory
+
 help:
 	@echo "Usage:"
-	@echo "  make run                      # Ejecuta con config.json por defecto"
-	@echo "  make run -- ruta/config.json  # Ejecuta con una ruta personalizada"
-	@echo "  make debug                    # Depurador pdb"
-	@echo "  make lint                     # Comprueba estilo y tipos"
+	@echo "  make install                   # Instala o sincroniza las dependencias"
+	@echo "  make run                       # Ejecuta el juego con config.json"
+	@echo "  make run -- ruta/config.json   # Ejecuta el juego con otra configuración"
+	@echo "  make debug                     # Ejecuta el juego con el depurador pdb"
+	@echo "  make test                      # Ejecuta las pruebas"
+	@echo "  make clean                     # Elimina cachés y archivos temporales de Python"
+	@echo "  make lint                      # Comprueba estilo y tipos"
+	@echo "  make lint-strict               # Comprueba estilo y tipos en modo estricto"
+	@echo "  make help                      # Muestra esta ayuda"
 
 %:
 	@:
