@@ -9,6 +9,11 @@ class Coord:
         self.x: int = xy[0] if xy else 0
         self.y: int = xy[1] if xy else 0
 
+    def __eq__(self, other):
+        if not isinstance(other, Coord):
+            return False
+        return self.x == other.x and self.y == other.y
+
     def get(self) -> Tuple[int, int]:
         """
         """
@@ -41,6 +46,19 @@ class Coord:
             self.y += 1
         elif dir == LEFT:
             self.x -= 1
+
+    def _get_delta(self, target: "Coord") -> int:
+        """
+        Te dice hacia que direccion está target
+        """
+        directions: Dict[Tuple[int, int], Coord] = {
+            (-1, 0): UP,
+            (0, 1): RIGHT,
+            (1, 0): DOWN,
+            (0, -1): LEFT
+        }
+        return directions[((target.x - self.x), (target.y - self.y))] 
+
 
 class Color:
     """
