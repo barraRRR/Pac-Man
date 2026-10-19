@@ -1,11 +1,11 @@
 import pygame
 from pygame import Surface
 from typing import Tuple, List, Dict
-from src.maze.bitmap import BitMap
+from src.maze.bitmap import BitMap, UP, RIGHT, DOWN, LEFT
 from src.core.entity import Entity
 from src.core.player import Player
 from src.core.ghost import Ghost, Blinky, Pinky, Inky, Clyde
-from src.core.pacgum import PacGum, PGType
+from src.core.pacgum import PacGum, SuperPacGum
 from src.utils.utils import Coord, Color
 from src.utils.class_maze import Maze
 
@@ -73,25 +73,25 @@ class SizeCalculator:
     @staticmethod
     def _calculate_line_px(tile_size: int) -> int:
         """
+        Establecemos el grosor de la línea según el tamaño de la celda
         """
-        # Establecemos el grosor de la línea según el tamaño de la celda
         line: int = _LINE if tile_size >= _STD_TILE_SIZE else _SAFE_LINE
         return line
 
     @staticmethod
     def _calculate_maze_size_px(maze_size: Coord) -> Tuple[int, int]:
         """
+        calculamos el tamaño que va a tener cada celda (tile) según los tamaños máximos y mínimos de pantalla que configuremos
+        calculamos en una tupla el tamaño que debe tener el maze (suma de todas las celdas) | ancho x alto
         """
-        # calculamos el tamaño que va a tener cada celda (tile) según los tamaños máximos y mínimos de pantalla que configuremos
         tile_size: int = SizeCalculator._calculate_dynamic_tile_size(maze_size)
-        # calculamos en una tupla el tamaño que debe tener el maze (suma de todas las celdas) | ancho x alto
         return (maze_size.x * tile_size), (maze_size.y * tile_size)
 
     @staticmethod
     def _calculate_window_size_px(maze_px: Coord) -> Tuple[int, int]:
         """
+        calculamos el tamaño que debe tener la ventana del programa, de primeras será lo que ocupe el maze + margen (padding) | ancho x alto
         """
-        # calculamos el tamaño que debe tener la ventana del programa, de primeras será lo que ocupe el maze + margen (padding) | ancho x alto
         return(
             max(_MIN_SCREEN_W, (maze_px.x + (_PADDING * 2)))), (maze_px.y + (_PADDING * 2)
         )
@@ -112,7 +112,6 @@ class SizeCalculator:
         Returns:
             Adjusted (x, y) coordinates.
         """
-        # Esto es para poner pixeles calculando los margenes que dejamos por los bordes del mapa
         extra_x = (win_px.x - maze_px.x) // 2
         return Coord((x_px + extra_x, y_px + _PADDING))
 
@@ -239,7 +238,8 @@ class PixelRender:
         ) -> None:
         """
         """
-        pg_size = self.tile_size // 5
+        size = 2 if isinstance(pacgum, SuperPacGum) else 5
+        pg_size = self.tile_size // size
         offset = (self.tile_size - pg_size) // 2
         for i in range(pg_size):
             for t in range(pg_size):
@@ -280,32 +280,32 @@ class GraphicEngine():
         self.maze_px.set_at(self.resize._calculate_maze_size_px(self.maze_size))
         self.win_px.set_at(self.resize._calculate_window_size_px(self.maze_px))
 
-    def put_window(self) -> Surface:
+    def _init_window(self) -> Surface:
         """
+        Imprime la ventana entera en pantalla
         """
-        # Imprime la ventana entera en pantalla
         return pygame.display.set_mode(self.win_px.get())
 
-    def put_background(self) -> Surface:
+    def _put_background(self) -> Surface:
         """
+        pone el fondo de pantalla sobre la pantalla
         """
-        # pone el fondo de pantalla sobre la pantalla
         background = Surface(self.win_px.get())
         background.fill(_BACKGROUND_COLOR)
         return background
 
-    def put_maze(
+    def _put_maze(
             self,
             bitmap: BitMap,
             color: Tuple[int, int, int, int] = _WALL_COLOR
         ) -> Surface:
         """
+        Imprime la ventana entera en pantalla
         """
         self.render.update(self.tile_size, self.maze_px, self.line)
         maze_surface = Surface(self.maze_px.get(), pygame.SRCALPHA)
         maze_surface.fill((0, 0, 0, 0)) 
         self.render._render_maze(maze_surface, bitmap, color)
-        # Imprime la ventana entera en pantalla
         return maze_surface
 
     def _init_entities(self) -> None:

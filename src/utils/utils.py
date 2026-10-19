@@ -1,4 +1,5 @@
-from typing import Tuple, Union
+from typing import Tuple, Union, Dict
+from src.maze.bitmap import UP, RIGHT, DOWN, LEFT
 
 
 class Coord:
@@ -28,7 +29,18 @@ class Coord:
             self.x = xy.x
         else:
             self.x, self.y = xy
-        
+
+    def step(self, dir: int) -> None:
+        """
+        """
+        if dir == UP:
+            self.y -= 1
+        elif dir == RIGHT:
+            self.x += 1
+        elif dir == DOWN:
+            self.y += 1
+        elif dir == LEFT:
+            self.x -= 1
 
 class Color:
     """
