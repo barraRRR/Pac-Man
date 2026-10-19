@@ -3,7 +3,7 @@ from src.utils.utils import Coord, Color
 from src.core.entity import Entity
 
 
-PLAYER_COLOR = (255, 255, 0, 255)
+PLAYER_COLOR = (243, 195, 0, 255)
 
 
 class Player(Entity):

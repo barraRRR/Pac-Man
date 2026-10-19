@@ -1,6 +1,6 @@
 from enum import Enum
 from src.utils.utils import Coord, Color
-from pygame import Surface
+from pygame import Surface, SRCALPHA
 
 
 class State(Enum):
@@ -23,4 +23,5 @@ class Entity:
         self.color: Color = Color(0, 0, 0, 0)
 
     def _init_surface(self, coord: Coord, tile_size: int) -> None:
-        self.sur: Surface = Surface(coord.off_get(tile_size))
+        self.sur: Surface = Surface((tile_size, tile_size), SRCALPHA)
+        self.sur.fill((0, 0, 0, 0))

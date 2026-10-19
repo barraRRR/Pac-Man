@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Tuple, Union
 
 
 class Coord:
@@ -20,25 +20,34 @@ class Coord:
         from src.core.engine import _PADDING
         return ((self.x * tile_size) + _PADDING, (self.y * tile_size) + _PADDING)
 
-    def set_at(self, xy: Tuple[int, int]) -> None:
+    def set_at(self, xy: Union['Coord', Tuple[int, int]]) -> None:
         """
         """
-        self.x, self.y = xy
+        if isinstance(xy, Coord):
+            self.y = xy.y
+            self.x = xy.x
+        else:
+            self.x, self.y = xy
         
 
 class Color:
     """
     """
     def __init__(self, r: int, g: int, b: int, alpha: int) -> None:
-        self.r: int = r
-        self.g: int = g
-        self.b: int = b
-        self.alpha: int = alpha
+        self._r: int = 0
+        self._g: int = 0
+        self._b: int = 0
+        self._alpha: int = 0
+        self.set((r, g, b, alpha))
 
     def get(self) -> Tuple[int, int, int, int]:
         """
         """
-        return (self.r, self.g, self.b, self.alpha)
+        return (self._r, self._g, self._b, self._alpha)
 
     def set(self, color: Tuple[int, int, int, int]) -> None:
-        self.r, self.g, self.b, self.alpha = color
+        """
+        """
+        self._r, self._g, self._b, self._alpha = tuple(
+            min(255, max(0, c)) for c in color
+            )

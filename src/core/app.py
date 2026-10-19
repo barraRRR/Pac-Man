@@ -64,7 +64,7 @@ class App:
         """Recorre los niveles en orden y ejecuta los momentos del juego."""
         for number, level in enumerate(self.config.level, start=1):
             # try:
-            self._start_level(number, level)   # Momento 1: preparar el nivel (mapa)
+            self._start_level(number, level, True)   # Momento 1: preparar el nivel (mapa)
             self._spawn_entities() # Momento 2: colocar Pac-Man y fantasmas (aún no existe)
             self._game_loop()      # Momento 3: mover, comer, morir (aún no existe)
             # self._end_game()       # Momento 4: guardar puntuación, despedida
@@ -79,7 +79,7 @@ class App:
 
         return 0
 
-    def _start_level(self, number: int, level: Level) -> None:
+    def _start_level(self, number: int, level: Level, debug: bool = False) -> None:
         """Prepara el nivel actual: genera el mapa y deja el estado listo."""
         # Genero el mapa de este nivel con el tamaño que dice la config.
         self.maze.generate_level(
@@ -108,13 +108,15 @@ class App:
         # 3º pacgums normales, al final porque no pueden pisar a nadie de lo de arriba.
         self.pacgum_spawns = self.maze.select_pacgum_spawns(reachable, self.pacman_start, self.ghost_spawns, self.super_pacgum_spawns, self.config.pacgum)
 
-        print(f"Level {number}:")
-        print(f"  Pac-Man: {self.pacman_start}")
-        print(f"  Ghosts: {self.ghost_spawns}")
-        print(f"  Super-pacgums: {self.super_pacgum_spawns}")
-        # print(f"  Pacgums: {self.pacgum_spawns}")
-        print(f"  Pacgums: {len(self.pacgum_spawns)} placed")
-        print()
+        if debug:
+            print(f"Level {number}:")
+            print(f"  Pac-Man: {self.pacman_start}")
+            print(f"  Ghosts: {self.ghost_spawns}")
+            print(f"  Super-pacgums: {self.super_pacgum_spawns}")
+            # print(f"  Pacgums: {self.pacgum_spawns}")
+            print(f"  Pacgums: {len(self.pacgum_spawns)} placed")
+            print(f"  Pacgums: {self.pacgum_spawns}")
+            print()
 
     def _spawn_entities(self) -> None:
         """
@@ -164,7 +166,7 @@ class App:
                 # pulsar la tecla ESC
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
-                        running == False
+                        running = False
             # actualiza frame
             pygame.display.flip()
 

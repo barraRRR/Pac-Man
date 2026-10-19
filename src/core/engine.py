@@ -44,8 +44,8 @@ _MIN_TILE_SIZE = 10
 _STD_TILE_SIZE = 20
 _MAX_TILE_SIZE = 45
 
-_BACKGROUND_COLOR = (0, 0, 0, 255)
-_WALL_COLOR = (128, 128, 128, 255)
+_BACKGROUND_COLOR = (3, 18, 15, 255)
+_WALL_COLOR = (5, 4, 170, 255)
 _TEST_COLOR = (0, 0, 0, 255)
 
 
@@ -92,7 +92,9 @@ class SizeCalculator:
         """
         """
         # calculamos el tamaño que debe tener la ventana del programa, de primeras será lo que ocupe el maze + margen (padding) | ancho x alto
-        return(max(_MIN_SCREEN_W, (maze_px.x + (_PADDING * 2)))), (maze_px.y + (_PADDING * 2))
+        return(
+            max(_MIN_SCREEN_W, (maze_px.x + (_PADDING * 2)))), (maze_px.y + (_PADDING * 2)
+        )
 
     @staticmethod
     def _px_with_padding(
@@ -137,18 +139,20 @@ class PixelRender:
     def _put_pixel(
             self,
             surface: Surface,
-            coord: Coord,
-            color: Color
+            coord: Coord | Tuple[int, int],
+            color: Color | Tuple[int, int, int, int]
         ) -> None:
         """
         coloca el pixel en la superficie
         """
+        xy = coord.get() if isinstance(coord, Coord) else coord
+        rgba = color.get() if isinstance(color, Color) else color
 
-        try:
-            surface.set_at(coord.get(), color.get())
+        surface.set_at(xy, rgba)
 
-        except Exception:   # buscar excepcion si la coord cae fuera de la ventana.
-            pass
+        # try:
+        # except Exception:   # buscar excepcion si la coord cae fuera de la ventana.
+        #    pass
 
     def _render_cell(
             self,
@@ -193,6 +197,11 @@ class PixelRender:
                 for t in range(self.line):
                     self._put_pixel(surface, (x + t, y + i), color)
 
+        if value == 15:  # CLOSED
+            for i in range(self.tile_size):
+                for t in range(self.tile_size):
+                    self._put_pixel(surface, (x + t, y + i), color)
+
     def _render_maze(
             self,
             maze_surface: Surface,
@@ -220,10 +229,21 @@ class PixelRender:
         ) -> None:
         """
         """
-        start_x, start_y = entity.pos.off_get(self.tile_size)
         for i in range(self.tile_size - px):
             for t in range(self.tile_size - px):
-                self._put_pixel(start_x + i + px, start_y + t + px, entity.color)
+                self._put_pixel(entity.sur, (i + px, t + px), entity.color)
+
+    def _render_pacgum(
+            self,
+            pacgum: PacGum,
+        ) -> None:
+        """
+        """
+        pg_size = self.tile_size // 5
+        offset = (self.tile_size - pg_size) // 2
+        for i in range(pg_size):
+            for t in range(pg_size):
+                self._put_pixel(pacgum.sur, (i + offset, t + offset), pacgum.color)
 
 
 class GraphicEngine():
@@ -258,7 +278,7 @@ class GraphicEngine():
         self.tile_size = self.resize._calculate_dynamic_tile_size(self.maze_size)
         self.line = self.resize._calculate_line_px(self.tile_size)
         self.maze_px.set_at(self.resize._calculate_maze_size_px(self.maze_size))
-        self.win_px.set_at(self.resize._calculate_window_size_px(self.maze_size))
+        self.win_px.set_at(self.resize._calculate_window_size_px(self.maze_px))
 
     def put_window(self) -> Surface:
         """
@@ -313,9 +333,9 @@ class GraphicEngine():
         Dibuja las entities en el mapa
         """
         self._init_entities()
-        self.render._render_entity_block(self.player, px=2)
+        self.render._render_entity_block(self.player)
         for ghost in self.ghosts.values():
-            self.render._render_entity_block(ghost, px=2)
+            self.render._render_entity_block(ghost)
         for pacgum in self.pacgum:
-            self.render._render_entity_block(pacgum, px=4)
+            self.render._render_pacgum(pacgum)
     

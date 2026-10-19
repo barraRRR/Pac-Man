@@ -3,10 +3,10 @@ from src.utils.utils import Coord, Color
 from src.core.entity import Entity, State
 
 
-BLINKY_COLOR = (255, 105, 180, 255)
+BLINKY_COLOR = (223, 0, 36, 255)
 PINKY_COLOR = (255, 192, 203, 255)
-INKY_COLOR = (173, 216, 230, 255)
-CLYDE_COLOR = (255, 255, 0, 255)
+INKY_COLOR = (46, 109, 180, 255)
+CLYDE_COLOR = (238, 70, 36, 255)
 
 
 class Ghost(Entity):
