@@ -1,6 +1,12 @@
 from typing import List
 
 
+UP = 1
+RIGHT = 2
+DOWN = 4
+LEFT = 8
+
+
 class BitMap:
     """
     Lista de integers que conforman el mapa con sus celdas tratadas como bytes
