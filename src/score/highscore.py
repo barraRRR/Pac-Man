@@ -28,6 +28,9 @@ class HighScore:
 
     scores: list[dict[str, str | int]] = []
 
+    # Nombre ACTUAL del archivo de puntuaciones.
+    filename: str = "highscore.csv"
+
     # Reintentos al guardar: intentos totales y segundos de espera
     # entre intento e intento.
     SAVE_ATTEMPTS = 3
@@ -114,7 +117,7 @@ class HighScore:
             return None
 
     @classmethod
-    def load(cls, filename: str) -> list[dict[str, str | int]]:
+    def load(cls,) -> list[dict[str, str | int]]:
         """Carga el ranking desde el archivo de puntuaciones.
 
         El archivo lo escribe siempre save() con datos ya limpios y
@@ -124,7 +127,7 @@ class HighScore:
         el archivo se regenerará en el próximo guardado.
         """
 
-        patch: Path = Path(cls.SCORES_FOLDER) / filename
+        patch: Path = Path(cls.SCORES_FOLDER) / cls.filename
         if not patch.is_file():
             cls.scores = []
             return cls.scores
@@ -149,7 +152,7 @@ class HighScore:
         return cls.scores
 
     @classmethod
-    def save(cls, filename: str) -> bool:
+    def save(cls) -> bool:
         """Guarda el ranking en el archivo de puntuaciones.
 
         Construye el texto CSV con los registros en memoria y lo
@@ -162,7 +165,7 @@ class HighScore:
         """
         text = "".join(
             f"{record['name']},{record['score']}\n" for record in cls.scores)
-        path = Path(cls.SCORES_FOLDER) / filename
+        path = Path(cls.SCORES_FOLDER) / cls.filename
         for attempt in range(1, cls.SAVE_ATTEMPTS + 1):
             try:
                 path.parent.mkdir(parents=True, exist_ok=True)
@@ -186,3 +189,45 @@ class HighScore:
             file=sys.stderr,
         )
         return False
+
+    @classmethod
+    def register(cls, name: str, score: int) -> bool:
+        """Registra una puntuación en el Top 10, si es que entra.
+
+        Limpia el nombre y valida la puntuación; si algo falla, avisa
+        en inglés por stderr y no toca nada. Con el ranking lleno,
+        solo entra una puntuación estrictamente mayor que la última:
+        un empate no desplaza a quien llegó antes. Si entra, se añade,
+        se ordena de mayor a menor (la ordenación estable conserva el
+        orden de llegada entre empates), se recorta a diez y se guarda
+        el archivo.
+
+        Devuelve True si el registro quedó dentro del Top 10 en
+        memoria; si el disco falla, save() avisará por su cuenta.
+        """
+        clean_name = cls.clean_name(name)
+        if not clean_name:
+            print(
+                "Error: player name cannot be empty.",
+                file=sys.stderr,
+            )
+            return False
+
+        if not cls.is_valid_score(score):
+            print(
+                "Error: score must be a non-negative integer.",
+                file=sys.stderr,
+            )
+            return False
+
+        if len(cls.scores) >= 10:
+            lowest_score = int(cls.scores[-1]["score"])
+            if score <= lowest_score:
+                return False
+
+        cls.scores.append({"name": clean_name, "score": score})
+        cls.scores.sort(key=lambda record: int(record["score"]), reverse=True)
+        cls.scores = cls.scores[:10]
+
+        cls.save()
+        return True

@@ -110,7 +110,7 @@ def test_save_creates_folder_and_file(
 ) -> None:
     monkeypatch.setattr(HighScore, "SCORES_FOLDER", str(tmp_path / "highscore"))
     monkeypatch.setattr(HighScore, "scores", [{"name": "Ana", "score": 846}])
-    HighScore.save("highscore.csv")
+    HighScore.save()
     assert (tmp_path / "highscore" / "highscore.csv").is_file()
 
 
@@ -123,8 +123,8 @@ def test_save_then_load_round_trip(
         {"name": "Ana", "score": 846},
         {"name": "Pac Man", "score": 42},
     ])
-    HighScore.save("highscore.csv")
-    assert HighScore.load("highscore.csv") == [
+    HighScore.save()
+    assert HighScore.load() == [
         {"name": "Ana", "score": 846},
         {"name": "Pac Man", "score": 42},
     ]
@@ -136,7 +136,7 @@ def test_saved_file_is_not_plain_csv(
 ) -> None:
     monkeypatch.setattr(HighScore, "SCORES_FOLDER", str(tmp_path))
     monkeypatch.setattr(HighScore, "scores", [{"name": "Ana", "score": 846}])
-    HighScore.save("highscore.csv")
+    HighScore.save()
     content = (tmp_path / "highscore.csv").read_text(encoding="ascii")
     assert "Ana" not in content
 
@@ -153,7 +153,7 @@ def test_save_total_failure_keeps_memory_and_returns_false(
         raise OSError("disk full")
 
     monkeypatch.setattr(pathlib.Path, "write_text", broken_write)
-    saved: bool = HighScore.save("highscore.csv")
+    saved: bool = HighScore.save()
     assert saved is False
     assert HighScore.scores == [{"name": "Ana", "score": 1}]
     assert "total failure" in capsys.readouterr().err
@@ -176,6 +176,133 @@ def test_save_succeeds_after_one_failed_attempt(
         return real_write_text(self, data, encoding=encoding)
 
     monkeypatch.setattr(pathlib.Path, "write_text", flaky_write)
-    assert HighScore.save("highscore.csv") is True
+    assert HighScore.save() is True
     assert len(calls) == 2
-    assert HighScore.load("highscore.csv") == [{"name": "Ana", "score": 1}]
+    assert HighScore.load() == [{"name": "Ana", "score": 1}]
+
+
+@pytest.fixture
+def full_ranking() -> list[dict[str, str | int]]:
+    """Ranking ya lleno: diez registros de 100 a 91 puntos."""
+    return [{"name": f"player{i}", "score": 100 - i} for i in range(10)]
+
+
+def test_register_adds_record_and_returns_true(
+    tmp_path: pathlib.Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(HighScore, "SCORES_FOLDER", str(tmp_path))
+    monkeypatch.setattr(HighScore, "scores", [])
+    assert HighScore.register("Ana", 50) is True
+    assert HighScore.scores == [{"name": "Ana", "score": 50}]
+
+
+def test_register_sorts_by_score_descending(
+    tmp_path: pathlib.Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(HighScore, "SCORES_FOLDER", str(tmp_path))
+    monkeypatch.setattr(HighScore, "scores", [{"name": "Ana", "score": 10}])
+    HighScore.register("Carl", 30)
+    HighScore.register("Bea", 20)
+    assert HighScore.scores == [
+        {"name": "Carl", "score": 30},
+        {"name": "Bea", "score": 20},
+        {"name": "Ana", "score": 10},
+    ]
+
+
+def test_register_tie_keeps_earlier_entry_first(
+    tmp_path: pathlib.Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(HighScore, "SCORES_FOLDER", str(tmp_path))
+    monkeypatch.setattr(HighScore, "scores", [{"name": "Ana", "score": 50}])
+    assert HighScore.register("Bea", 50) is True
+    assert HighScore.scores == [
+        {"name": "Ana", "score": 50},
+        {"name": "Bea", "score": 50},
+    ]
+
+
+def test_register_rejects_equal_score_when_full(
+    tmp_path: pathlib.Path,
+    monkeypatch: pytest.MonkeyPatch,
+    full_ranking: list[dict[str, str | int]],
+) -> None:
+    monkeypatch.setattr(HighScore, "SCORES_FOLDER", str(tmp_path))
+    monkeypatch.setattr(HighScore, "scores", full_ranking)
+    assert HighScore.register("Zoe", 91) is False
+    assert len(HighScore.scores) == 10
+    assert all(record["name"] != "Zoe" for record in HighScore.scores)
+
+
+def test_register_rejects_lower_score_when_full(
+    tmp_path: pathlib.Path,
+    monkeypatch: pytest.MonkeyPatch,
+    full_ranking: list[dict[str, str | int]],
+) -> None:
+    monkeypatch.setattr(HighScore, "SCORES_FOLDER", str(tmp_path))
+    monkeypatch.setattr(HighScore, "scores", full_ranking)
+    assert HighScore.register("Zoe", 1) is False
+    assert len(HighScore.scores) == 10
+
+
+def test_register_higher_score_drops_last_when_full(
+    tmp_path: pathlib.Path,
+    monkeypatch: pytest.MonkeyPatch,
+    full_ranking: list[dict[str, str | int]],
+) -> None:
+    monkeypatch.setattr(HighScore, "SCORES_FOLDER", str(tmp_path))
+    monkeypatch.setattr(HighScore, "scores", full_ranking)
+    assert HighScore.register("Zoe", 95) is True
+    assert len(HighScore.scores) == 10
+    assert HighScore.scores[6] == {"name": "Zoe", "score": 95}
+    names = [record["name"] for record in HighScore.scores]
+    assert "player9" not in names
+
+
+def test_register_rejects_invalid_score(
+    tmp_path: pathlib.Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    monkeypatch.setattr(HighScore, "SCORES_FOLDER", str(tmp_path))
+    monkeypatch.setattr(HighScore, "scores", [])
+    assert HighScore.register("Ana", -5) is False
+    assert HighScore.scores == []
+    assert "score" in capsys.readouterr().err
+
+
+def test_register_rejects_empty_name(
+    tmp_path: pathlib.Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    monkeypatch.setattr(HighScore, "SCORES_FOLDER", str(tmp_path))
+    monkeypatch.setattr(HighScore, "scores", [])
+    assert HighScore.register("   ", 100) is False
+    assert HighScore.scores == []
+    assert "name" in capsys.readouterr().err
+
+
+def test_register_cleans_the_name(
+    tmp_path: pathlib.Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(HighScore, "SCORES_FOLDER", str(tmp_path))
+    monkeypatch.setattr(HighScore, "scores", [])
+    assert HighScore.register("  Ana<3  ", 10) is True
+    assert HighScore.scores == [{"name": "  Ana3", "score": 10}]
+
+
+def test_register_writes_the_obfuscated_file(
+    tmp_path: pathlib.Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(HighScore, "SCORES_FOLDER", str(tmp_path))
+    monkeypatch.setattr(HighScore, "scores", [])
+    HighScore.register("Ana", 10)
+    assert (tmp_path / "highscore.csv").is_file()
+    HighScore.scores = []
+    assert HighScore.load() == [{"name": "Ana", "score": 10}]
