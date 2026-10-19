@@ -87,6 +87,8 @@ class App:
             width=level.width,
             height=level.height,
         )
+        print(f"\nLevel {number}:")
+
         # Apunto qué nivel estamos preparando (para el HUD, errores y highscore).
         self.current_level = number
 
