@@ -1,23 +1,14 @@
 from enum import Enum
 from src.utils.utils import Coord, Color
+from src.core.entity import Entity
 
 
-PLAYER_COLOR = (0, 0, 0, 0)
+PLAYER_COLOR = (243, 195, 0, 255)
 
 
-class PState(Enum):
-    """
-    """
-    NORMAL = "normal"
-    POWER = "power"
-    DEAD = "dead"
-    PAUSE = "pause"
-
-
-class Player:
+class Player(Entity):
     """
     """
     def __init__(self) -> None:
-        self.state: PState = PState.PAUSE
-        self.pos: Coord = Coord()
-        self.color: Color = Color(*PLAYER_COLOR)
+        super().__init__()
+        self.color.set(PLAYER_COLOR)
