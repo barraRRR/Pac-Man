@@ -5,6 +5,7 @@ from src.maze.bitmap import BitMap
 from typing import List, Tuple, Set, Dict
 from collections import deque
 import pygame
+import time
 
 
 BLINKY_COLOR = (223, 0, 36, 255)
@@ -20,12 +21,16 @@ CLYDE_SPEED = 100
 class Ghost(Entity):
     """
     """
-    path_map: Dict[Tuple[Coord, Coord], List[Coord]] = {}
+    path_map: Dict[
+        Tuple[Tuple[int, int], Tuple[int, int]],
+        List[Coord]
+    ] = {}
 
     def __init__(self, name: str) -> None:
         super().__init__()
         self.name: str = name
         self.delta: Coord = Coord()
+        self.next_move_time: float = 0.0
 
     def _find_path(
             self,
@@ -40,8 +45,9 @@ class Ghost(Entity):
         """
         if start == target:
             return []
-        if (start, target) in self.path_map:
-            return self.path_map[(start, target)]
+        cache_key = (start.get(), target.get())
+        if cache_key in self.path_map:
+            return self.path_map[cache_key]
 
         queue: deque[Coord] = deque([start])
         visited: Set[Coord] = {start}
@@ -49,17 +55,18 @@ class Ghost(Entity):
         found: bool = False
 
         while queue:
-            curr_xy: Coord = queue.pop()
+            curr_xy: Coord = queue.popleft()
 
-            if current == target:
+            if curr_xy == target:
                 found = True
                 break
 
             for dir in [UP, RIGHT, DOWN, LEFT]:
                 if not bitmap.grid[curr_xy.y][curr_xy.x] & dir:
-                    new_xy: Coord = curr_xy.step(dir)
+                    new_xy = Coord(curr_xy.get())
+                    new_xy.step(dir)
 
-                    if (new_xy) not in visited:
+                    if new_xy not in visited:
                         visited.add(new_xy)
                         parent_map[new_xy] = curr_xy
                         queue.append(new_xy)
@@ -69,22 +76,23 @@ class Ghost(Entity):
             return []  # No path found, return empty list
         current: Coord = target
         while current != start:
-            path.append(current)
+            path.append(Coord(current.get()))
             current = parent_map[current]
-        path.append(start)
+        path.append(Coord(start.get()))
         path.reverse()
-        self.path_map[(start, target)] = path
+        self.path_map[cache_key] = path
         return path
 
     def _move(
             self,
+            target: Coord,
             clock: pygame.time.Clock,
             tile_size: int,
+            movement_interval: int,
+            bitmap: BitMap,
             fps: int = 60
         ) -> None:
-        """
-        """
-        dt: float = clock.tick(fps) / 1000
+        pass
 
 
 class Blinky(Ghost):
@@ -95,6 +103,33 @@ class Blinky(Ghost):
         super().__init__(name="Blinky")
         self.color.set(BLINKY_COLOR)
         self.speed: int = BLINKY_SPEED
+
+    def _move(
+            self,
+            target: Coord,
+            clock: pygame.time.Clock,
+            tile_size: int,
+            movement_interval: int,
+            bitmap: BitMap,
+            fps: int = 60
+        ) -> None:
+        """
+        """
+        now = time.monotonic()
+        if now < self.next_move_time:
+            return
+
+        path: List[Coord] = self._find_path(
+            start=self.pos,
+            target=target,
+            bitmap=bitmap
+        )
+        if len(path) < 2:
+            self.next_move_time = now + movement_interval / 1000
+            return
+
+        self.pos.set_at(path[1])
+        self.next_move_time = now + movement_interval / 1000
 
 
 class Pinky(Ghost):
@@ -125,4 +160,3 @@ class Clyde(Ghost):
         super().__init__(name="Clyde")
         self.color.set(CLYDE_COLOR)
         self.speed: int = CLYDE_SPEED
-

@@ -15,6 +15,7 @@ import random
 
 
 _FPS = 60
+_MOVEMENT_INTERVAL = 500
 
 
 class App:
@@ -94,6 +95,7 @@ class App:
             width=level.width,
             height=level.height,
         )
+        Coord._set_frontier(self.maze._get_size())
         print(f"\nLevel {number}:")
 
         # Apunto qué nivel estamos preparando (para el HUD, errores y highscore).
@@ -140,6 +142,7 @@ class App:
             ghost.pos.set_at(spawn)
 
         #colocamos los gums
+        self.pacgum.clear()
         for spawn in self.super_pacgum_spawns:
             self.pacgum.append(SuperPacGum(Coord(spawn)))
         for spawn in self.pacgum_spawns:
@@ -192,6 +195,14 @@ class App:
             for ghost in self.ghosts.values():
                 window.blit(ghost.sur, ghost.pos.off_get(self._engine.tile_size))
             window.blit(self.player.sur, self.player.pos.off_get(self._engine.tile_size))
+            for ghost in self.ghosts.values():
+                ghost._move(
+                    target=self.player.pos,
+                    clock=self.clock,
+                    tile_size=self._engine.tile_size,
+                    movement_interval=_MOVEMENT_INTERVAL,
+                    bitmap=self.maze._bitmap
+                )
             running = self._handle_events()
             # actualiza frame
             pygame.display.flip()
