@@ -153,6 +153,8 @@ class App:
         for ghost, spawn in zip(self.ghosts.values(), random_ghost_spawn):
             ghost.pos.set_at(spawn)
 
+        #limpiamos antes de colocar.  --> Reparado por Javi
+        self.pacgum.clear()
         #colocamos los gums
         for spawn in self.super_pacgum_spawns:
             self.pacgum.append(SuperPacGum(Coord(spawn)))
