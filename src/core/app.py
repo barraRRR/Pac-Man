@@ -204,6 +204,7 @@ class App:
         # mantiene el programa en ejecución hasta que haya un evento de cierre
         running = True
         while running:
+            dt: int = self.clock.tick(_FPS)
             window.blit(self._engine._put_background(), (0, 0))
             window.blit(maze, (_PADDING, _PADDING))
             for pacgum in self.pacgum:
@@ -211,19 +212,19 @@ class App:
             for ghost in self.ghosts.values():
                 window.blit(ghost.sur, ghost.pos.off_get(self._engine.tile_size))
             window.blit(self.player.sur, self.player.pos.off_get(self._engine.tile_size))
+
+            # movement
             for ghost in self.ghosts.values():
                 ghost._move(
                     target=self.player.pos,
-                    clock=self.clock,
+                    dt=dt,
                     tile_size=self._engine.tile_size,
-                    movement_interval=_MOVEMENT_INTERVAL,
                     bitmap=self.maze._bitmap
                 )
             running = self._handle_events()
             # actualiza frame
             pygame.display.flip()
             window.fill((0, 0, 0, 0))
-            self.clock.tick(_FPS)
 
     def _end_game(self) -> None:
         """

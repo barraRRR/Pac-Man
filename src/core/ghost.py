@@ -12,10 +12,12 @@ BLINKY_COLOR = (223, 0, 36, 255)
 PINKY_COLOR = (255, 192, 203, 255)
 INKY_COLOR = (46, 109, 180, 255)
 CLYDE_COLOR = (238, 70, 36, 255)
-BLINKY_SPEED = 100
-PINKY_SPEED = 100
-INKY_SPEED = 100
-CLYDE_SPEED = 100
+
+# Cuanta menos, más rápido
+BLINKY_SPEED = 200
+PINKY_SPEED = 500
+INKY_SPEED = 500
+CLYDE_SPEED = 500
 
 
 class Ghost(Entity):
@@ -30,7 +32,7 @@ class Ghost(Entity):
         super().__init__()
         self.name: str = name
         self.delta: Coord = Coord()
-        self.next_move_time: float = 0.0
+        self._timer_ms: int = 0
 
     def _find_path(
             self,
@@ -86,9 +88,8 @@ class Ghost(Entity):
     def _move(
             self,
             target: Coord,
-            clock: pygame.time.Clock,
+            dt: int,
             tile_size: int,
-            movement_interval: int,
             bitmap: BitMap,
             fps: int = 60
         ) -> None:
@@ -107,30 +108,23 @@ class Blinky(Ghost):
     def _move(
             self,
             target: Coord,
-            clock: pygame.time.Clock,
+            dt: int,
             tile_size: int,
-            movement_interval: int,
             bitmap: BitMap,
             fps: int = 60
         ) -> None:
         """
         """
-        now = time.monotonic()
-        if now < self.next_move_time:
-            return
-
-        path: List[Coord] = self._find_path(
-            start=self.pos,
-            target=target,
-            bitmap=bitmap
-        )
-        if len(path) < 2:
-            self.next_move_time = now + movement_interval / 1000
-            return
-
-        self.pos.set_at(path[1])
-        self.next_move_time = now + movement_interval / 1000
-
+        self._timer_ms += dt
+        if self._timer_ms >= self.speed:
+            self._timer_ms -= self.speed
+            path: List[Coord] = self._find_path(
+                start=self.pos,
+                target=target,
+                bitmap=bitmap
+            )
+            if len(path) >= 2:
+                self.pos.set_at(path[1])
 
 class Pinky(Ghost):
     """
