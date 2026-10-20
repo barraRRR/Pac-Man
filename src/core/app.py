@@ -117,8 +117,22 @@ class App:
         # 3º pacgums normales, al final porque no pueden pisar a nadie de lo de arriba.
         self.pacgum_spawns = self.maze.select_pacgum_spawns(reachable, self.pacman_start, self.ghost_spawns, self.super_pacgum_spawns, self.config.pacgum)
 
+        # TEMPORAL: diagnóstico de pacgums sobre el patrón 42. Quitar al resolver el fallo.
+        # on_solid = [
+        #     cell
+        #     for cell in self.pacgum_spawns
+        #     if self.maze.grid[cell[1]][cell[0]] == 1
+        # ]
+        # print(f"  Pacgums on solid cells: {len(on_solid)}")
+        counts = {}
+        for cell in self.pacgum_spawns:
+            value = self.maze.grid[cell[1]][cell[0]]
+            counts[value] = counts.get(value, 0) + 1
+        print(f"  Pacgum cell values: {dict(sorted(counts.items()))}")
+
+
+
         if debug:
-            print(f"Level {number}:")
             print(f"  Pac-Man: {self.pacman_start}")
             print(f"  Ghosts: {self.ghost_spawns}")
             print(f"  Super-pacgums: {self.super_pacgum_spawns}")

@@ -244,7 +244,7 @@ class Maze:
         if requested <= 0:
             return []
 
-        occupied = {pacman_start, *ghost_spawns, *super_pacgum_spawns}
+        occupied = {pacman_start, *ghost_spawns, *super_pacgum_spawns}      #El *desempaqueta la lista, ahorra el bucle for, pacman_start solo tiene una posición.
         candidates = sorted(reachable - occupied)
         placed = random.sample(candidates, min(requested, len(candidates)))
 
