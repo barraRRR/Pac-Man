@@ -7,37 +7,36 @@
 
 ```
 .
-├── assets
-│   ├── seleccion fantasma y pops de pollo , su posicion de inicio.png
-│   └── visualization.png
-├── config.json
-├── en.subject.pdf
-├── Makefile
-├── pac-man.py
-├── pyproject.toml
-├── README.md
-├── scripts
-├── src
-│   ├── core
-│   │   ├── app.py
-│   │   ├── engine.py
-│   │   ├── ghost.py
-│   │   ├── pacgum.py
-│   │   ├── player.py
-│   │   └── SuperPacgum.py
-│   ├── __init__.py
-│   ├── __main__.py
-│   ├── main.py
-│   ├── maze
-│   │   └── bitmap.py
-│   └── utils
-│       ├── class_config.py
-│       ├── class_maze.py
-│       └── utils.py
-├── uv.lock
-├── visualization.png:Zone.Identifier
-└── wheels
-    └── mazegenerator-2.1.0-py3-none-any.whl
+├── Attract Mode & HUD Assets.png
+├── ghosts
+│   ├── blinky_down.gif
+│   ├── blinky_intermission_3.gif
+│   ├── blinky_left.gif
+│   ├── blinky_right.gif
+│   ├── blinky_up.gif
+│   ├── clyde_down.gif
+│   ├── clyde_left.gif
+│   ├── clyde_right.gif
+│   ├── clyde_up.gif
+│   ├── inky_down.gif
+│   ├── inky_left.gif
+│   ├── inky_right.gif
+│   ├── inky_up.gif
+│   ├── izike_flashing_scared_ghost.gif
+│   ├── izike_scared_ghost.gif
+│   ├── pinky_down.gif
+│   ├── pinky_left.gif
+│   ├── pinky_right.gif
+│   └── pinky_up.gif
+├── player
+│   ├── pac-man_death_animation.gif
+│   ├── pac-man_down.gif
+│   ├── pac-man_intermission_#1.gif
+│   ├── pac-man_left.gif
+│   ├── pac-man_right.gif
+│   └── pac-man_up.gif
+├── seleccion fantasma y pops de pollo , su posicion de inicio.png
+└── visualization.png
 ```
 tree -I '.venv|.git'
 
@@ -229,3 +228,136 @@ Si se solicitan más pacgums de las que caben, el programa coloca todas las que 
 App._start_level() llama una vez a reachable_cells(self.pacman_start) y guarda el resultado en reachable. Después pasa ese conjunto a los métodos que necesitan comprobar qué celdas son alcanzables.
 
 Así se evita repetir el recorrido BFS al seleccionar fantasmas, super-pacgums y pacgums normales.
+
+
+
+
+## Puntuaciones (Highscore)
+
+La gestión de puntuaciones vive en `src/score/highscore.py`, en la clase `HighScore`. Todos sus métodos son métodos de clase: no se crea ningún objeto, se llama a las funciones directamente (`HighScore.load()`, `HighScore.save()`...).
+
+El ranking se guarda en el atributo de clase `HighScore.scores`: una lista de registros, donde cada registro es un diccionario con `name` y `score`. Esa lista en memoria es el ranking de verdad; el archivo es su copia de respaldo.
+
+### El archivo de puntuaciones
+
+- Vive en la carpeta `highscore/`, en la raíz del proyecto. El nombre de la carpeta es fijo en el código y se crea solo la primera vez que se guarda.
+- El nombre del archivo vendrá de `config.json` (clave `highscore_filename`, que debe acabar en `.csv`). Config ya lee y valida esa clave; cuando conectemos esta clase con el juego, App se la asignará a `HighScore.filename` al arrancar.
+- El formato interno es CSV: una fila por jugador, con `nombre,puntuación`, ordenado de mayor a menor y con solo el Top 10.
+
+El CSV "de verdad", después de descodificar, se ve así:
+
+```text
+Luna,100
+Marta,70
+Aitor,40
+```
+
+Pero ese contenido nunca se guarda en claro: antes pasa por la ofuscación. Si abres el archivo con un editor verás una línea de letras y números sin sentido:
+
+```text
+Kw8LTVhUWmsoBAtNW1RaazoACQwLD0ZQWlFg
+```
+
+### Cómo se codifica y se descodifica
+
+Para guardar, el texto del CSV pasa por tres pasos:
+
+1. Se convierte a bytes (UTF-8).
+2. Se aplica XOR con una contraseña fija, guardada como constante dentro de la propia clase. La contraseña se repite como clave hasta cubrir todo el texto: cada byte se mezcla con el byte de la clave que le toca.
+3. El resultado son bytes que no se pueden escribir bien en un archivo de texto, así que se convierten a base64, que sí es texto normal. Eso es lo que se escribe.
+
+Para leer, se hace lo mismo al revés: base64 a bytes, XOR otra vez, y de ahí sale el texto del CSV.
+
+El truco es que XOR es su propio inverso: aplicarlo dos veces devuelve el original. Por eso un único método (`_xor`) sirve para codificar y descodificar, con `_encode` y `_decode` como envoltorios.
+
+Si el archivo no es base64 válido, o al deshacer no se recupera texto UTF-8, `_decode` devuelve `None`: el archivo está dañado. Esto no es un cifrado fuerte, ni pretende serlo: es una protección ligera para que nadie edite el ranking a mano con el bloc de notas.
+
+### Las 3 funciones
+
+| Función | Recibe | Devuelve | Qué hace |
+|---|---|---|---|
+| `HighScore.load()` | Nada | La lista de registros (y la deja en `HighScore.scores`) | Lee el archivo, lo descodifica y rellena el ranking |
+| `HighScore.save()` | Nada | `True` si el archivo quedó escrito; `False` si falló todo | Vuelca `HighScore.scores` al archivo |
+| `HighScore.register(name, score)` | Un nombre y una puntuación | `True` si la puntuación entró en el Top 10; `False` si no | Limpia, valida, ordena, recorta a 10 y guarda |
+
+#### `HighScore.load()`
+
+- Si el archivo no existe, el ranking empieza vacío y sin ningún aviso: es lo normal la primera vez que se juega.
+- Si el archivo está dañado, se escribe un aviso en inglés por stderr y el ranking empieza vacío, sin traceback. El archivo se regenerará en el próximo guardado.
+- No revalida lo que lee: confía en el archivo porque el único escritor es `save()`, que guarda datos ya limpios y validados.
+
+#### `HighScore.save()`
+
+- Vuelca a disco lo que hay en memoria en ese momento.
+- Si el disco falla (permisos, disco lleno...), lo intenta hasta 3 veces, con una cuenta atrás de 3, 2, 1 segundos entre intento e intento, avisando en inglés por stderr.
+- Si agota los intentos, avisa del fallo total y devuelve `False`, sin traceback: el ranking sobrevive en memoria y el próximo guardado volverá a intentarlo.
+
+#### `HighScore.register(name, score)`
+
+Es el orquestador: hace todo, en este orden.
+
+1. Limpia el nombre con las reglas de abajo. Si tras limpiar queda vacío, avisa y devuelve `False`.
+2. Valida la puntuación con las reglas de abajo. Si no es válida, avisa y devuelve `False`.
+3. Si el Top 10 está lleno, solo entra una puntuación estrictamente mayor que la última. Un empate no desplaza a quien llegó antes, y una puntuación menor se descarta sin tocar nada.
+4. Añade el registro, ordena el ranking de mayor a menor y lo recorta a 10.
+5. Llama a `save()` y devuelve `True` si el registro quedó dentro del Top 10 en memoria.
+
+Dos detalles del ordenado: es estable, así que si dos registros empatan se conserva el orden de llegada y el nuevo se queda por detrás del anterior. Y los nombres pueden repetirse: no se quitan duplicados, porque pueden ser jugadores distintos con las mismas iniciales.
+
+### Reglas del nombre y de la puntuación
+
+**El nombre:**
+
+- Máximo 10 caracteres; si tiene más, se recorta con un aviso.
+- Caracteres permitidos: letras, dígitos y espacio. Cualquier otro carácter se elimina.
+- Los espacios del final se quitan; los del principio se conservan, así se acordó.
+- Si tras limpiar no queda nada, el registro se rechaza.
+
+**La puntuación:**
+
+- Un número entero mayor o igual que 0.
+- `True` y `False` no valen: Python los trata como enteros y se descartan a mano.
+
+### Nada de tracebacks
+
+El subject lo prohíbe, y aquí se cumple: cualquier situación rara (archivo que no existe, archivo dañado, disco que falla) termina en un aviso en inglés por stderr y el juego sigue funcionando. Un fallo de disco jamás destruye el ranking en memoria.
+
+### Conexión con el juego (pendiente)
+
+La clase ya está terminada y probada, pero App todavía no la usa. La conexión, cuando llegue con la mecánica del juego, tiene tres puntos:
+
+1. **Al arrancar:** `HighScore.filename = config.highscore_filename` (la clave ya existe en `config.json` y Config la valida).
+2. **Una vez al inicio:** `HighScore.load()` para tener el ranking en memoria.
+3. **Al terminar la partida** (momento 4, `_end_game`, que ya reserva ese paso): `HighScore.register(nombre, score)`.
+
+Mientras tanto, la clase se puede usar de forma aislada:
+
+```python
+from src.score.highscore import HighScore
+
+HighScore.register("Aitor", 846)   # limpia, valida, ordena y guarda
+ranking = HighScore.load()          # lee el archivo y lo descodifica
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
