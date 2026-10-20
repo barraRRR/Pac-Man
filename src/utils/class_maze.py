@@ -1,6 +1,7 @@
 from mazegenerator import MazeGenerator
 from src.maze.bitmap import BitMap
 from collections import deque
+from typing import Tuple
 import random
 import sys
 
@@ -24,6 +25,12 @@ class Maze:
     def grid(self) -> list[list[int]]:
         """Devuelve la cuadrícula del nivel actual (solo lectura)."""
         return self._bitmap.grid
+
+    def _get_size(self) -> Tuple[int, int]:
+        """
+        Devuelve el tamaño (y, x) del laberinto
+        """
+        return (len(self.grid) - 1, len(self.grid[0]) - 1) 
 
     def generate_level(self, number:int, width: int, height:int) -> None:
         """Genera el mapa de un nivel y guarda sus cuadrícula.

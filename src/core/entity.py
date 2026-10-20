@@ -24,6 +24,7 @@ class Entity:
         self.state: State = State.INIT
         self.pos: Coord = Coord()
         self.color: Color = Color(0, 0, 0, 0)
+        self.delta: int = None
 
     def _init_surface(self, coord: Coord, tile_size: int) -> None:
         """

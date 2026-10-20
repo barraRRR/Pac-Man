@@ -1,13 +1,41 @@
 from typing import Tuple, Union, Dict
 from src.maze.bitmap import UP, RIGHT, DOWN, LEFT
+from src.utils.error import UnreachableTileError
 
 
 class Coord:
     """
     """
+    frontier: Tuple[int, int] = (0, 0)
+
     def __init__(self, xy: Tuple[int, int] = None) -> None:
         self.x: int = xy[0] if xy else 0
         self.y: int = xy[1] if xy else 0
+
+    def __eq__(self, other):
+        if not isinstance(other, Coord):
+            return False
+        return self.x == other.x and self.y == other.y
+
+    def __hash__(self):
+        return hash((self.x, self.y))
+
+    def __add__(self, other):
+        if not isinstance(other, Coord):
+            return NotImplemented
+        return Coord((self.x + other.x, self.y + other.y))
+
+    def __sub__(self, other):
+        if not isinstance(other, Coord):
+            return NotImplemented
+        return Coord((self.x - other.x, self.y - other.y))
+
+    @classmethod
+    def _set_frontier(cls, maze_size: Tuple[int, int]) -> None:
+        """
+        Actualiza el limite del mapa del maze
+        """
+        cls.frontier = maze_size
 
     def get(self) -> Tuple[int, int]:
         """
@@ -33,6 +61,7 @@ class Coord:
     def step(self, dir: int) -> None:
         """
         """
+        # pdt implementa off boundaries
         if dir == UP:
             self.y -= 1
         elif dir == RIGHT:
@@ -41,6 +70,23 @@ class Coord:
             self.y += 1
         elif dir == LEFT:
             self.x -= 1
+
+    def _get_delta(self, target: "Coord") -> int:
+        """
+        Te dice hacia que direccion está target
+        """
+        directions = {
+            (0, -1): UP,
+            (1, 0): RIGHT,
+            (0, 1): DOWN,
+            (-1, 0): LEFT,
+        }
+        delta = directions.get(((target.x - self.x), (target.y - self.y)), -1)
+        if delta == -1:
+            raise UnreachableTileError
+        
+        return delta
+
 
 class Color:
     """
