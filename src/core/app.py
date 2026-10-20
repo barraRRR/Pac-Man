@@ -161,6 +161,13 @@ class App:
         for spawn in self.pacgum_spawns:
             self.pacgum.append(PacGum(Coord(spawn)))
 
+        # TEMPORAL: comprobar que cada fantasma tiene sus sprites cargados. Quitar al cerrar la #51.
+        for name, ghost in self.ghosts.items():
+            print(f"  {name}: {len(ghost.images)} sprites -> {ghost.images['right']}")
+
+        # TEMPORAL: comprobar sprites del player. Quitar al cerrar la #51.
+        print(f"  player: {len(self.player.images)} sprites -> {self.player.images['right']}")
+
     def _handle_events(self) -> bool:
         """
         """
