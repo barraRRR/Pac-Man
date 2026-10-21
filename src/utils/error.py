@@ -4,3 +4,7 @@ class MovementError(Exception):
 
 class HitWallError(MovementError):
     pass
+
+
+class UnreachableTileError(MovementError):
+    pass
