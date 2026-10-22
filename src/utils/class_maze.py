@@ -4,6 +4,8 @@ from collections import deque
 from typing import Tuple
 import random
 import sys
+from pygame import Surface
+
 
 class Maze:
     """Adaptador del laberinto: envuelve el paquete mazegenerator.
@@ -20,17 +22,37 @@ class Maze:
         """
         self._seed = seed                             # Semilla base (solo nivel 1).
         self._bitmap: BitMap = BitMap()              # Grid [fila][columna] del nivel actual ([] = sin nivel).
+        self.sur: Surface | None = None
+
+        # ***** SIZE *****
+        self._col: int = 0
+        self._row: int = 0
+        self._size: Tuple[int, int] = 0
+        self._frontier: Tuple[int, int] = (0, 0)
 
     @property
     def grid(self) -> list[list[int]]:
         """Devuelve la cuadrícula del nivel actual (solo lectura)."""
         return self._bitmap.grid
 
-    def _get_size(self) -> Tuple[int, int]:
+    @property
+    def size(self) -> Tuple[int, int]:
         """
-        Devuelve el tamaño (y, x) del laberinto
+        Devuelve el tamaño (col, row) del laberinto
         """
-        return (len(self.grid) - 1, len(self.grid[0]) - 1) 
+        return (len(self.grid), len(self.grid[0]))
+
+    @property
+    def col(self) -> int:
+        return self._col
+
+    @property
+    def row(self) -> int:
+        return self._row
+
+    @property
+    def frontier(self) -> Tuple[int, int]:
+        return (self._col - 1, self._row - 1)
 
     def generate_level(self, number:int, width: int, height:int) -> None:
         """Genera el mapa de un nivel y guarda sus cuadrícula.
@@ -47,6 +69,9 @@ class Maze:
 
         self._bitmap.grid.clear()
         self._bitmap.grid.extend(generator_map.maze)        #Lee el mapa ya creado contiene Una lista de listas de enteros (list[list[int]]
+        self._row = len(self._bitmap.grid)
+        self._col = len(self._bitmap.grid[0])
+        self._size = (self._col, self._row)
         # print(self._grid)
         # print('\n')
         # for row in self._grid:
