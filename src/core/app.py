@@ -276,8 +276,6 @@ class App:
             # window.blit(self.player.sur, self.player.pos.off_get(self._engine.tile_size))   #player, me ha costado, blit dibuja pos mueve
 
             #========GHOST============
-            self._engine._blit_elements()
-
             for ghost in self.ghosts.values():      # movement
                 ghost._move(
                     target=self.player.pos,
@@ -286,6 +284,8 @@ class App:
                     bitmap=self.maze._bitmap
                 )
             running = self._handle_events()
+            self._engine._blit_elements()   #player, me ha costado: el blit del player vive ahora aqui
+
             # actualiza frame
             pygame.display.flip()
             self._engine.window.fill((0, 0, 0, 0))
