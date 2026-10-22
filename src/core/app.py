@@ -49,6 +49,7 @@ class App:
             ghosts=self.ghosts,
             pacgum=self.pacgum
         )
+        self.list_key = []
 
     @property
     def blinky(self) -> Blinky:
@@ -171,8 +172,24 @@ class App:
         # TEMPORAL: comprobar sprites del player. Quitar al cerrar la #51.
         print(f"  player: {len(self.player.images)} sprites -> {self.player.images['right']}")
 
+
+    def _push_direction(self, dir:int) ->None:
+        """Apunta la direccion pulsada: si hay hueco se apila, si esta llena se sustituye la pendiente."""
+        if dir in self.list_key:
+            return
+        if len(self.list_key) < 2:
+            self.list_key.append(dir)
+        else:
+            self.list_key[1]        # lista llena: la nueva tecla sustituye a la pendiente
+
+
+
     def _handle_events(self) -> bool:
-        """
+        """Gestiona los eventos de pygame y traduce las teclas a direcciones.
+
+        La tecla no mueve a Pac-Man: apunta su direccion en list_key.
+        Devuelve False si se pide cerrar el juego (boton X o ESC),
+        True mientras la partida siga en marcha.
         """
         for event in pygame.event.get():
             # pulsar el boton X con el raton
@@ -184,12 +201,16 @@ class App:
                     if event.key == pygame.K_ESCAPE:
                         return False
                     elif event.key == pygame.K_UP:
+                        self._push_direction(UP)
                         self.player._move(self.maze._bitmap, UP)
                     elif event.key == pygame.K_RIGHT:
+                        self._push_direction(RIGHT)
                         self.player._move(self.maze._bitmap, RIGHT)
                     elif event.key == pygame.K_DOWN:
+                        self._push_direction(DOWN)
                         self.player._move(self.maze._bitmap, DOWN)
                     elif event.key == pygame.K_LEFT:
+                        self._push_direction(LEFT)
                         self.player._move(self.maze._bitmap, LEFT)
 
                 except HitWallError:
