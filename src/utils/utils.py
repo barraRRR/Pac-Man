@@ -1,6 +1,11 @@
 from typing import Tuple, Union, Dict
 from src.maze.bitmap import UP, RIGHT, DOWN, LEFT
 from src.utils.error import UnreachableTileError
+from pygame import Surface
+import pygame
+
+
+_LOGO_PATH = "assets/logo/pacman_logo.png"
 
 
 class Coord:
@@ -42,12 +47,19 @@ class Coord:
         """
         return (self.x, self.y)
 
-    def off_get(self, tile_size: int) -> Tuple[int, int]:
+    def off_get(
+            self,
+            tile_size: int,
+            top_padding: int,
+            left_padding: int
+        ) -> Tuple[int, int]:
         """
         Devuelve las coords con offset (margen de ventana)
         """
-        from src.core.engine import _PADDING
-        return ((self.x * tile_size) + _PADDING, (self.y * tile_size) + _PADDING)
+        return (
+            (self.x * tile_size) + left_padding,
+            (self.y * tile_size) + top_padding
+        )
 
     def set_at(self, xy: Union['Coord', Tuple[int, int]]) -> None:
         """
@@ -109,3 +121,21 @@ class Color:
         self._r, self._g, self._b, self._alpha = tuple(
             min(255, max(0, c)) for c in color
             )
+
+
+class Logo:
+    """
+    Loads the logo asset
+    """
+    img: Surface | None = None
+
+    def __init__(self, path: str = _LOGO_PATH) -> None:
+        self._path: str = path
+    
+    @classmethod
+    def _load_logo(cls, path: str = _LOGO_PATH) -> Surface:
+        """
+        proteger con try-except y pensar qué ocurre si no se encuentra el file
+        """
+        cls.img = pygame.image.load(path)
+        cls.img.convert()

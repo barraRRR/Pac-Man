@@ -17,14 +17,16 @@ import random
 _FPS = 60
 _MOVEMENT_INTERVAL = 500
 
+_UI_SIZE = (600, 800)
+
 
 class App:
     """Coordina la lógica del juego y prepara el estado de cada nivel."""
 
     def __init__(self, config: Config) -> None:
         """Construye la App con la configuración y deja el estado vacío."""
-        self.config = config                                  # Configuración ya validada y acotada.
-        self.maze = Maze(config.seed)                         # Adaptador del laberinto; semilla para el nivel 1.
+        self.config: Config = config                                  # Configuración ya validada y acotada.
+        self.maze: Maze = Maze(config.seed)                         # Adaptador del laberinto; semilla para el nivel 1.
         self.pacman_start: tuple[int, int] | None = None      # Salida de Pac-Man (x, y); None hasta generar un nivel.
         self.ghost_spawns: list[tuple[int, int]] = []         # Salidas de los 4 fantasmas (x, y).
         self.super_pacgum_spawns: list[tuple[int, int]] = []  # Las 4 super-pacgums, una por esquina (x, y).
@@ -70,12 +72,13 @@ class App:
         """Recorre los niveles en orden y ejecuta los momentos del juego."""
         pygame.init()
         self.clock: pygame.time.Clock = pygame.time.Clock()
+        self._engine._init_window()
         for number, level in enumerate(self.config.level, start=1):
             # try:
             self._start_level(number, level, True)   # Momento 1: preparar el nivel (mapa)
             self._spawn_entities() # Momento 2: colocar Pac-Man y fantasmas (aún no existe)
             self._game_loop()      # Momento 3: mover, comer, morir (aún no existe)
-            self._end_game()       # Momento 4: guardar puntuación, despedida
+            
             """
             except Exception:
                 print(
@@ -84,7 +87,7 @@ class App:
                 )
                 return 1
             """
-
+        self._end_game()       # Momento 4: guardar puntuación, despedida
         return 0
 
     def _start_level(self, number: int, level: Level, debug: bool = False) -> None:
@@ -95,44 +98,23 @@ class App:
             width=level.width,
             height=level.height,
         )
-        Coord._set_frontier(self.maze._get_size())
+        Coord._set_frontier(self.maze.frontier)
         print(f"\nLevel {number}:")
 
-        # Apunto qué nivel estamos preparando (para el HUD, errores y highscore).
         self.current_level = number
-
-        # Pacman nace en la casilla andable más cercana al centro del mapa.
         self.pacman_start = self.maze.center_comecocos()
-
-        # BFS una sola vez por nivel: guardo aquí todas las casillas alcanzables desde Pacman.
-        # Esas casillas ya descartan muros (15) y zonas cortadas, no hace falta restar nada a mano.
         reachable = self.maze.reachable_cells(self.pacman_start)
-
-        # A partir de aquí coloco en orden: cada colocación depende de las anteriores.
-        # 1º fantasmas, uno por esquina elegidos entre las casillas alcanzables.
         self.ghost_spawns = self.maze.select_ghost_spawns(reachable)
-        # 2º super-pacgums, una por esquina, sin pisar a los fantasmas que acabo de poner.
         self.super_pacgum_spawns = self.maze.select_super_pacgum_spawns(
             reachable,
             self.ghost_spawns,
         )
-        # 3º pacgums normales, al final porque no pueden pisar a nadie de lo de arriba.
         self.pacgum_spawns = self.maze.select_pacgum_spawns(reachable, self.pacman_start, self.ghost_spawns, self.super_pacgum_spawns, self.config.pacgum)
-
-        # TEMPORAL: diagnóstico de pacgums sobre el patrón 42. Quitar al resolver el fallo.
-        # on_solid = [
-        #     cell
-        #     for cell in self.pacgum_spawns
-        #     if self.maze.grid[cell[1]][cell[0]] == 1
-        # ]
-        # print(f"  Pacgums on solid cells: {len(on_solid)}")
         counts = {}
         for cell in self.pacgum_spawns:
             value = self.maze.grid[cell[1]][cell[0]]
             counts[value] = counts.get(value, 0) + 1
         print(f"  Pacgum cell values: {dict(sorted(counts.items()))}")
-
-
 
         if debug:
             print(f"  Pac-Man: {self.pacman_start}")
@@ -156,8 +138,6 @@ class App:
             ghost.pos.set_at(spawn)
 
         #limpiamos antes de colocar.  --> Reparado por Javi
-        self.pacgum.clear()
-        #colocamos los gums
         self.pacgum.clear()
         for spawn in self.super_pacgum_spawns:
             self.pacgum.append(SuperPacGum(Coord(spawn)))
@@ -196,23 +176,15 @@ class App:
         """
         
         # render de surfaces
-        self._engine._update_size(self.maze)
-        window = self._engine._init_window()
-        maze = self._engine._put_maze(self.maze._bitmap)
+        self._engine._update_maze(self.maze)
+        self._engine._put_maze(self.maze)
         self._engine._put_entities()
 
         # mantiene el programa en ejecución hasta que haya un evento de cierre
         running = True
         while running:
             dt: int = self.clock.tick(_FPS)
-            window.blit(self._engine._put_background(), (0, 0))
-            window.blit(maze, (_PADDING, _PADDING))
-            for pacgum in self.pacgum:
-                window.blit(pacgum.sur, pacgum.pos.off_get(self._engine.tile_size))
-            for ghost in self.ghosts.values():
-                window.blit(ghost.sur, ghost.pos.off_get(self._engine.tile_size))
-            window.blit(self.player.sur, self.player.pos.off_get(self._engine.tile_size))
-
+            self._engine._blit_elements()
             # movement
             for ghost in self.ghosts.values():
                 ghost._move(
@@ -224,7 +196,7 @@ class App:
             running = self._handle_events()
             # actualiza frame
             pygame.display.flip()
-            window.fill((0, 0, 0, 0))
+            self._engine.window.fill((0, 0, 0, 0))
 
     def _end_game(self) -> None:
         """
