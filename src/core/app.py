@@ -15,7 +15,7 @@ import random
 
 
 _FPS = 60
-_MOVEMENT_INTERVAL = 500
+_MOVEMENT_INTERVAL = 150
 
 
 class App:
@@ -180,7 +180,7 @@ class App:
         if len(self.list_key) < 2:
             self.list_key.append(dir)
         else:
-            self.list_key[1]        # lista llena: la nueva tecla sustituye a la pendiente
+            self.list_key[1] = dir      # lista llena: la nueva tecla sustituye a la pendiente
 
 
 
@@ -254,16 +254,22 @@ class App:
             if move_timer >= _MOVEMENT_INTERVAL:
                 move_timer -= _MOVEMENT_INTERVAL   # resto en vez de cero, igual que la hucha de Blinky
                 if self.list_key:
-                    try:
-                        self.player._move(self.maze._bitmap, self.list_key[0])
-                    except HitWallError:
-                        # pared: cae la actual y se prueba la pendiente en este turno
-                        if len(self.list_key) == 2:
+                    moved: bool = False     # giro anticipado: si la pendiente ya se puede, se ejecuta al instante
+                    if len(self.list_key) == 2:
+                        try:
+                            self.player._move(self.maze._bitmap, self.list_key[1])
                             self.list_key.pop(0)
-                            try:
-                                self.player._move(self.maze._bitmap, self.list_key[0])
-                            except HitWallError:
-                                pass
+                            moved = True
+                        except HitWallError:
+                            pass
+                        # paso normal con la actual, si no acabamos de girar
+                    if not moved:
+                        try:
+                            self.player._move(self.maze._bitmap, self.list_key[0])
+                        except HitWallError:
+                            # pared: cae la actual y la pendiente manda en el proximo latido
+                            if len(self.list_key) == 2:
+                                self.list_key.pop(0)
 
             window.blit(self.player.sur, self.player.pos.off_get(self._engine.tile_size))   #player, me ha costado, blit dibuja pos mueve
 
