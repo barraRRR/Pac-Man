@@ -16,7 +16,7 @@ import random
 
 
 _FPS = 60
-_MOVEMENT_INTERVAL = 500
+_MOVEMENT_INTERVAL = 150
 
 _UI_SIZE = (600, 800)
 
@@ -52,6 +52,7 @@ class App:
             ghosts=self.ghosts,
             pacgum=self.pacgum
         )
+        self.list_key = []
 
     @property
     def blinky(self) -> Blinky:
@@ -158,8 +159,24 @@ class App:
         # TEMPORAL: comprobar sprites del player. Quitar al cerrar la #51.
         print(f"  player: {len(self.player.images)} sprites -> {self.player.images['right']}")
 
+
+    def _push_direction(self, dir:int) ->None:
+        """Apunta la direccion pulsada: si hay hueco se apila, si esta llena se sustituye la pendiente."""
+        if dir in self.list_key:
+            return
+        if len(self.list_key) < 2:
+            self.list_key.append(dir)
+        else:
+            self.list_key[1] = dir      # lista llena: la nueva tecla sustituye a la pendiente
+
+
+
     def _handle_events(self) -> bool:
-        """
+        """Gestiona los eventos de pygame y traduce las teclas a direcciones.
+
+        La tecla no mueve a Pac-Man: apunta su direccion en list_key.
+        Devuelve False si se pide cerrar el juego (boton X o ESC),
+        True mientras la partida siga en marcha.
         """
         for event in pygame.event.get():
             # pulsar el boton X con el raton
@@ -171,16 +188,21 @@ class App:
                     if event.key == pygame.K_ESCAPE:
                         return False
                     elif event.key == pygame.K_UP:
-                        self.player._move(self.maze._bitmap, UP)
+                        self._push_direction(UP)
+                        # self.player._move(self.maze._bitmap, UP)
                     elif event.key == pygame.K_RIGHT:
-                        self.player._move(self.maze._bitmap, RIGHT)
+                        self._push_direction(RIGHT)
+                        # self.player._move(self.maze._bitmap, RIGHT)
                     elif event.key == pygame.K_DOWN:
-                        self.player._move(self.maze._bitmap, DOWN)
+                        self._push_direction(DOWN)
+                        # self.player._move(self.maze._bitmap, DOWN)
                     elif event.key == pygame.K_LEFT:
-                        self.player._move(self.maze._bitmap, LEFT)
+                        self._push_direction(LEFT)
+                        # self.player._move(self.maze._bitmap, LEFT)
 
                 except HitWallError:
-                    pass #definir
+                    # return False #definir
+                    pass
 
         return True
 
@@ -218,11 +240,45 @@ class App:
 
         # mantiene el programa en ejecución hasta que haya un evento de cierre
         running = True
+        move_timer: int = 0
         while running:
             dt: int = self.clock.tick(_FPS)
+
+            #========PLAYER============
+            # movimiento del player: un paso cada _MOVEMENT_INTERVAL ms
+
+            # if self.list_key:
+            #     try:
+            #         self.player._move(self.maze._bitmap, self.list_key[0])
+            #     except HitWallError:
+            #         self.list_key.pop(0)
+            move_timer += dt
+            if move_timer >= _MOVEMENT_INTERVAL:
+                move_timer -= _MOVEMENT_INTERVAL   # resto en vez de cero, igual que la hucha de Blinky
+                if self.list_key:
+                    moved: bool = False     # giro anticipado: si la pendiente ya se puede, se ejecuta al instante
+                    if len(self.list_key) == 2:
+                        try:
+                            self.player._move(self.maze._bitmap, self.list_key[1])
+                            self.list_key.pop(0)
+                            moved = True
+                        except HitWallError:
+                            pass
+                        # paso normal con la actual, si no acabamos de girar
+                    if not moved:
+                        try:
+                            self.player._move(self.maze._bitmap, self.list_key[0])
+                        except HitWallError:
+                            # pared: cae la actual y la pendiente manda en el proximo latido
+                            if len(self.list_key) == 2:
+                                self.list_key.pop(0)
+
+            # window.blit(self.player.sur, self.player.pos.off_get(self._engine.tile_size))   #player, me ha costado, blit dibuja pos mueve
+
+            #========GHOST============
             self._engine._blit_elements()
-            # movement
-            for ghost in self.ghosts.values():
+
+            for ghost in self.ghosts.values():      # movement
                 ghost._move(
                     target=self.player.pos,
                     dt=dt,

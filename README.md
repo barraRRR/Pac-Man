@@ -339,7 +339,19 @@ HighScore.register("Aitor", 846)   # limpia, valida, ordena y guarda
 ranking = HighScore.load()          # lee el archivo y lo descodifica
 ```
 
+Movimiento del jugador
+El movimiento de Pac-Man se coordina desde App. _handle_events() recoge las teclas pulsadas y traduce las flechas de Pygame a las direcciones del juego (UP, RIGHT, DOWN y LEFT). En lugar de mover al jugador directamente al recibir cada evento, guarda las direcciones en list_key, un búfer de hasta dos posiciones:
 
+La posición 0 conserva la dirección actual.
+La posición 1 guarda el siguiente giro solicitado.
+Si el búfer ya está lleno, una nueva tecla sustituye la dirección pendiente.
+Así, Pac-Man puede continuar avanzando aunque el jugador no mantenga pulsada la tecla. El bucle de juego acumula el tiempo transcurrido entre fotogramas (dt) y, al alcanzar el intervalo de movimiento, intenta avanzar una casilla. La velocidad se controla con _MOVEMENT_INTERVAL, por separado de la frecuencia de dibujo del juego.
+
+El bucle también comprueba la dirección pendiente. Si esa dirección no está bloqueada por una pared, Pac-Man gira y la pendiente pasa a ser la dirección actual. Si todavía no puede girar, continúa por su dirección actual. El movimiento se realiza mediante Entity._move(), que consulta el mapa y avanza la posición; si encuentra una pared, señaliza el bloqueo con HitWallError.
+
+Finalmente, el jugador se dibuja después de actualizar su posición, de modo que cada fotograma muestra el estado más reciente.
+
+Estado: el movimiento continuo y los giros anticipados ya funcionan en las pruebas realizadas. La velocidad se ajusta mediante _MOVEMENT_INTERVAL; si has aplicado el valor de 150 ms, Pac-Man tiene un intervalo menor que el de Blinky (200 ms) y, por tanto, puede avanzar más rápido. Queda verificar el giro de 180° y probar distintas situaciones del laberinto antes de dar por cerrada toda la lógica de movimiento.
 
 
 
