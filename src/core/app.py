@@ -202,19 +202,20 @@ class App:
                         return False
                     elif event.key == pygame.K_UP:
                         self._push_direction(UP)
-                        self.player._move(self.maze._bitmap, UP)
+                        # self.player._move(self.maze._bitmap, UP)
                     elif event.key == pygame.K_RIGHT:
                         self._push_direction(RIGHT)
-                        self.player._move(self.maze._bitmap, RIGHT)
+                        # self.player._move(self.maze._bitmap, RIGHT)
                     elif event.key == pygame.K_DOWN:
                         self._push_direction(DOWN)
-                        self.player._move(self.maze._bitmap, DOWN)
+                        # self.player._move(self.maze._bitmap, DOWN)
                     elif event.key == pygame.K_LEFT:
                         self._push_direction(LEFT)
-                        self.player._move(self.maze._bitmap, LEFT)
+                        # self.player._move(self.maze._bitmap, LEFT)
 
                 except HitWallError:
-                    pass #definir
+                    # return False #definir
+                    pass
 
         return True
 
@@ -239,7 +240,12 @@ class App:
                 window.blit(pacgum.sur, pacgum.pos.off_get(self._engine.tile_size))
             for ghost in self.ghosts.values():
                 window.blit(ghost.sur, ghost.pos.off_get(self._engine.tile_size))
-            window.blit(self.player.sur, self.player.pos.off_get(self._engine.tile_size))
+            if self.list_key:
+                try:
+                    self.player._move(self.maze._bitmap, self.list_key[0])
+                except HitWallError:
+                    self.list_key.pop(0)
+            window.blit(self.player.sur, self.player.pos.off_get(self._engine.tile_size))   #player, me ha costado, blit dibuja pos mueve
 
             # movement
             for ghost in self.ghosts.values():
