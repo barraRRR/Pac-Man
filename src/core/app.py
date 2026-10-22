@@ -232,6 +232,7 @@ class App:
 
         # mantiene el programa en ejecución hasta que haya un evento de cierre
         running = True
+        move_timer: int = 0
         while running:
             dt: int = self.clock.tick(_FPS)
             window.blit(self._engine._put_background(), (0, 0))
@@ -240,15 +241,34 @@ class App:
                 window.blit(pacgum.sur, pacgum.pos.off_get(self._engine.tile_size))
             for ghost in self.ghosts.values():
                 window.blit(ghost.sur, ghost.pos.off_get(self._engine.tile_size))
-            if self.list_key:
-                try:
-                    self.player._move(self.maze._bitmap, self.list_key[0])
-                except HitWallError:
-                    self.list_key.pop(0)
+            
+            #========PLAYER============
+
+            # if self.list_key:
+            #     try:
+            #         self.player._move(self.maze._bitmap, self.list_key[0])
+            #     except HitWallError:
+            #         self.list_key.pop(0)
+            # movimiento del player: un paso cada _MOVEMENT_INTERVAL ms
+            move_timer += dt
+            if move_timer >= _MOVEMENT_INTERVAL:
+                move_timer -= _MOVEMENT_INTERVAL   # resto en vez de cero, igual que la hucha de Blinky
+                if self.list_key:
+                    try:
+                        self.player._move(self.maze._bitmap, self.list_key[0])
+                    except HitWallError:
+                        # pared: cae la actual y se prueba la pendiente en este turno
+                        if len(self.list_key) == 2:
+                            self.list_key.pop(0)
+                            try:
+                                self.player._move(self.maze._bitmap, self.list_key[0])
+                            except HitWallError:
+                                pass
+
             window.blit(self.player.sur, self.player.pos.off_get(self._engine.tile_size))   #player, me ha costado, blit dibuja pos mueve
 
-            # movement
-            for ghost in self.ghosts.values():
+            #========GHOST============
+            for ghost in self.ghosts.values():      # movement
                 ghost._move(
                     target=self.player.pos,
                     dt=dt,
