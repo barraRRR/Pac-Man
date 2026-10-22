@@ -7,7 +7,8 @@ from src.core.pacgum import PacGum, SuperPacGum
 from src.core.engine import GraphicEngine, _PADDING
 from src.maze.bitmap import BitMap, UP, RIGHT, DOWN, LEFT
 from src.utils.utils import Coord, Color
-from typing import List, Dict
+from src.ux_ui.menu import Item, ItemType, Menu, MenuInit
+from typing import List, Dict, Callable
 from src.utils.error import HitWallError
 import sys
 import pygame
@@ -73,6 +74,12 @@ class App:
         pygame.init()
         self.clock: pygame.time.Clock = pygame.time.Clock()
         self._engine._init_window()
+        if self._menu_loop(
+            self._engine.menu_init,
+            lambda: self._engine._blit_menu_init(self._engine.menu_init)
+        ) == ItemType.QUIT:
+            return 0
+
         for number, level in enumerate(self.config.level, start=1):
             # try:
             self._start_level(number, level, True)   # Momento 1: preparar el nivel (mapa)
@@ -169,6 +176,28 @@ class App:
                     pass #definir
 
         return True
+
+    def _menu_loop(self, menu: Menu, func: Callable[[Menu], None]) -> ItemType:
+        """
+        """
+        while True:
+            dt: int = self.clock.tick(_FPS)
+            func()
+            for event in pygame.event.get():
+                # pulsar el boton X con el raton
+                if event.type == pygame.QUIT:
+                    return ItemType.QUIT
+                # pulsar la tecla ESC
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_UP:
+                        menu._select_item(False)
+                    elif event.key == pygame.K_DOWN:
+                        menu._select_item(True)
+                    elif event.key == pygame.K_RETURN:
+                        return menu._active_item._item_type
+            pygame.display.flip()
+            self._engine.window.fill((0, 0, 0, 0))
+
 
     def _game_loop(self):
         """

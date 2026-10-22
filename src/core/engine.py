@@ -8,7 +8,7 @@ from src.core.ghost import Ghost, Blinky, Pinky, Inky, Clyde
 from src.core.pacgum import PacGum, SuperPacGum
 from src.utils.utils import Coord, Color, Logo
 from src.utils.class_maze import Maze
-from src.ux_ui.menu import MenuInit
+from src.ux_ui.menu import Menu, MenuInit
 
 """
 
@@ -36,13 +36,18 @@ _MIN_SCREEN_W = 400
 
 _WINDOW_WIDTH = 600
 _WINDOW_HEIGHT = 800
-
-_LOGO_AREA = 200
-_LOGO_DIMENSIONS = (450, 117)
+_WINDOW_CENTER = ((_WINDOW_WIDTH // 2), (_WINDOW_HEIGHT // 2))
 
 _PADDING = 30
 _LINE = 2
 _SAFE_LINE = 1
+
+_LOGO_AREA = (450, 117)
+_SCORE_AREA = (600, 100)
+_HEADER_AREA = _PADDING + _LOGO_AREA[1] + _SCORE_AREA[1]
+_FOOTER_AREA = 100
+
+_ITEM_LINE_SPACING = 30
 
 _MIN_TILE_SIZE = 10
 _STD_TILE_SIZE = 20
@@ -80,7 +85,7 @@ class GraphicEngine():
         self.logo: Logo = Logo()
         self.background: Surface = None
         self.window: Surface = None
-        self.init_menu: MenuInit = None
+        self.menu_init: MenuInit = MenuInit()
 
     """
     ╔═════════════════════════════════════════════════════════════════════════╗
@@ -107,7 +112,7 @@ class GraphicEngine():
         # Esto son operaciones para que el tamaño de las celdas se ajuste
         # al tamaño de la pantalla
         safe_w: int = _WINDOW_WIDTH - (_PADDING * 2)
-        safe_h: int = _WINDOW_HEIGHT - _LOGO_AREA - _PADDING
+        safe_h: int = _WINDOW_HEIGHT - _HEADER_AREA - _FOOTER_AREA - _PADDING
 
         ideal_tile_w: int = safe_w // self.maze.col
         ideal_tile_h: int = safe_h // self.maze.row
@@ -273,7 +278,7 @@ class GraphicEngine():
 
     def _cal_maze_offset(
             self,
-            h: int = _LOGO_AREA
+            h: int = _HEADER_AREA
         ) -> Tuple[int, int]:
         """
         """
@@ -333,6 +338,19 @@ class GraphicEngine():
 
     """
     ╔═════════════════════════════════════════════════════════════════════════╗
+    ║                                 MENU                                    ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+    """
+
+    def _init_menu_init(self) -> None:
+        """
+        Crea el menu de inicio
+        """
+        self.menu_init._render_item_list()
+
+
+    """
+    ╔═════════════════════════════════════════════════════════════════════════╗
     ║                                UX-UI                                    ║
     ╚═════════════════════════════════════════════════════════════════════════╝
     """
@@ -354,8 +372,12 @@ class GraphicEngine():
         """
         """
         self.logo._load_logo()
-        scaled_logo: Surface = pygame.transform.smoothscale(self.logo.img, _LOGO_DIMENSIONS)
-        self.window.blit(scaled_logo, (75, _PADDING))
+        scaled_logo: Surface = pygame.transform.smoothscale(self.logo.img, _LOGO_AREA)
+        logo_pos: Tuple[int, int] = (
+            (_WINDOW_WIDTH - _LOGO_AREA[0]) // 2,
+            _PADDING
+        )
+        self.window.blit(scaled_logo, logo_pos)
 
     def _put_maze(
             self,
@@ -394,7 +416,21 @@ class GraphicEngine():
         for pacgum in self.pacgum:
             self.window.blit(
                 pacgum.sur,
-                pacgum.pos.off_get(self.tile_size, _LOGO_AREA, self._cal_left_padding()))
+                pacgum.pos.off_get(self.tile_size, _HEADER_AREA, self._cal_left_padding()))
         for ghost in self.ghosts.values():
-            self.window.blit(ghost.sur, ghost.pos.off_get(self.tile_size, _LOGO_AREA, self._cal_left_padding()))
-        self.window.blit(self.player.sur, self.player.pos.off_get(self.tile_size, _LOGO_AREA, self._cal_left_padding()))
+            self.window.blit(ghost.sur, ghost.pos.off_get(self.tile_size, _HEADER_AREA, self._cal_left_padding()))
+        self.window.blit(self.player.sur, self.player.pos.off_get(self.tile_size, _HEADER_AREA, self._cal_left_padding()))
+
+    def _blit_menu_init(self, menu: Menu) -> None:
+        """
+        Muestra el menú de inicio en pantalla
+        """
+        self.window.blit(self.background, (0, 0))
+        for i, item in enumerate(menu._items):
+            x, y = _WINDOW_CENTER
+            y += (i * _ITEM_LINE_SPACING)
+            item.xy = (x, y)
+            self.window.blit(item.sur, (x, y))
+            if item == menu._active_item:
+                self.window.blit(menu.selector, (x - 10, y))
+        
