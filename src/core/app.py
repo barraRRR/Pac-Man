@@ -191,7 +191,7 @@ class App:
                     elif event.key == pygame.K_SPACE:
                         self._paused = not self._paused
                         if self._paused:
-                            print("Game Pauseeeeed")
+                            print("Game Paused")
                         else:
                             print("Game resumed")
                     elif event.key == pygame.K_UP:
@@ -242,14 +242,18 @@ class App:
         
         # render de surfaces
         self._engine._update_maze(self.maze)
+        self._engine._put_background()
         self._engine._put_maze(self.maze)
         self._engine._put_entities()
 
         # mantiene el programa en ejecución hasta que haya un evento de cierre
         running = True
         move_timer: int = 0
+
         while running:
             dt: int = self.clock.tick(_FPS)
+            self._engine._blit_elements()   #blit siemrpe pinta
+
             if not self._paused:
                 #========PLAYER============
                 # movimiento del player: un paso cada _MOVEMENT_INTERVAL ms
@@ -274,11 +278,7 @@ class App:
                                 if len(self.list_key) == 2:
                                     self.list_key.pop(0)
 
-                # window.blit(self.player.sur, self.player.pos.off_get(self._engine.tile_size))   #player, me ha costado, blit dibuja pos mueve
-
                 #========GHOST============
-                self._engine._blit_elements()
-
                 for ghost in self.ghosts.values():      # movement
                     ghost._move(
                         target=self.player.pos,
@@ -286,6 +286,7 @@ class App:
                         tile_size=self._engine.tile_size,
                         bitmap=self.maze._bitmap
                     )
+                
             running = self._handle_events()
             # actualiza frame
             pygame.display.flip()

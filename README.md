@@ -382,13 +382,6 @@ Return to the main menu
 
 
 
-Bloque 3 — Detener el juego
-Cuando la pausa esté activa, no actualizar el movimiento de Pac-Man ni el de los fantasmas.
-Tampoco deben avanzar temporizadores de juego mientras dure la pausa.
-El bucle debe seguir atendiendo eventos para permitir reanudar.
-Comprobación: al pausar, los personajes se quedan quietos; al reanudar, continúan.
-
-
 Bloque 4 — Mostrar la pantalla de pausa
 Mantener la composición de la ventana del juego y el logo de arriba.
 Dibujar la escena congelada y superponer un velo translúcido gris o blanco.
