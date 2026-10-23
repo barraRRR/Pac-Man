@@ -378,18 +378,8 @@ Resume the game
 Return to the main menu
 
 
-OK - Bloque 1 — Detectar la tecla
-OK - Localizar el punto existente que recibe los eventos de teclado durante la partida.
-OK -  Añadir la detección de ESPACIO sin cambiar el funcionamiento de las demás teclas.
-OK - Por ahora, escribir un print en inglés cada vez que se pulse.
-OK - Comprobación: el mensaje aparece al pulsar ESPACIO y la partida sigue funcionando como antes.
 
 
-Bloque 2 — Añadir el estado de pausa
-Añadir a nuestra parte un estado que indique si la partida está pausada, por ejemplo, _paused.
-Al pulsar ESPACIO durante la partida, cambiar ese estado.
-Todavía no mostrar el menú ni cambiar la pantalla.
-Comprobación: podemos comprobar por consola cuándo se activa y desactiva la pausa.
 
 
 Bloque 3 — Detener el juego
