@@ -355,6 +355,95 @@ Estado: el movimiento continuo y los giros anticipados ya funcionan en las prueb
 
 
 
+============pausa==============1. Qué dice el subject sobre la pausa
+La sección relevante, textual:
+
+Pause Menu
+
+Resume the game - Allows the player to return to the ongoing game.
+Return to the main menu - Allows the player to exit the current game and go back to the main menu.
+Y sobre teclas, esto es todo lo que hay:
+
+"Can move in 4 directions (up, down, left, right) using arrow keys or WASD (depending on your keyboard)."
+
+"Push SPACE to play" (pie de la imagen de ejemplo del menú principal)
+
+El subject NO fija ninguna tecla de pausa. No aparece la palabra en todo el documento salvo en el título de esa sección. Lo que sí hace es: exigir que el menú de pausa tenga exactamente esas 2 opciones
+
+
+Issue #69 — Plan de trabajo: menú de pausa
+Propósito: al pulsar ESPACIO durante la partida, detener temporalmente el juego y mostrar una pantalla de pausa con el logo habitual arriba, la partida congelada detrás de un velo gris o blanco, el título PAUSE y estas dos opciones:
+
+Resume the game
+Return to the main menu
+
+
+OK - Bloque 1 — Detectar la tecla
+OK - Localizar el punto existente que recibe los eventos de teclado durante la partida.
+OK -  Añadir la detección de ESPACIO sin cambiar el funcionamiento de las demás teclas.
+OK - Por ahora, escribir un print en inglés cada vez que se pulse.
+OK - Comprobación: el mensaje aparece al pulsar ESPACIO y la partida sigue funcionando como antes.
+
+
+Bloque 2 — Añadir el estado de pausa
+Añadir a nuestra parte un estado que indique si la partida está pausada, por ejemplo, _paused.
+Al pulsar ESPACIO durante la partida, cambiar ese estado.
+Todavía no mostrar el menú ni cambiar la pantalla.
+Comprobación: podemos comprobar por consola cuándo se activa y desactiva la pausa.
+
+
+Bloque 3 — Detener el juego
+Cuando la pausa esté activa, no actualizar el movimiento de Pac-Man ni el de los fantasmas.
+Tampoco deben avanzar temporizadores de juego mientras dure la pausa.
+El bucle debe seguir atendiendo eventos para permitir reanudar.
+Comprobación: al pausar, los personajes se quedan quietos; al reanudar, continúan.
+
+
+Bloque 4 — Mostrar la pantalla de pausa
+Mantener la composición de la ventana del juego y el logo de arriba.
+Dibujar la escena congelada y superponer un velo translúcido gris o blanco.
+Añadir PAUSE y las dos opciones del subject.
+El título puede ser texto grande o una imagen; decidiremos eso al llegar a este bloque.
+Comprobación: la pantalla se reconoce como pausa y se ve el juego detenido detrás.
+
+
+Bloque 5 — Navegar y elegir una opción
+Dentro del menú, usar ↑/↓ para cambiar la opción seleccionada.
+Usar ESPACIO para confirmar; se puede valorar aceptar también ENTER.
+Resume the game vuelve a la partida.
+Return to the main menu lleva al menú principal.
+Comprobación: ambas opciones hacen lo indicado.
+
+
+Bloque 6 — Revisar la integración
+Probar el ciclo completo: partida → pausa → reanudar → pausa → menú principal.
+Comprobar que no se han roto los controles ni el menú que ya existían.
+Anotar las teclas elegidas en las instrucciones del juego cuando corresponda.
+Criterios para trabajar en el código
+No borrar ni reescribir funciones existentes solo para acomodar la pausa.
+Conservar los nombres de variables, comentarios y estructura que ya tenga el proyecto.
+Si una función se hace larga, separar visualmente las partes con comentarios breves, por ejemplo # ==== PAUSA ====.
+Los comentarios y explicaciones del código, en español; los print visibles, en inglés.
+Avanzar bloque por bloque: ahora toca únicamente el Bloque 1, sin implementar todavía la pausa ni la pantalla.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -187,6 +187,8 @@ class App:
                 try:
                     if event.key == pygame.K_ESCAPE:
                         return False
+                    elif event.key == pygame.K_SPACE:
+                        print("Space pressed")
                     elif event.key == pygame.K_UP:
                         self._push_direction(UP)
                         # self.player._move(self.maze._bitmap, UP)
