@@ -4,6 +4,7 @@
 
 # cache
 __pycache__/
+.pytest_cache
 
 # uv
 #   Similar to Pipfile.lock, it is generally recommended to include uv.lock in version control.

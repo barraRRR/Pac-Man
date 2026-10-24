@@ -6,6 +6,7 @@ from src.core.entity import Entity
 from src.core.player import Player
 from src.core.ghost import Ghost, Blinky, Pinky, Inky, Clyde
 from src.core.pacgum import PacGum, SuperPacGum
+from src.score.score import Score
 from src.utils.utils import Coord, Color, Logo
 from src.utils.class_maze import Maze
 from src.ux_ui.menu import Menu, MenuInit
@@ -65,7 +66,8 @@ class GraphicEngine():
             self,
             player: Player,
             ghosts: Dict[str, Ghost],
-            pacgum: List[PacGum]) -> None:
+            pacgum: List[PacGum],
+            score: Score) -> None:
 
         # ***** ENTITIES *****
         self.player: Player = player
@@ -86,6 +88,7 @@ class GraphicEngine():
         self.background: Surface = None
         self.window: Surface = None
         self.menu_init: MenuInit = MenuInit()
+        self.score: Score = score
 
     """
     ╔═════════════════════════════════════════════════════════════════════════╗
