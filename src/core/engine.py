@@ -8,7 +8,7 @@ from src.core.ghost import Ghost, Blinky, Pinky, Inky, Clyde
 from src.core.pacgum import PacGum, SuperPacGum
 from src.utils.utils import Coord, Color, Logo
 from src.utils.class_maze import Maze
-from src.ux_ui.menu import Menu, MenuInit
+from src.ux_ui.menu import Menu, MenuInit, MenuPause
 
 """
 
@@ -86,6 +86,7 @@ class GraphicEngine():
         self.background: Surface = None
         self.window: Surface = None
         self.menu_init: MenuInit = MenuInit()
+        self.menu_pause: MenuPause = MenuPause()
 
     """
     ╔═════════════════════════════════════════════════════════════════════════╗
@@ -433,4 +434,33 @@ class GraphicEngine():
             self.window.blit(item.sur, (x, y))
             if item == menu._active_item:
                 self.window.blit(menu.selector, (x - 10, y))
-        
+
+    # def _blit_menu_pause(self, menu: Menu) -> None:
+    #     """Muestra el título y las opciones del menú de pausa."""
+    #     if not pygame.font.get_init():
+    #         pygame.font.init()
+
+    #     title_font = pygame.font.SysFont("Arial", 40)
+    #     title = title_font.render("PAUSE", True, (255, 255, 255, 255))
+    #     self.window.blit(title, (240, 300))
+
+    #     # for i, item in enumerate(menu._items):
+    #     #     x = 240
+    #     #     y = 370 + (i * _ITEM_LINE_SPACING)
+    #     #     item.xy = (x, y)
+    #     #     self.window.blit(item.sur, (x, y))
+    #     #     if item == menu._active_item:
+    #     #         self.window.blit(menu.selector, (x - 15, y))
+
+    def _blit_menu_pause(self, menu: MenuPause) -> None:
+        """Muestra las opciones de pausa sobre la escena congelada."""
+        for i, item in enumerate(menu._items):
+            x, y = _WINDOW_CENTER
+            y += i * _ITEM_LINE_SPACING
+            item.xy = (x, y)
+            self.window.blit(item.sur, (x, y))
+            if item == menu._active_item:
+                self.window.blit(menu.selector, (x - 10, y))
+
+
+

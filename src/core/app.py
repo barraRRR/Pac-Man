@@ -286,7 +286,8 @@ class App:
                         tile_size=self._engine.tile_size,
                         bitmap=self.maze._bitmap
                     )
-                
+            else:
+                self._engine._blit_menu_init(self._engine.menu_pause)
             running = self._handle_events()
             # actualiza frame
             pygame.display.flip()

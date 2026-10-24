@@ -16,6 +16,9 @@ class ItemType(str, Enum):
     """
     START = "START"
     QUIT = "QUIT"
+    RESUME = "RESUME"
+    MAIN_MENU = "MAIN MENU"
+    
 
 
 class Item:
@@ -93,3 +96,22 @@ class MenuInit(Menu):
         ])
         self._render_item_list()
         self._active_item = self._items[0]
+
+
+class MenuPause(Menu):
+    """
+    """
+    def __init__(self) -> None:
+        super().__init__()
+        self._items.extend([
+            Item(ItemType.RESUME),
+            Item(ItemType.MAIN_MENU)
+        ])
+        self._render_item_list()
+        self._active_item = self._items[0]
+
+
+
+
+
+
