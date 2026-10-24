@@ -2,6 +2,7 @@ from src.utils.class_config import Config, Level
 from src.utils.class_maze import Maze
 from src.utils.class_config import Config
 from src.core.player import Player
+from src.core.entity import Entity
 from src.core.ghost import Ghost, Blinky, Pinky, Inky, Clyde
 from src.core.pacgum import PacGum, SuperPacGum
 from src.core.engine import GraphicEngine, _PADDING
@@ -37,12 +38,12 @@ class App:
         self.score: int = 0                                   # Puntos acumulados; sube al comer.
 
         # Entity instancies
-        self.player: Player = Player()
+        self.player: Player = Player(lives=self.config.lives)
         self.ghosts: Dict[str, Ghost] = {
-            "blinky": Blinky(),
-            "pinky": Pinky(),
-            "inky": Inky(),
-            "clyde": Clyde()
+            "blinky": Blinky(points=self.config.points_per_ghost),
+            "pinky": Pinky(points=self.config.points_per_ghost),
+            "inky": Inky(points=self.config.points_per_ghost),
+            "clyde": Clyde(points=self.config.points_per_ghost)
         }
         self.pacgum: List[PacGum] = []
 
@@ -148,9 +149,13 @@ class App:
         #limpiamos antes de colocar.  --> Reparado por Javi
         self.pacgum.clear()
         for spawn in self.super_pacgum_spawns:
-            self.pacgum.append(SuperPacGum(Coord(spawn)))
+            self.pacgum.append(SuperPacGum(Coord(spawn), points=self.config.points_per_super_pacgum))
         for spawn in self.pacgum_spawns:
-            self.pacgum.append(PacGum(Coord(spawn)))
+            self.pacgum.append(PacGum(Coord(spawn), points=self.config.points_per_pacgum))
+
+        Entity.entity_map.clear()
+        for entity in [self.player, *self.ghosts.values(), *self.pacgum]:
+            entity._update_entity_map(True)
 
         # TEMPORAL: comprobar que cada fantasma tiene sus sprites cargados. Quitar al cerrar la #51.
         for name, ghost in self.ghosts.items():
@@ -227,7 +232,6 @@ class App:
             pygame.display.flip()
             self._engine.window.fill((0, 0, 0, 0))
 
-
     def _game_loop(self):
         """
         TO-DO
@@ -243,6 +247,7 @@ class App:
         move_timer: int = 0
         while running:
             dt: int = self.clock.tick(_FPS)
+
 
             #========PLAYER============
             # movimiento del player: un paso cada _MOVEMENT_INTERVAL ms
@@ -272,6 +277,8 @@ class App:
                             # pared: cae la actual y la pendiente manda en el proximo latido
                             if len(self.list_key) == 2:
                                 self.list_key.pop(0)
+
+            self.player.resolve_tile()
 
             # window.blit(self.player.sur, self.player.pos.off_get(self._engine.tile_size))   #player, me ha costado, blit dibuja pos mueve
 
