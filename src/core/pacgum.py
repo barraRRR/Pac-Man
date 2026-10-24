@@ -10,15 +10,15 @@ SUPER_COLOR = (255, 255, 255, 255)
 class PacGum(Entity):
     """
     """
-    def __init__(self, pos: Coord) -> None:
+    def __init__(self, pos: Coord, points: int) -> None:
         super().__init__()
         self.pos.set_at(pos)
         self.color.set(PACGUM_COLOR)
-
+        self.points: int = points
 
 class SuperPacGum(PacGum):
     """
     """
-    def __init__(self, pos: Coord) -> None:
-        super().__init__(pos)
+    def __init__(self, pos: Coord, points: int) -> None:
+        super().__init__(pos, points)
         self.color.set(SUPER_COLOR)

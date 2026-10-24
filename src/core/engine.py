@@ -414,11 +414,13 @@ class GraphicEngine():
         self._put_logo()
         self.window.blit(self.maze.sur, (self._cal_maze_offset()))
         for pacgum in self.pacgum:
-            self.window.blit(
-                pacgum.sur,
-                pacgum.pos.off_get(self.tile_size, _HEADER_AREA, self._cal_left_padding()))
+            if pacgum.alive:
+                self.window.blit(
+                    pacgum.sur,
+                    pacgum.pos.off_get(self.tile_size, _HEADER_AREA, self._cal_left_padding()))
         for ghost in self.ghosts.values():
-            self.window.blit(ghost.sur, ghost.pos.off_get(self.tile_size, _HEADER_AREA, self._cal_left_padding()))
+            if ghost.alive:
+                self.window.blit(ghost.sur, ghost.pos.off_get(self.tile_size, _HEADER_AREA, self._cal_left_padding()))
         self.window.blit(self.player.sur, self.player.pos.off_get(self.tile_size, _HEADER_AREA, self._cal_left_padding()))
 
     def _blit_menu_init(self, menu: Menu) -> None:
