@@ -7,6 +7,7 @@ from src.core.ghost import Ghost, Blinky, Pinky, Inky, Clyde
 from src.core.pacgum import PacGum, SuperPacGum
 from src.core.engine import GraphicEngine, _PADDING
 from src.maze.bitmap import BitMap, UP, RIGHT, DOWN, LEFT
+from src.score.score import Score
 from src.utils.utils import Coord, Color
 from src.ux_ui.menu import Item, ItemType, Menu, MenuInit
 from typing import List, Dict, Callable
@@ -35,10 +36,13 @@ class App:
         self.pacgum_spawns: list[tuple[int, int]] = []        # Pacgums normales colocadas (x, y).
         self.current_level: int = 0                           # Número del nivel en curso (0 = ninguno iniciado).
         self.lives: int = config.lives                        # Vidas restantes; el game loop las gasta.
-        self.score: int = 0                                   # Puntos acumulados; sube al comer.
+        self.score: Score = Score()                                   # Puntos acumulados; sube al comer.
 
         # Entity instancies
-        self.player: Player = Player(lives=self.config.lives)
+        self.player: Player = Player(
+            lives=self.config.lives,
+            score=self.score
+        )
         self.ghosts: Dict[str, Ghost] = {
             "blinky": Blinky(points=self.config.points_per_ghost),
             "pinky": Pinky(points=self.config.points_per_ghost),
@@ -51,7 +55,8 @@ class App:
         self._engine: GraphicEngine = GraphicEngine(
             player=self.player,
             ghosts=self.ghosts,
-            pacgum=self.pacgum
+            pacgum=self.pacgum,
+            score=self.score
         )
         self.list_key = []
 
@@ -164,8 +169,7 @@ class App:
         # TEMPORAL: comprobar sprites del player. Quitar al cerrar la #51.
         print(f"  player: {len(self.player.images)} sprites -> {self.player.images['right']}")
 
-
-    def _push_direction(self, dir:int) ->None:
+    def _push_direction(self, dir:int) -> None:
         """Apunta la direccion pulsada: si hay hueco se apila, si esta llena se sustituye la pendiente."""
         if dir in self.list_key:
             return
@@ -173,8 +177,6 @@ class App:
             self.list_key.append(dir)
         else:
             self.list_key[1] = dir      # lista llena: la nueva tecla sustituye a la pendiente
-
-
 
     def _handle_events(self) -> bool:
         """Gestiona los eventos de pygame y traduce las teclas a direcciones.

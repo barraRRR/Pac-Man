@@ -3,6 +3,7 @@ from src.utils.utils import Coord, Color
 from src.core.entity import Entity
 from src.core.ghost import Ghost
 from src.core.pacgum import PacGum
+from src.score.score import Score
 from src.utils.utils import Coord
 import pygame
 from pygame import Surface
@@ -14,11 +15,11 @@ PLAYER_COLOR = (243, 195, 0, 255)
 class Player(Entity):
     """
     """
-    def __init__(self, lives: int) -> None:
+    def __init__(self, lives: int, score: Score) -> None:
         super().__init__()
         self.color.set(PLAYER_COLOR)
         self.images: dict[str, Surface] = self._load_images()
-        self.score: int = 0
+        self._score: Score = score
         self._lives: int = lives
 
     @staticmethod
@@ -46,7 +47,7 @@ class Player(Entity):
 
         if target.alive:
             self.kill(target)
-            self.score += target.points
+            self._score.add(target.points)
 
     def resolve_tile(self) -> None:
         """
