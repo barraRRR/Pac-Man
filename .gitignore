@@ -6,6 +6,10 @@
 __pycache__/
 .pytest_cache
 
+# edit
+*.ai
+pacman_px_ref_edit.png
+
 # uv
 #   Similar to Pipfile.lock, it is generally recommended to include uv.lock in version control.
 #   This is especially recommended for binary packages to ensure reproducibility, and is more
