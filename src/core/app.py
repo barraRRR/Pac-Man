@@ -20,7 +20,7 @@ from src.ux_ui.instructions import Instructions
 
 
 _FPS = 60
-_MOVEMENT_INTERVAL = 150
+_MOVEMENT_INTERVAL = 220
 
 _UI_SIZE = (600, 800)
 

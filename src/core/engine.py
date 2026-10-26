@@ -69,6 +69,11 @@ _INTRO_SUB_SIZE = 10     # Tamaño del "Push SPACE to play"
 _INTRO_PAD = 20          # Margen interior de la banda
 _INTRO_GAP = 30          # Hueco entre título y subtítulo
 
+# ==== INSTRUCCIONES ====
+_INSTR_FIRST_ROW_Y = 260               # primera fila, debajo del logo
+_INSTR_ROW_SPACING = 70                # hueco entre filas
+_INSTR_PAIR_GAP = 30                   # hueco entre placa y texto
+_INSTR_HINT_Y = 700                    # pista de salida, zona del pie
 
 class GraphicEngine():
     """
@@ -100,6 +105,7 @@ class GraphicEngine():
         self.window: Surface = None
         self.menu_init: MenuInit = MenuInit()
         self.menu_pause: MenuPause = MenuPause()
+        self.instructions: Instructions = Instructions()
 
         # ***** SCORE *****
         self.up_title: Title = Title("1UP")
@@ -462,7 +468,6 @@ class GraphicEngine():
                 self.window.blit(menu.selector, (x - 10, y))
         self._put_logo()
                 
-    #Mantener, si no se usa borrar y modificar su llamada al init por si se une con la de arriba, son iguales, excepto personalizacion, comprobar
     def _blit_menu_pause(self, menu: MenuPause) -> None:
         """Muestra las opciones de pausa sobre la escena congelada."""
         for i, item in enumerate(menu._items):
@@ -522,24 +527,24 @@ class GraphicEngine():
         self.window.blit(sub, (sub_x, band_y + _INTRO_PAD + title.get_height() + _INTRO_GAP))
 
     def _blit_instructions(self) -> None:
-        """Dibuja el logo y las instrucciones en filas sencillas."""
+        """Pega la pantalla de instrucciones renderizada por su objeto."""
         self._put_logo()
 
-        if not pygame.font.get_init():
-            pygame.font.init()
+        for index, (cap, text) in enumerate(self.instructions.rows):
+            pair_w: int = cap.get_width() + _INSTR_PAIR_GAP + text.get_width()
+            x: int = (_WINDOW_WIDTH - pair_w) // 2
+            y: int = _INSTR_FIRST_ROW_Y + index * _INSTR_ROW_SPACING
+            self.window.blit(cap, (x, y))
+            self.window.blit(
+                text,
+                (x + cap.get_width() + _INSTR_PAIR_GAP,
+                 y + (cap.get_height() - text.get_height()) // 2)
+            )
 
-        font = pygame.font.Font("assets/font/font_emulogic.ttf", 12)
-        text_color = (255, 255, 255, 255)
-        first_row_y = 240
-        row_spacing = 55
-
-        for index, (keys, description) in enumerate(
-            Instructions.get_entries()
-        ):
-            text = font.render(f"{keys}: {description}", True, text_color)
-            x = (_WINDOW_WIDTH - text.get_width()) // 2
-            y = first_row_y + index * row_spacing
-            self.window.blit(text, (x, y))
+        # pista de salida, como el "Push SPACE to play" de la intro
+        hint: Surface = self.instructions.hint
+        self.window.blit(hint, ((_WINDOW_WIDTH - hint.get_width()) // 2,
+                                _INSTR_HINT_Y))
 
 
 
