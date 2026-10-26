@@ -6,37 +6,151 @@
 
 
 ```
-.
-├── Attract Mode & HUD Assets.png
-├── ghosts
-│   ├── blinky_down.gif
-│   ├── blinky_intermission_3.gif
-│   ├── blinky_left.gif
-│   ├── blinky_right.gif
-│   ├── blinky_up.gif
-│   ├── clyde_down.gif
-│   ├── clyde_left.gif
-│   ├── clyde_right.gif
-│   ├── clyde_up.gif
-│   ├── inky_down.gif
-│   ├── inky_left.gif
-│   ├── inky_right.gif
-│   ├── inky_up.gif
-│   ├── izike_flashing_scared_ghost.gif
-│   ├── izike_scared_ghost.gif
-│   ├── pinky_down.gif
-│   ├── pinky_left.gif
-│   ├── pinky_right.gif
-│   └── pinky_up.gif
-├── player
-│   ├── pac-man_death_animation.gif
-│   ├── pac-man_down.gif
-│   ├── pac-man_intermission_#1.gif
-│   ├── pac-man_left.gif
-│   ├── pac-man_right.gif
-│   └── pac-man_up.gif
-├── seleccion fantasma y pops de pollo , su posicion de inicio.png
-└── visualization.png
+├── Makefile
+├── README.md
+├── assets
+│   ├── Attract Mode & HUD Assets.png
+│   ├── animations
+│   │   ├── frames.json
+│   │   ├── ghosts
+│   │   │   ├── blinky_down
+│   │   │   │   ├── frame_00.png
+│   │   │   │   └── frame_01.png
+│   │   │   ├── blinky_left
+│   │   │   │   ├── frame_00.png
+│   │   │   │   └── frame_01.png
+│   │   │   ├── blinky_right
+│   │   │   │   ├── frame_00.png
+│   │   │   │   └── frame_01.png
+│   │   │   ├── blinky_up
+│   │   │   │   ├── frame_00.png
+│   │   │   │   └── frame_01.png
+│   │   │   ├── clyde_down
+│   │   │   │   ├── frame_00.png
+│   │   │   │   └── frame_01.png
+│   │   │   ├── clyde_left
+│   │   │   │   ├── frame_00.png
+│   │   │   │   └── frame_01.png
+│   │   │   ├── clyde_right
+│   │   │   │   ├── frame_00.png
+│   │   │   │   └── frame_01.png
+│   │   │   ├── clyde_up
+│   │   │   │   ├── frame_00.png
+│   │   │   │   └── frame_01.png
+│   │   │   ├── flashing_scared_ghost
+│   │   │   │   ├── frame_00.png
+│   │   │   │   └── frame_01.png
+│   │   │   ├── inky_down
+│   │   │   │   ├── frame_00.png
+│   │   │   │   └── frame_01.png
+│   │   │   ├── inky_left
+│   │   │   │   ├── frame_00.png
+│   │   │   │   └── frame_01.png
+│   │   │   ├── inky_right
+│   │   │   │   ├── frame_00.png
+│   │   │   │   └── frame_01.png
+│   │   │   ├── inky_up
+│   │   │   │   ├── frame_00.png
+│   │   │   │   └── frame_01.png
+│   │   │   ├── pinky_down
+│   │   │   │   ├── frame_00.png
+│   │   │   │   └── frame_01.png
+│   │   │   ├── pinky_left
+│   │   │   │   ├── frame_00.png
+│   │   │   │   └── frame_01.png
+│   │   │   ├── pinky_right
+│   │   │   │   ├── frame_00.png
+│   │   │   │   └── frame_01.png
+│   │   │   ├── pinky_up
+│   │   │   │   ├── frame_00.png
+│   │   │   │   └── frame_01.png
+│   │   │   └── scared_ghost
+│   │   │       ├── frame_00.png
+│   │   │       └── frame_01.png
+│   │   └── player
+│   │       ├── pac-man_death
+│   │       │   ├── frame_00.png
+│   │       │   ├── frame_01.png
+│   │       │   ├── frame_02.png
+│   │       │   ├── frame_03.png
+│   │       │   ├── frame_04.png
+│   │       │   ├── frame_05.png
+│   │       │   ├── frame_06.png
+│   │       │   ├── frame_07.png
+│   │       │   ├── frame_08.png
+│   │       │   ├── frame_09.png
+│   │       │   ├── frame_10.png
+│   │       │   ├── frame_11.png
+│   │       │   ├── frame_12.png
+│   │       │   ├── frame_13.png
+│   │       │   ├── frame_14.png
+│   │       │   └── frame_15.png
+│   │       ├── pac-man_down
+│   │       │   ├── frame_00.png
+│   │       │   ├── frame_01.png
+│   │       │   ├── frame_02.png
+│   │       │   └── frame_03.png
+│   │       ├── pac-man_left
+│   │       │   ├── frame_00.png
+│   │       │   ├── frame_01.png
+│   │       │   ├── frame_02.png
+│   │       │   └── frame_03.png
+│   │       ├── pac-man_right
+│   │       │   ├── frame_00.png
+│   │       │   ├── frame_01.png
+│   │       │   ├── frame_02.png
+│   │       │   └── frame_03.png
+│   │       └── pac-man_up
+│   │           ├── frame_00.png
+│   │           ├── frame_01.png
+│   │           ├── frame_02.png
+│   │           └── frame_03.png
+│   ├── font
+│   │   └── font_emulogic.ttf
+│   ├── fonts
+│   ├── logo
+│   │   └── pacman_logo.png
+│   ├── seleccion fantasma y pops de pollo , su posicion de inicio.png
+│   └── visualization.png
+├── config.json
+├── en.subject.pdf
+├── pac-man.py
+├── pyproject.toml
+├── scripts
+├── src
+│   ├── __init__.py
+│   ├── __main__.py
+│   ├── core
+│   │   ├── app.py
+│   │   ├── engine.py
+│   │   ├── entity.py
+│   │   ├── ghost.py
+│   │   ├── pacgum.py
+│   │   └── player.py
+│   ├── main.py
+│   ├── maze
+│   │   └── bitmap.py
+│   ├── score
+│   │   ├── highscore.py
+│   │   └── score.py
+│   ├── utils
+│   │   ├── class_config.py
+│   │   ├── class_maze.py
+│   │   ├── error.py
+│   │   └── utils.py
+│   └── ux_ui
+│       └── menu.py
+├── tests
+│   └── test_highscore.py
+├── uv.lock
+└── wheels
+    ├── mazegenerator-2.1.0-py3-none-any - copia
+    │   ├── mazegenerator
+    │   │   └── mazegenerator.py
+    │   └── mazegenerator-2.1.0.dist-info
+    └── mazegenerator-2.1.0-py3-none-any.whl
+
+43 directories, 101 files
 ```
 tree -I '.venv|.git'
 

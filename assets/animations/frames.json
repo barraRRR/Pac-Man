@@ -1,0 +1,116 @@
+{
+    "ghosts/blinky_down": [
+        100,
+        100
+    ],
+    "ghosts/blinky_left": [
+        100,
+        100
+    ],
+    "ghosts/blinky_right": [
+        100,
+        100
+    ],
+    "ghosts/blinky_up": [
+        100,
+        100
+    ],
+    "ghosts/clyde_down": [
+        100,
+        100
+    ],
+    "ghosts/clyde_left": [
+        100,
+        100
+    ],
+    "ghosts/clyde_right": [
+        100,
+        100
+    ],
+    "ghosts/clyde_up": [
+        100,
+        100
+    ],
+    "ghosts/flashing_scared_ghost": [
+        100,
+        100
+    ],
+    "ghosts/inky_down": [
+        100,
+        100
+    ],
+    "ghosts/inky_left": [
+        100,
+        100
+    ],
+    "ghosts/inky_right": [
+        100,
+        100
+    ],
+    "ghosts/inky_up": [
+        100,
+        100
+    ],
+    "ghosts/pinky_down": [
+        100,
+        100
+    ],
+    "ghosts/pinky_left": [
+        100,
+        100
+    ],
+    "ghosts/pinky_right": [
+        100,
+        100
+    ],
+    "ghosts/pinky_up": [
+        100,
+        100
+    ],
+    "ghosts/scared_ghost": [
+        100,
+        100
+    ],
+    "player/pac-man_death": [
+        80,
+        80,
+        80,
+        80,
+        80,
+        80,
+        80,
+        80,
+        80,
+        80,
+        80,
+        80,
+        80,
+        80,
+        80,
+        80
+    ],
+    "player/pac-man_down": [
+        40,
+        40,
+        40,
+        40
+    ],
+    "player/pac-man_left": [
+        40,
+        40,
+        40,
+        40
+    ],
+    "player/pac-man_right": [
+        40,
+        40,
+        40,
+        40
+    ],
+    "player/pac-man_up": [
+        40,
+        40,
+        40,
+        40
+    ]
+}
