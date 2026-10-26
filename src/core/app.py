@@ -126,6 +126,7 @@ class App:
         print(f"\nLevel {number}:")
 
         self.current_level = number
+        self.list_key.clear()   # nivel nuevo: sin giros pendientes del anterior
         self.pacman_start = self.maze.center_comecocos()
         reachable = self.maze.reachable_cells(self.pacman_start)
         self.ghost_spawns = self.maze.select_ghost_spawns(reachable)
