@@ -28,7 +28,7 @@ class Entity:
         self.color: Color = Color(0, 0, 0, 0)
         self.delta: int = None
         self.alive: bool = True
-        self.spawn_pos: Coord = self.pos
+        self.spawn_pos: Coord = Coord(self.pos.get())
         self._update_entity_map(True)
 
     def _init_surface(self, coord: Coord, tile_size: int) -> None:
@@ -48,11 +48,11 @@ class Entity:
             self.pos.step(dir)
             self._update_entity_map(True)
 
-    def kill(self, other: "Entity") -> None:
-        """
-        Elimina a la otra entidad
-        """
-        other.alive = False
+    def _set_position(self, position: Coord) -> None:
+        """Cambia la posición manteniendo actualizado el mapa de entidades."""
+        self._update_entity_map(False)
+        self.pos.set_at(position)
+        self._update_entity_map(True)
 
     def _update_entity_map(self, add: bool) -> None:
         """
@@ -66,5 +66,11 @@ class Entity:
         elif not add and self in Entity.entity_map[pos]:
             Entity.entity_map[pos].remove(self)
 
+    def kill(self, other: "Entity") -> None:
+        """
+        Elimina a la otra entidad
+        """
+        other.alive = False
+        other._set_position(other.spawn_pos)
 
 

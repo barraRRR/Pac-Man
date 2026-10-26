@@ -170,11 +170,13 @@ class App:
         """
         # colocamos al player
         self.player.pos.set_at(self.pacman_start)
+        self.player.spawn_pos.set_at(self.pacman_start)
 
         # colocamos a los fantasmas cogiendo los puntos aleatoriamente
         random_ghost_spawn = random.sample(self.ghost_spawns, 4)
         for ghost, spawn in zip(self.ghosts.values(), random_ghost_spawn):
             ghost.pos.set_at(spawn)
+            ghost.spawn_pos.set_at(spawn)
 
         # limpiamos antes de colocar.  --> Reparado por Javi
         self.pacgum.clear()
@@ -362,6 +364,7 @@ class App:
                         tile_size=self._engine.tile_size,
                         bitmap=self.maze._bitmap
                     )
+                    ghost.resolve_tile()
             else:
                 self._engine._blit_menu_pause(self._engine.menu_pause)
             running = self._handle_events()
