@@ -122,6 +122,23 @@ class Ghost(Entity):
         ) -> None:
         pass
 
+    def _die(self) -> None:
+        """
+        El jugador alcanza o es aclanzado por un Ghost not edible
+        """
+        self._set_position(self.spawn_pos)
+        self.alive = True
+        # implementar cooldown
+
+    def resolve_tile(self) -> None:
+        """
+        Interactua con el resto de Entity de la casilla
+        """
+        from src.core.player import Player
+        for ent in list(Entity.entity_map.get(self.pos.get(), [])):
+            if isinstance(ent, Player) and not self.edible and ent.alive:
+                ent._die()
+
 
 class Blinky(Ghost):
     """
@@ -143,6 +160,8 @@ class Blinky(Ghost):
         ) -> None:
         """
         """
+        if self.alive == False:
+            self._die()
         self._timer_ms += dt
         if self._timer_ms >= self.speed:
             self._timer_ms -= self.speed
@@ -152,7 +171,7 @@ class Blinky(Ghost):
                 bitmap=bitmap
             )
             if len(path) >= 2:
-                self.pos.set_at(path[1])
+                self._set_position(path[1])
 
 class Pinky(Ghost):
     """

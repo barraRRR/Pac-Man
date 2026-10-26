@@ -36,7 +36,8 @@ class Player(Entity):
         El jugador alcanza o es aclanzado por un Ghost not edible
         """
         self._lives -= 1
-        self.pos = self.spawn_pos
+        self._set_position(self.spawn_pos)
+        self.alive = True
 
     def _eat(self, target: Entity) -> None:
         """
@@ -57,4 +58,3 @@ class Player(Entity):
             if ent == self:
                 continue
             self._eat(ent)
-
