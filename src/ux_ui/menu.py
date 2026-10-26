@@ -14,8 +14,10 @@ _FONT_BODY_SIZE = 10
 class ItemType(str, Enum):
     """
     """
-    START = "START"
-    QUIT = "QUIT"
+    START = "START GAME"
+    HIGHSCORES = "VIEW HIGHSCORES"
+    INSTRUCTIONS = "INSTRUCTIONS"
+    QUIT = "EXIT"
     RESUME = "RESUME"
     MAIN_MENU = "MAIN MENU"
     
@@ -105,6 +107,8 @@ class MenuInit(Menu):
         super().__init__()
         self._items.extend([
             Item(ItemType.START),
+            Item(ItemType.HIGHSCORES),
+            Item(ItemType.INSTRUCTIONS),
             Item(ItemType.QUIT)
         ])
         self._render_item_list("assets/font/font_emulogic.ttf", 16)

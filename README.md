@@ -434,6 +434,17 @@ Ya probaste que al elegir Main Menu se vuelve al menú inicial. Queda probar el 
 - Pendiente documentar las teclas elegidas en Instructions.
 
 
+Trabajo que hemos hecho en esta conversación
+Intro entre niveles
+Se muestra LEVEL <n> y Push SPACE to play sobre una banda de ancho completo.
+Espera a que se pulse SPACE antes de empezar a jugar.
+La llamada desde run() debe ser a self._level_intro(number) y solo mostrarse cuando number > 1.
+Opciones del menú principal
+Añadimos las cuatro opciones del subject: START GAME, VIEW HIGHSCORES, INSTRUCTIONS y EXIT.
+Propusimos cambiar el despacho de run() para que solo START inicie la partida.
+Importante: en la última versión comentada aquí, las ramas de Highscores e Instructions todavía tenían pass. Eso evita que lancen la partida, pero sus pantallas no están hechas todavía.
+Bug #80
+Reiniciar las direcciones pendientes al empezar un nivel, limpiando list_key.
 
 
 

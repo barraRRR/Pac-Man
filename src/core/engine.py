@@ -60,6 +60,14 @@ _FOOTER_POS = (40, 740)
 
 _HEADER_AREA = 220
 
+# ==== INTRO DE NIVEL ====
+_INTRO_FONT_PATH = "assets/font/font_emulogic.ttf"
+_INTRO_TEXT_COLOR = (255, 255, 255, 255)
+_INTRO_TITLE_SIZE = 24   # Tamaño del título "LEVEL X"
+_INTRO_SUB_SIZE = 10     # Tamaño del "Push SPACE to play"
+_INTRO_PAD = 20          # Margen interior de la banda
+_INTRO_GAP = 30          # Hueco entre título y subtítulo
+
 
 class GraphicEngine():
     """
@@ -483,7 +491,33 @@ class GraphicEngine():
             if item == menu._active_item:
                 self.window.blit(menu.selector, (item.xy[0] - 10, item.xy[1]))
 
+    def _blit_level_intro(self, number: int) -> None:
+        """Dibuja la banda de inicio de nivel a todo el ancho de la ventana.
 
+        Muestra "LEVEL <n>" en grande y "Push SPACE to play" en letra
+        pequeña, sobre una banda opaca que ocupa el ancho completo,
+        igual que la tira del menú de pausa pero extendida.
+        """
+        if not pygame.font.get_init():
+            pygame.font.init()
+        title_font = pygame.font.Font(_INTRO_FONT_PATH, _INTRO_TITLE_SIZE)
+        sub_font = pygame.font.Font(_INTRO_FONT_PATH, _INTRO_SUB_SIZE)
+        title: Surface = title_font.render(f"LEVEL {number}", True, _INTRO_TEXT_COLOR)
+        sub: Surface = sub_font.render("Push SPACE to play", True, _INTRO_TEXT_COLOR)
+
+        # banda a todo el ancho, alto = margen + titulo + hueco + subtitulo + margen
+        band_h: int = (_INTRO_PAD + title.get_height()
+                    + _INTRO_GAP + sub.get_height() + _INTRO_PAD)
+        band_y: int = (_WINDOW_HEIGHT - band_h) // 2
+        band: Surface = Surface((_WINDOW_WIDTH, band_h))
+        band.fill(_BACKGROUND_COLOR)
+        self.window.blit(band, (0, band_y))
+
+        # textos centrados, como en los menus: se resta media superficie
+        title_x: int = (_WINDOW_WIDTH - title.get_width()) // 2
+        sub_x: int = (_WINDOW_WIDTH - sub.get_width()) // 2
+        self.window.blit(title, (title_x, band_y + _INTRO_PAD))
+        self.window.blit(sub, (sub_x, band_y + _INTRO_PAD + title.get_height() + _INTRO_GAP))
 
 
 

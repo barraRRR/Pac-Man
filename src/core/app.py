@@ -15,6 +15,7 @@ from src.utils.error import HitWallError
 import sys
 import pygame
 import random
+from src.score.highscore import HighScore
 
 
 _FPS = 60
@@ -62,6 +63,11 @@ class App:
         self._pause: bool = False
         self._return_to_menu: bool = False
 
+        # HighScore: el nombre del archivo lo manda la config y el ranking
+        # se carga una sola vez al arrancar (alta en #35, conexión con App).
+        HighScore.filename = self.config.highscore_filename
+        HighScore.load()
+        print(f"  highscores loaded: {len(HighScore.scores)}")
     @property
     def blinky(self) -> Blinky:
         return self.ghosts["blinky"]
@@ -84,33 +90,40 @@ class App:
         self.clock: pygame.time.Clock = pygame.time.Clock()
         self._engine._init_window()
         while True:
-            if self._menu_loop(
-                self._engine.menu_init,
-                lambda: self._engine._blit_menu_init(self._engine.menu_init)
-            ) == ItemType.QUIT:
+            option: ItemType = self._menu_loop(
+            self._engine.menu_init,
+            lambda: self._engine._blit_menu_init(self._engine.menu_init)
+        )
+            if option == ItemType.QUIT:
                 break
                 # return 0
+            elif option == ItemType.START:
+                for number, level in enumerate(self.config.level, start=1):
+                    # try:
+                    # Momento 1: preparar el nivel (mapa)
+                    self._start_level(number, level, True)
+                    self._spawn_entities()  # Momento 2: colocar Pac-Man y fantasmas (aún no existe)
+                    if number != 1:
+                        self._level_intro(number)
+                    self._game_loop()      # Momento 3: mover, comer, morir (aún no existe)
 
-            for number, level in enumerate(self.config.level, start=1):
-                # try:
-                # Momento 1: preparar el nivel (mapa)
-                self._start_level(number, level, True)
-                self._spawn_entities()  # Momento 2: colocar Pac-Man y fantasmas (aún no existe)
-                self._game_loop()      # Momento 3: mover, comer, morir (aún no existe)
-
-                if self._return_to_menu:
-                    self._return_to_menu = False
+                    if self._return_to_menu:
+                        self._return_to_menu = False
+                        break
+                else:
                     break
-            else:
-                break
-            """
-            except Exception:
-                print(
-                    f"Error: Could not generate level {number}.",
-                    file=sys.stderr,
-                )
-                return 1
-            """
+                """
+                except Exception:
+                    print(
+                        f"Error: Could not generate level {number}.",
+                        file=sys.stderr,
+                    )
+                    return 1
+                """
+            elif option == ItemType.HIGHSCORES:
+                pass  # Pantalla Top 10: siguiente bloque
+            elif option == ItemType.INSTRUCTIONS:
+                pass  # Pantalla de controles y reglas: luego
         self._end_game()       # Momento 4: guardar puntuación, despedida
         return 0
 
@@ -269,6 +282,28 @@ class App:
                         return menu._active_item._item_type
             pygame.display.flip()
             self._engine.window.fill((0, 0, 0, 0))
+
+    def _level_intro(self, number: int) -> None:
+        """Muestra la banda de inicio de nivel y espera SPACE para jugar.
+
+        Pinta la escena del nivel nuevo con la banda encima y no deja
+        entrar al game loop hasta que se pulse la barra espaciadora.
+        """
+        # escena del nivel nuevo, lo mismo que pinta _game_loop antes de arrancar
+        self._engine._put_maze(self.maze)
+        self._engine._put_entities()
+
+        waiting: bool = True
+        while waiting:
+            self.clock.tick(_FPS)
+            self._engine._blit_elements()           # escena + HUD, como en juego
+            self._engine._blit_level_intro(number)  # banda encima de la escena
+            for event in pygame.event.get():
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+                    waiting = False
+            pygame.display.flip()
+            self._engine.window.fill((0, 0, 0, 0))
+
 
     def _game_loop(self):
         """
