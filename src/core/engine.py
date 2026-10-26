@@ -6,6 +6,7 @@ from src.core.entity import Entity
 from src.core.player import Player
 from src.core.ghost import Ghost, Blinky, Pinky, Inky, Clyde
 from src.core.pacgum import PacGum, SuperPacGum
+from src.score.score import Score, Title
 from src.utils.utils import Coord, Color, Logo
 from src.utils.class_maze import Maze
 from src.ux_ui.menu import Menu, MenuInit, MenuPause
@@ -28,12 +29,6 @@ mlx_destroy_window()	    pygame.display.quit()	            Destruye el contexto 
 
 """
 
-# Valores provisionales
-_MAX_SCREEN_W = 1200
-_MAX_SCREEN_H = 800
-_MIN_SCREEN_W = 400
-# MIN_SCREEN_H = 400
-
 _WINDOW_WIDTH = 600
 _WINDOW_HEIGHT = 800
 _WINDOW_CENTER = ((_WINDOW_WIDTH // 2), (_WINDOW_HEIGHT // 2))
@@ -42,9 +37,8 @@ _PADDING = 30
 _LINE = 2
 _SAFE_LINE = 1
 
-_LOGO_AREA = (450, 117)
+_LOGO_AREA = (510, 130)
 _SCORE_AREA = (600, 100)
-_HEADER_AREA = _PADDING + _LOGO_AREA[1] + _SCORE_AREA[1]
 _FOOTER_AREA = 100
 
 _ITEM_LINE_SPACING = 30
@@ -57,6 +51,15 @@ _BACKGROUND_COLOR = (3, 18, 15, 255)
 _WALL_COLOR = (5, 4, 170, 255)
 _TEST_COLOR = (0, 0, 0, 255)
 
+_LOGO_POS = (45, 20)
+_1UP_POS = (100, 160)
+_HIGHSCORE = (210, 160)
+_1UP_SCORE_POS = (140, 180)
+_HIGHSCORE_SCORE_POS = (280, 180)
+_FOOTER_POS = (40, 740)
+
+_HEADER_AREA = 220
+
 
 class GraphicEngine():
     """
@@ -65,7 +68,8 @@ class GraphicEngine():
             self,
             player: Player,
             ghosts: Dict[str, Ghost],
-            pacgum: List[PacGum]) -> None:
+            pacgum: List[PacGum],
+            score: Score) -> None:
 
         # ***** ENTITIES *****
         self.player: Player = player
@@ -87,6 +91,12 @@ class GraphicEngine():
         self.window: Surface = None
         self.menu_init: MenuInit = MenuInit()
         self.menu_pause: MenuPause = MenuPause()
+
+        # ***** SCORE *****
+        self.up_title: Title = Title("1UP")
+        self.highscore_title: Title = Title("HIGH SCORE")
+        self.highscore_int: Title = Title("0000")
+        self.score: Score = score
 
     """
     ╔═════════════════════════════════════════════════════════════════════════╗
@@ -414,12 +424,18 @@ class GraphicEngine():
         self.window.blit(self.background, (0, 0))
         self._put_logo()
         self.window.blit(self.maze.sur, (self._cal_maze_offset()))
+        self.window.blit(self.score.sur, _1UP_SCORE_POS)
+        self.window.blit(self.up_title.sur, _1UP_POS)
+        self.window.blit(self.highscore_title.sur, _HIGHSCORE)
+        self.window.blit(self.highscore_int.sur, _HIGHSCORE_SCORE_POS)
         for pacgum in self.pacgum:
-            self.window.blit(
-                pacgum.sur,
-                pacgum.pos.off_get(self.tile_size, _HEADER_AREA, self._cal_left_padding()))
+            if pacgum.alive:
+                self.window.blit(
+                    pacgum.sur,
+                    pacgum.pos.off_get(self.tile_size, _HEADER_AREA, self._cal_left_padding()))
         for ghost in self.ghosts.values():
-            self.window.blit(ghost.sur, ghost.pos.off_get(self.tile_size, _HEADER_AREA, self._cal_left_padding()))
+            if ghost.alive:
+                self.window.blit(ghost.sur, ghost.pos.off_get(self.tile_size, _HEADER_AREA, self._cal_left_padding()))
         self.window.blit(self.player.sur, self.player.pos.off_get(self.tile_size, _HEADER_AREA, self._cal_left_padding()))
 
     def _blit_menu_init(self, menu: Menu) -> None:
@@ -435,7 +451,7 @@ class GraphicEngine():
             if item == menu._active_item:
                 self.window.blit(menu.selector, (x - 10, y))
                 
-    #Mantener, si no se usa borrar y modificar su llamada al init
+    #Mantener, si no se usa borrar y modificar su llamada al init por si se une con la de arriba, son iguales, excepto personalizacion, comprobar
     def _blit_menu_pause(self, menu: MenuPause) -> None:
         """Muestra las opciones de pausa sobre la escena congelada."""
         for i, item in enumerate(menu._items):

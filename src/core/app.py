@@ -2,10 +2,12 @@ from src.utils.class_config import Config, Level
 from src.utils.class_maze import Maze
 from src.utils.class_config import Config
 from src.core.player import Player
+from src.core.entity import Entity
 from src.core.ghost import Ghost, Blinky, Pinky, Inky, Clyde
 from src.core.pacgum import PacGum, SuperPacGum
 from src.core.engine import GraphicEngine, _PADDING
 from src.maze.bitmap import BitMap, UP, RIGHT, DOWN, LEFT
+from src.score.score import Score
 from src.utils.utils import Coord, Color
 from src.ux_ui.menu import Item, ItemType, Menu, MenuInit
 from typing import List, Dict, Callable
@@ -27,30 +29,25 @@ class App:
     def __init__(self, config: Config) -> None:
         """Construye la App con la configuración y deja el estado vacío."""
         self.config: Config = config                                  # Configuración ya validada y acotada.
-        # Adaptador del laberinto; semilla para el nivel 1.
-        self.maze: Maze = Maze(config.seed)
-        # Salida de Pac-Man (x, y); None hasta generar un nivel.
-        self.pacman_start: tuple[int, int] | None = None
-        # Salidas de los 4 fantasmas (x, y).
-        self.ghost_spawns: list[tuple[int, int]] = []
-        # Las 4 super-pacgums, una por esquina (x, y).
-        self.super_pacgum_spawns: list[tuple[int, int]] = []
-        # Pacgums normales colocadas (x, y).
-        self.pacgum_spawns: list[tuple[int, int]] = []
-        # Número del nivel en curso (0 = ninguno iniciado).
-        self.current_level: int = 0
-        # Vidas restantes; el game loop las gasta.
-        self.lives: int = config.lives
-        # Puntos acumulados; sube al comer.
-        self.score: int = 0
+        self.maze: Maze = Maze(config.seed)                         # Adaptador del laberinto; semilla para el nivel 1.
+        self.pacman_start: tuple[int, int] | None = None      # Salida de Pac-Man (x, y); None hasta generar un nivel.
+        self.ghost_spawns: list[tuple[int, int]] = []         # Salidas de los 4 fantasmas (x, y).
+        self.super_pacgum_spawns: list[tuple[int, int]] = []  # Las 4 super-pacgums, una por esquina (x, y).
+        self.pacgum_spawns: list[tuple[int, int]] = []        # Pacgums normales colocadas (x, y).
+        self.current_level: int = 0                           # Número del nivel en curso (0 = ninguno iniciado).
+        self.lives: int = config.lives                        # Vidas restantes; el game loop las gasta.
+        self.score: Score = Score()                                   # Puntos acumulados; sube al comer.
 
         # Entity instancies
-        self.player: Player = Player()
+        self.player: Player = Player(
+            lives=self.config.lives,
+            score=self.score
+        )
         self.ghosts: Dict[str, Ghost] = {
-            "blinky": Blinky(),
-            "pinky": Pinky(),
-            "inky": Inky(),
-            "clyde": Clyde()
+            "blinky": Blinky(points=self.config.points_per_ghost),
+            "pinky": Pinky(points=self.config.points_per_ghost),
+            "inky": Inky(points=self.config.points_per_ghost),
+            "clyde": Clyde(points=self.config.points_per_ghost)
         }
         self.pacgum: List[PacGum] = []
 
@@ -58,7 +55,8 @@ class App:
         self._engine: GraphicEngine = GraphicEngine(
             player=self.player,
             ghosts=self.ghosts,
-            pacgum=self.pacgum
+            pacgum=self.pacgum,
+            score=self.score
         )
         self.list_key = []
         self._pause: bool = False
@@ -167,9 +165,13 @@ class App:
         # limpiamos antes de colocar.  --> Reparado por Javi
         self.pacgum.clear()
         for spawn in self.super_pacgum_spawns:
-            self.pacgum.append(SuperPacGum(Coord(spawn)))
+            self.pacgum.append(SuperPacGum(Coord(spawn), points=self.config.points_per_super_pacgum))
         for spawn in self.pacgum_spawns:
-            self.pacgum.append(PacGum(Coord(spawn)))
+            self.pacgum.append(PacGum(Coord(spawn), points=self.config.points_per_pacgum))
+
+        Entity.entity_map.clear()
+        for entity in [self.player, *self.ghosts.values(), *self.pacgum]:
+            entity._update_entity_map(True)
 
         # TEMPORAL: comprobar que cada fantasma tiene sus sprites cargados. Quitar al cerrar la #51.
         for name, ghost in self.ghosts.items():
