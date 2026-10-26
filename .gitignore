@@ -44,3 +44,6 @@ dmypy.json
 tempCodeRunnerFile.py
 
 *:Zone.Identifier
+
+#macOS
+.DS_Store/
