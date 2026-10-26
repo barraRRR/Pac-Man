@@ -202,8 +202,7 @@ class App:
             self._pause = False #aquí u a donde vamos, apreniciar todo
             self._return_to_menu = True
             print("Return to main menu")
-        
-
+      
     def _handle_events(self) -> bool:
         """Gestiona los eventos de pygame y traduce las teclas a direcciones.
 
@@ -265,7 +264,7 @@ class App:
                         menu._select_item(False)
                     elif event.key == pygame.K_DOWN:
                         menu._select_item(True)
-                    elif event.key == pygame.K_RETURN:
+                    elif event.key == pygame.K_SPACE:
                         return menu._active_item._item_type
             pygame.display.flip()
             self._engine.window.fill((0, 0, 0, 0))
@@ -277,7 +276,7 @@ class App:
 
         # render de surfaces
         self._engine._update_maze(self.maze)
-        self._engine._put_background()
+        # self._engine._put_background()
         self._engine._put_maze(self.maze)
         self._engine._put_entities()
 

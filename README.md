@@ -392,7 +392,46 @@ Main Menu pone _pause a False y activa _return_to_menu. El bucle de juego termin
 Ya probaste que al elegir Main Menu se vuelve al menú inicial. Queda probar el ciclo completo y revisar qué estado debe reiniciarse al empezar otra partida, además de comprobar ESC/X y documentar las teclas.
 
 
+## feat(#69): menú de pausa completo y mejoras visuales de menús
 
+### Qué añade
+- **Pausa durante la partida**: SPACE pausa y reanuda. El juego se congela
+  del todo (player, fantasmas y timers quedan como están) y se muestran las
+  opciones sobre la escena congelada.
+- **MenuPause** (hereda de Menu, como MenuInit) con dos opciones: RESUME y
+  MAIN MENU. ItemType ampliado de forma aditiva.
+- **Volver al menú inicial**: al elegir MAIN MENU se descongela la pausa y se
+  activa la señal `_return_to_menu`; `run()` tiene un bucle exterior que
+  rompe el ciclo de niveles y vuelve al menú de inicio sin reiniciar el
+  programa. Probado el ciclo completo: partida → pausa → main menu → nueva
+  partida (sin arrastrar score, vidas ni teclas pendientes).
+- **Confirmación unificada con SPACE** en todos los menús: `_menu_loop`
+  cambia K_RETURN por K_SPACE, coherente con la pausa y con el subject
+  ("Push SPACE to play").
+
+### Mejoras visuales de los menús
+- **Fuente del proyecto** `assets/font/font_emulogic.ttf` en las opciones de
+  pausa: `Item._render_item` y `Menu._render_item_list` aceptan ahora
+  `font_path` y `size_font` opcionales; sin argumentos siguen usando la
+  fuente del sistema, así START/QUIT no cambian por defecto.
+- **Opciones centradas**: el blit usaba el centro de la ventana como esquina
+  del texto; ahora se resta la mitad del ancho de cada `item.sur` (arreglado
+  en `_blit_menu_init` y `_blit_menu_pause`).
+- **Separación entre opciones** subida a 60 px (`_ITEM_LINE_SPACING`).
+- **Panel opaco** detrás de las opciones de pausa: superficie del color del
+  fondo (`_BACKGROUND_COLOR`) medida a partir del ancho de la opción más
+  larga, pintada antes que los textos. Sin transparencia (solo
+  Surface/fill/blit, sin SRCALPHA).
+
+### Archivos tocados
+- `src/ux_ui/menu.py` — fuente y tamaño opcionales en Item/Menu, MenuPause.
+- `src/core/engine.py` — centrado, panel de pausa, spacing.
+- `src/core/app.py` — pausa, confirmación, return-to-menu, SPACE en menús.
+
+### Para comentar con el equipo
+- El spacing a 60 px es global: también separa START/QUIT en el menú inicial.
+- El centrado toca `_blit_menu_init` (código compartido).
+- Pendiente documentar las teclas elegidas en Instructions.
 
 
 

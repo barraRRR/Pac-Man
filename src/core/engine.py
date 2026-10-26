@@ -41,7 +41,7 @@ _LOGO_AREA = (510, 130)
 _SCORE_AREA = (600, 100)
 _FOOTER_AREA = 100
 
-_ITEM_LINE_SPACING = 30
+_ITEM_LINE_SPACING = 60
 
 _MIN_TILE_SIZE = 10
 _STD_TILE_SIZE = 20
@@ -446,6 +446,7 @@ class GraphicEngine():
         for i, item in enumerate(menu._items):
             x, y = _WINDOW_CENTER
             y += (i * _ITEM_LINE_SPACING)
+            x -= item.sur.get_width() // 2
             item.xy = (x, y)
             self.window.blit(item.sur, (x, y))
             if item == menu._active_item:
@@ -457,10 +458,34 @@ class GraphicEngine():
         for i, item in enumerate(menu._items):
             x, y = _WINDOW_CENTER
             y += i * _ITEM_LINE_SPACING
+            x -= item.sur.get_width() // 2
             item.xy = (x, y)
-            self.window.blit(item.sur, (x, y))
+        #tirita (los ajsutes pro al ia 100%)
+        pad : int = 20
+        text_w: int = max(item.sur.get_width() for item in menu._items)
+        text_h: int = menu._items[0].sur.get_height()
+        panel_size: Tuple[int, int] = (
+            text_w + pad * 2,
+            _ITEM_LINE_SPACING + text_h + pad * 2
+        )
+        panel: Surface = Surface(panel_size)
+        panel.fill(_BACKGROUND_COLOR)
+        panel_x: int = (_WINDOW_WIDTH - panel_size[0]) // 2
+        panel_y: int = menu._items[0].xy[1] - pad
+        self.window.blit(panel, (panel_x, panel_y))
+        # self.window.blit(item.sur, (x, y))
+        # if item == menu._active_item:
+        #     self.window.blit(menu.selector, (x - 10, y))
+
+        # las opciones encima de la tira
+        for item in menu._items:
+            self.window.blit(item.sur, item.xy)
             if item == menu._active_item:
-                self.window.blit(menu.selector, (x - 10, y))
+                self.window.blit(menu.selector, (item.xy[0] - 10, item.xy[1]))
+
+
+
+
 
 
 
