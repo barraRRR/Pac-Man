@@ -352,6 +352,8 @@ class App:
                                 if len(self.list_key) == 2:
                                     self.list_key.pop(0)
 
+                self.player.resolve_tile()
+
                 #========GHOST============
                 for ghost in self.ghosts.values():      # movement
                     ghost._move(
