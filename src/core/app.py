@@ -16,10 +16,11 @@ import sys
 import pygame
 import random
 from src.score.highscore import HighScore
+from src.ux_ui.instructions import Instructions
 
 
 _FPS = 60
-_MOVEMENT_INTERVAL = 150
+_MOVEMENT_INTERVAL = 220
 
 _UI_SIZE = (600, 800)
 
@@ -30,14 +31,22 @@ class App:
     def __init__(self, config: Config) -> None:
         """Construye la App con la configuración y deja el estado vacío."""
         self.config: Config = config                                  # Configuración ya validada y acotada.
-        self.maze: Maze = Maze(config.seed)                         # Adaptador del laberinto; semilla para el nivel 1.
-        self.pacman_start: tuple[int, int] | None = None      # Salida de Pac-Man (x, y); None hasta generar un nivel.
-        self.ghost_spawns: list[tuple[int, int]] = []         # Salidas de los 4 fantasmas (x, y).
-        self.super_pacgum_spawns: list[tuple[int, int]] = []  # Las 4 super-pacgums, una por esquina (x, y).
-        self.pacgum_spawns: list[tuple[int, int]] = []        # Pacgums normales colocadas (x, y).
-        self.current_level: int = 0                           # Número del nivel en curso (0 = ninguno iniciado).
-        self.lives: int = config.lives                        # Vidas restantes; el game loop las gasta.
-        self.score: Score = Score()                                   # Puntos acumulados; sube al comer.
+        # Adaptador del laberinto; semilla para el nivel 1.
+        self.maze: Maze = Maze(config.seed)
+        # Salida de Pac-Man (x, y); None hasta generar un nivel.
+        self.pacman_start: tuple[int, int] | None = None
+        # Salidas de los 4 fantasmas (x, y).
+        self.ghost_spawns: list[tuple[int, int]] = []
+        # Las 4 super-pacgums, una por esquina (x, y).
+        self.super_pacgum_spawns: list[tuple[int, int]] = []
+        # Pacgums normales colocadas (x, y).
+        self.pacgum_spawns: list[tuple[int, int]] = []
+        # Número del nivel en curso (0 = ninguno iniciado).
+        self.current_level: int = 0
+        # Vidas restantes; el game loop las gasta.
+        self.lives: int = config.lives
+        # Puntos acumulados; sube al comer.
+        self.score: Score = Score()
 
         # Entity instancies
         self.player: Player = Player(
@@ -68,6 +77,7 @@ class App:
         HighScore.filename = self.config.highscore_filename
         HighScore.load()
         print(f"  highscores loaded: {len(HighScore.scores)}")
+
     @property
     def blinky(self) -> Blinky:
         return self.ghosts["blinky"]
@@ -91,9 +101,9 @@ class App:
         self._engine._init_window()
         while True:
             option: ItemType = self._menu_loop(
-            self._engine.menu_init,
-            lambda: self._engine._blit_menu_init(self._engine.menu_init)
-        )
+                self._engine.menu_init,
+                lambda: self._engine._blit_menu_init(self._engine.menu_init)
+            )
             if option == ItemType.QUIT:
                 break
                 # return 0
@@ -123,7 +133,8 @@ class App:
             elif option == ItemType.HIGHSCORES:
                 pass  # Pantalla Top 10: siguiente bloque
             elif option == ItemType.INSTRUCTIONS:
-                pass  # Pantalla de controles y reglas: luego
+                self._instructions_loop()
+                # pass  # Pantalla de controles y reglas: luego
         self._end_game()       # Momento 4: guardar puntuación, despedida
         return 0
 
@@ -181,9 +192,11 @@ class App:
         # limpiamos antes de colocar.  --> Reparado por Javi
         self.pacgum.clear()
         for spawn in self.super_pacgum_spawns:
-            self.pacgum.append(SuperPacGum(Coord(spawn), points=self.config.points_per_super_pacgum))
+            self.pacgum.append(SuperPacGum(
+                Coord(spawn), points=self.config.points_per_super_pacgum))
         for spawn in self.pacgum_spawns:
-            self.pacgum.append(PacGum(Coord(spawn), points=self.config.points_per_pacgum))
+            self.pacgum.append(
+                PacGum(Coord(spawn), points=self.config.points_per_pacgum))
 
         Entity.entity_map.clear()
         for entity in [self.player, *self.ghosts.values(), *self.pacgum]:
@@ -215,10 +228,10 @@ class App:
             self._pause = False
             print("Game resumed")
         elif option == ItemType.MAIN_MENU:
-            self._pause = False #aquí u a donde vamos, apreniciar todo
+            self._pause = False  # aquí u a donde vamos, apreniciar todo
             self._return_to_menu = True
             print("Return to main menu")
-      
+
     def _handle_events(self) -> bool:
         """Gestiona los eventos de pygame y traduce las teclas a direcciones.
 
@@ -243,19 +256,19 @@ class App:
                         else:
                             self._pause = True
                             print("Game pause")
-                    elif event.key == pygame.K_UP:
+                    elif event.key in (pygame.K_UP, pygame.K_w):
                         if self._pause:
                             self._engine.menu_pause._select_item(False)
                         else:
                             self._push_direction(UP)
-                    elif event.key == pygame.K_RIGHT:
+                    elif event.key in (pygame.K_RIGHT, pygame.K_d):
                         self._push_direction(RIGHT)
-                    elif event.key == pygame.K_DOWN:
+                    elif event.key in (pygame.K_DOWN, pygame.K_s):
                         if self._pause:
                             self._engine.menu_pause._select_item(True)
                         else:
                             self._push_direction(DOWN)
-                    elif event.key == pygame.K_LEFT:
+                    elif event.key in (pygame.K_LEFT, pygame.K_a):
                         self._push_direction(LEFT)
 
                 except HitWallError:
@@ -306,6 +319,23 @@ class App:
             pygame.display.flip()
             self._engine.window.fill((0, 0, 0, 0))
 
+    def _instructions_loop(self) -> None:
+        """Muestra la pantalla de instrucciones hasta pulsar SPACE.
+
+        Misma idea que la intro de nivel: se repite el dibujo y se
+        espera la barra para volver al menú principal.
+        """
+        waiting: bool = True
+        while waiting:
+            self.clock.tick(_FPS)
+            self._engine._blit_instructions()
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    waiting = False
+                elif event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+                    waiting = False
+            pygame.display.flip()
+            self._engine.window.fill((0, 0, 0, 0))
 
     def _game_loop(self):
         """
@@ -356,7 +386,7 @@ class App:
 
                 self.player.resolve_tile()
 
-                #========GHOST============
+                # ========GHOST============
                 for ghost in self.ghosts.values():      # movement
                     ghost._move(
                         target=self.player.pos,

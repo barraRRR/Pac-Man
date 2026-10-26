@@ -448,6 +448,36 @@ Reiniciar las direcciones pendientes al empezar un nivel, limpiando list_key.
 
 
 
+Issue #88: pantalla de instrucciones con placas de teclas
+
+- Nuevo Instructions en src/ux_ui/instructions.py: guarda el contenido
+  (tecla -> funcion) y renderiza de una vez placas de teclas, textos y
+  pista de salida, igual que los menus renderizan sus items.
+- Engine: self.instructions en __init__ y _blit_instructions() que pega
+  fondo, logo, filas placa+texto centradas y la pista "Push SPACE to go
+  back"; constantes _INSTR_* de colocacion.
+- App: _instructions_loop() (misma estructura que _level_intro, espera
+  SPACE) y rama ItemType.INSTRUCTIONS conectada en run().
+- Ajuste: _MOVEMENT_INTERVAL 150 -> 200, mas margen de reaccion en
+  pasillos estrechos.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
