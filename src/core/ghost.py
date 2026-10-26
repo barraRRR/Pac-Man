@@ -8,6 +8,7 @@ from typing import List, Tuple, Set, Dict
 from collections import deque
 import pygame
 import time
+from pathlib import Path
 
 
 BLINKY_COLOR = (223, 0, 36, 255)
@@ -39,25 +40,38 @@ class Ghost(Entity):
         self.points: int = points
 
         # Imágenes propias de este fantasma, una por dirección.
-        self.images: dict[str, Surface] = self._load_images(name)
+        self.images: dict[str, list[Surface]] = self._load_images(name)
 
         # Imágenes compartidas para el estado de huida.
-        self.image_scared: Surface = pygame.image.load(
-            "assets/ghosts/scared_ghost.gif"
-        )
-        self.image_flashing: Surface = pygame.image.load(
-            "assets/ghosts/flashing_scared_ghost.gif"
+        self.image_scared: list[Surface] = self._load_animation("scared_ghost")
+        self.image_flashing: list[Surface] = self._load_animation(
+            "flashing_scared_ghost"
         )
 
     @staticmethod
+    def _load_animation(animation_name: str) -> list[Surface]:
+        """Carga los frames PNG de una animación de fantasma."""
+        frames_dir = Path("assets/animations/ghosts") / animation_name
+        frame_paths = sorted(frames_dir.glob("frame_*.png"))
+
+        if not frame_paths:
+            raise FileNotFoundError(
+                f"No animation frames found in '{frames_dir}'"
+            )
+        return [
+            pygame.image.load(str(frame_path)) for frame_path in frame_paths
+        ]
+        
+
+    @staticmethod
     def _load_images(name: str) -> dict[str, Surface]:
-        base = f"assets/ghosts/{name.lower()}"
+        """Carga los frames PNG de cada dirección del fantasma."""
+        images = {}
         directions = ("down", "left", "right", "up")
 
-        images = {}
         for dir in directions:
-            path = f"{base}_{dir}.gif"
-            images[dir] = pygame.image.load(path)
+            animation_name = f"{name.lower()}_{dir}"
+            images[dir] = Ghost._load_animation(animation_name)
 
         return images
 

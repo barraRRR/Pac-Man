@@ -7,6 +7,9 @@ from src.score.score import Score
 from src.utils.utils import Coord
 import pygame
 from pygame import Surface
+from pathlib import Path
+from enum import Enum
+from pathlib import Path
 
 
 PLAYER_COLOR = (243, 195, 0, 255)
@@ -18,17 +21,22 @@ class Player(Entity):
     def __init__(self, lives: int, score: Score) -> None:
         super().__init__()
         self.color.set(PLAYER_COLOR)
-        self.images: dict[str, Surface] = self._load_images()
+        self.images: dict[str, list[Surface]] = self._load_images()
         self._score: Score = score
         self._lives: int = lives
 
     @staticmethod
-    def _load_images() -> dict[str, Surface] :
-        base = "assets/player/pac-man"
+    def _load_images() -> dict[str, list[Surface]]:
+        """Carga los frames PNG de cada animacion del jugador."""
+        base = Path("assets/animations/player")
         images = {}
 
         for dir in ("down", "left", "right", "up", "death"):
-            images[dir] = pygame.image.load(f"{base}_{dir}.gif")
+            frames_dir = base / f"pac-man_{dir}"
+            images[dir] = [
+                pygame.image.load(str(frame_path))
+                for frame_path in sorted(frames_dir.glob("frame_*.png"))
+            ]
         return images
 
     def _die(self) -> None:
