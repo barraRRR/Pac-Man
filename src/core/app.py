@@ -241,19 +241,19 @@ class App:
                         else:
                             self._pause = True
                             print("Game pause")
-                    elif event.key == pygame.K_UP:
+                    elif event.key in (pygame.K_UP, pygame.K_w):
                         if self._pause:
                             self._engine.menu_pause._select_item(False)
                         else:
                             self._push_direction(UP)
-                    elif event.key == pygame.K_RIGHT:
+                    elif event.key in (pygame.K_RIGHT, pygame.K_d):
                         self._push_direction(RIGHT)
-                    elif event.key == pygame.K_DOWN:
+                    elif event.key in (pygame.K_DOWN, pygame.K_s):
                         if self._pause:
                             self._engine.menu_pause._select_item(True)
                         else:
                             self._push_direction(DOWN)
-                    elif event.key == pygame.K_LEFT:
+                    elif event.key in (pygame.K_LEFT, pygame.K_a):
                         self._push_direction(LEFT)
 
                 except HitWallError:
