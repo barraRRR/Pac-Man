@@ -523,7 +523,6 @@ class GraphicEngine():
 
     def _blit_instructions(self) -> None:
         """Dibuja el logo y las instrucciones en filas sencillas."""
-        self.window.fill(_BACKGROUND_COLOR)
         self._put_logo()
 
         if not pygame.font.get_init():
