@@ -303,8 +303,7 @@ class App:
                     waiting = False
             pygame.display.flip()
             self._engine.window.fill((0, 0, 0, 0))
-
-
+    
     def _game_loop(self):
         """
         TO-DO
