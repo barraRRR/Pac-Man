@@ -42,3 +42,6 @@ dmypy.json
 .vscode/
 # Temporary file for partial code execution
 tempCodeRunnerFile.py
+
+#macOS
+.DS_Store/
