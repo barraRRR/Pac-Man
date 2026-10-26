@@ -434,24 +434,8 @@ class GraphicEngine():
             self.window.blit(item.sur, (x, y))
             if item == menu._active_item:
                 self.window.blit(menu.selector, (x - 10, y))
-
-    # def _blit_menu_pause(self, menu: Menu) -> None:
-    #     """Muestra el título y las opciones del menú de pausa."""
-    #     if not pygame.font.get_init():
-    #         pygame.font.init()
-
-    #     title_font = pygame.font.SysFont("Arial", 40)
-    #     title = title_font.render("PAUSE", True, (255, 255, 255, 255))
-    #     self.window.blit(title, (240, 300))
-
-    #     # for i, item in enumerate(menu._items):
-    #     #     x = 240
-    #     #     y = 370 + (i * _ITEM_LINE_SPACING)
-    #     #     item.xy = (x, y)
-    #     #     self.window.blit(item.sur, (x, y))
-    #     #     if item == menu._active_item:
-    #     #         self.window.blit(menu.selector, (x - 15, y))
-
+                
+    #Mantener, si no se usa borrar y modificar su llamada al init
     def _blit_menu_pause(self, menu: MenuPause) -> None:
         """Muestra las opciones de pausa sobre la escena congelada."""
         for i, item in enumerate(menu._items):

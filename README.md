@@ -355,6 +355,9 @@ Estado: el movimiento continuo y los giros anticipados ya funcionan en las prueb
 
 
 
+
+
+
 ============pausa==============1. Qué dice el subject sobre la pausa
 La sección relevante, textual:
 
@@ -379,35 +382,15 @@ Return to the main menu
 
 
 
+Como funciona la pausa:
 
+App controla el estado del juego con _pause; GraphicEngine se ocupa de dibujar.
+Durante la partida, ESPACIO abre la pausa. Mientras está pausada, ↑/↓ cambian la opción y ESPACIO confirma.
+MenuPause reutiliza la clase Menu y ofrece Resume y Main Menu.
+Resume pone _pause a False.
+Main Menu pone _pause a False y activa _return_to_menu. El bucle de juego termina al ver esa señal, y run() vuelve a mostrar el menú de inicio.
+Ya probaste que al elegir Main Menu se vuelve al menú inicial. Queda probar el ciclo completo y revisar qué estado debe reiniciarse al empezar otra partida, además de comprobar ESC/X y documentar las teclas.
 
-
-Bloque 4 — Mostrar la pantalla de pausa
-Mantener la composición de la ventana del juego y el logo de arriba.
-Dibujar la escena congelada y superponer un velo translúcido gris o blanco.
-Añadir PAUSE y las dos opciones del subject.
-El título puede ser texto grande o una imagen; decidiremos eso al llegar a este bloque.
-Comprobación: la pantalla se reconoce como pausa y se ve el juego detenido detrás.
-
-
-Bloque 5 — Navegar y elegir una opción
-Dentro del menú, usar ↑/↓ para cambiar la opción seleccionada.
-Usar ESPACIO para confirmar; se puede valorar aceptar también ENTER.
-Resume the game vuelve a la partida.
-Return to the main menu lleva al menú principal.
-Comprobación: ambas opciones hacen lo indicado.
-
-
-Bloque 6 — Revisar la integración
-Probar el ciclo completo: partida → pausa → reanudar → pausa → menú principal.
-Comprobar que no se han roto los controles ni el menú que ya existían.
-Anotar las teclas elegidas en las instrucciones del juego cuando corresponda.
-Criterios para trabajar en el código
-No borrar ni reescribir funciones existentes solo para acomodar la pausa.
-Conservar los nombres de variables, comentarios y estructura que ya tenga el proyecto.
-Si una función se hace larga, separar visualmente las partes con comentarios breves, por ejemplo # ==== PAUSA ====.
-Los comentarios y explicaciones del código, en español; los print visibles, en inglés.
-Avanzar bloque por bloque: ahora toca únicamente el Bloque 1, sin implementar todavía la pausa ni la pantalla.
 
 
 

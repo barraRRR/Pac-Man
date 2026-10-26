@@ -27,14 +27,22 @@ class App:
     def __init__(self, config: Config) -> None:
         """Construye la App con la configuración y deja el estado vacío."""
         self.config: Config = config                                  # Configuración ya validada y acotada.
-        self.maze: Maze = Maze(config.seed)                         # Adaptador del laberinto; semilla para el nivel 1.
-        self.pacman_start: tuple[int, int] | None = None      # Salida de Pac-Man (x, y); None hasta generar un nivel.
-        self.ghost_spawns: list[tuple[int, int]] = []         # Salidas de los 4 fantasmas (x, y).
-        self.super_pacgum_spawns: list[tuple[int, int]] = []  # Las 4 super-pacgums, una por esquina (x, y).
-        self.pacgum_spawns: list[tuple[int, int]] = []        # Pacgums normales colocadas (x, y).
-        self.current_level: int = 0                           # Número del nivel en curso (0 = ninguno iniciado).
-        self.lives: int = config.lives                        # Vidas restantes; el game loop las gasta.
-        self.score: int = 0                                   # Puntos acumulados; sube al comer.
+        # Adaptador del laberinto; semilla para el nivel 1.
+        self.maze: Maze = Maze(config.seed)
+        # Salida de Pac-Man (x, y); None hasta generar un nivel.
+        self.pacman_start: tuple[int, int] | None = None
+        # Salidas de los 4 fantasmas (x, y).
+        self.ghost_spawns: list[tuple[int, int]] = []
+        # Las 4 super-pacgums, una por esquina (x, y).
+        self.super_pacgum_spawns: list[tuple[int, int]] = []
+        # Pacgums normales colocadas (x, y).
+        self.pacgum_spawns: list[tuple[int, int]] = []
+        # Número del nivel en curso (0 = ninguno iniciado).
+        self.current_level: int = 0
+        # Vidas restantes; el game loop las gasta.
+        self.lives: int = config.lives
+        # Puntos acumulados; sube al comer.
+        self.score: int = 0
 
         # Entity instancies
         self.player: Player = Player()
@@ -53,7 +61,8 @@ class App:
             pacgum=self.pacgum
         )
         self.list_key = []
-        self._paused: bool = False
+        self._pause: bool = False
+        self._return_to_menu: bool = False
 
     @property
     def blinky(self) -> Blinky:
@@ -76,18 +85,26 @@ class App:
         pygame.init()
         self.clock: pygame.time.Clock = pygame.time.Clock()
         self._engine._init_window()
-        if self._menu_loop(
-            self._engine.menu_init,
-            lambda: self._engine._blit_menu_init(self._engine.menu_init)
-        ) == ItemType.QUIT:
-            return 0
+        while True:
+            if self._menu_loop(
+                self._engine.menu_init,
+                lambda: self._engine._blit_menu_init(self._engine.menu_init)
+            ) == ItemType.QUIT:
+                break
+                # return 0
 
-        for number, level in enumerate(self.config.level, start=1):
-            # try:
-            self._start_level(number, level, True)   # Momento 1: preparar el nivel (mapa)
-            self._spawn_entities() # Momento 2: colocar Pac-Man y fantasmas (aún no existe)
-            self._game_loop()      # Momento 3: mover, comer, morir (aún no existe)
-            
+            for number, level in enumerate(self.config.level, start=1):
+                # try:
+                # Momento 1: preparar el nivel (mapa)
+                self._start_level(number, level, True)
+                self._spawn_entities()  # Momento 2: colocar Pac-Man y fantasmas (aún no existe)
+                self._game_loop()      # Momento 3: mover, comer, morir (aún no existe)
+
+                if self._return_to_menu:
+                    self._return_to_menu = False
+                    break
+            else:
+                break
             """
             except Exception:
                 print(
@@ -118,7 +135,8 @@ class App:
             reachable,
             self.ghost_spawns,
         )
-        self.pacgum_spawns = self.maze.select_pacgum_spawns(reachable, self.pacman_start, self.ghost_spawns, self.super_pacgum_spawns, self.config.pacgum)
+        self.pacgum_spawns = self.maze.select_pacgum_spawns(
+            reachable, self.pacman_start, self.ghost_spawns, self.super_pacgum_spawns, self.config.pacgum)
         counts = {}
         for cell in self.pacgum_spawns:
             value = self.maze.grid[cell[1]][cell[0]]
@@ -146,7 +164,7 @@ class App:
         for ghost, spawn in zip(self.ghosts.values(), random_ghost_spawn):
             ghost.pos.set_at(spawn)
 
-        #limpiamos antes de colocar.  --> Reparado por Javi
+        # limpiamos antes de colocar.  --> Reparado por Javi
         self.pacgum.clear()
         for spawn in self.super_pacgum_spawns:
             self.pacgum.append(SuperPacGum(Coord(spawn)))
@@ -155,22 +173,34 @@ class App:
 
         # TEMPORAL: comprobar que cada fantasma tiene sus sprites cargados. Quitar al cerrar la #51.
         for name, ghost in self.ghosts.items():
-            print(f"  {name}: {len(ghost.images)} sprites -> {ghost.images['right']}")
+            print(
+                f"  {name}: {len(ghost.images)} sprites -> {ghost.images['right']}")
 
         # TEMPORAL: comprobar sprites del player. Quitar al cerrar la #51.
-        print(f"  player: {len(self.player.images)} sprites -> {self.player.images['right']}")
+        print(
+            f"  player: {len(self.player.images)} sprites -> {self.player.images['right']}")
 
-
-    def _push_direction(self, dir:int) ->None:
+    def _push_direction(self, dir: int) -> None:
         """Apunta la direccion pulsada: si hay hueco se apila, si esta llena se sustituye la pendiente."""
         if dir in self.list_key:
             return
         if len(self.list_key) < 2:
             self.list_key.append(dir)
         else:
-            self.list_key[1] = dir      # lista llena: la nueva tecla sustituye a la pendiente
+            # lista llena: la nueva tecla sustituye a la pendiente
+            self.list_key[1] = dir
 
-
+    def _confirm_menu_pause(self) -> None:
+        """Ejecuta la opcion marcada del menu de pausa."""
+        option = self._engine.menu_pause._active_item._item_type
+        if option == ItemType.RESUME:
+            self._pause = False
+            print("Game resumed")
+        elif option == ItemType.MAIN_MENU:
+            self._pause = False #aquí u a donde vamos, apreniciar todo
+            self._return_to_menu = True
+            print("Return to main menu")
+        
 
     def _handle_events(self) -> bool:
         """Gestiona los eventos de pygame y traduce las teclas a direcciones.
@@ -188,24 +218,28 @@ class App:
                 try:
                     if event.key == pygame.K_ESCAPE:
                         return False
+                    # Barra pausa y confirma la elección
                     elif event.key == pygame.K_SPACE:
-                        self._paused = not self._paused
-                        if self._paused:
-                            print("Game Paused")
+                        # self._pause = not self._pause
+                        if self._pause:
+                            self._confirm_menu_pause()
                         else:
-                            print("Game resumed")
+                            self._pause = True
+                            print("Game pause")
                     elif event.key == pygame.K_UP:
-                        self._push_direction(UP)
-                        # self.player._move(self.maze._bitmap, UP)
+                        if self._pause:
+                            self._engine.menu_pause._select_item(False)
+                        else:
+                            self._push_direction(UP)
                     elif event.key == pygame.K_RIGHT:
                         self._push_direction(RIGHT)
-                        # self.player._move(self.maze._bitmap, RIGHT)
                     elif event.key == pygame.K_DOWN:
-                        self._push_direction(DOWN)
-                        # self.player._move(self.maze._bitmap, DOWN)
+                        if self._pause:
+                            self._engine.menu_pause._select_item(True)
+                        else:
+                            self._push_direction(DOWN)
                     elif event.key == pygame.K_LEFT:
                         self._push_direction(LEFT)
-                        # self.player._move(self.maze._bitmap, LEFT)
 
                 except HitWallError:
                     # return False #definir
@@ -234,12 +268,11 @@ class App:
             pygame.display.flip()
             self._engine.window.fill((0, 0, 0, 0))
 
-
     def _game_loop(self):
         """
         TO-DO
         """
-        
+
         # render de surfaces
         self._engine._update_maze(self.maze)
         self._engine._put_background()
@@ -250,21 +283,24 @@ class App:
         running = True
         move_timer: int = 0
 
-        while running:
+        while running and not self._return_to_menu:
             dt: int = self.clock.tick(_FPS)
-            self._engine._blit_elements()   #blit siemrpe pinta
+            self._engine._blit_elements()  # blit siemrpe pinta
 
-            if not self._paused:
-                #========PLAYER============
+            if not self._pause:
+                # ========PLAYER============
                 # movimiento del player: un paso cada _MOVEMENT_INTERVAL ms
                 move_timer += dt
                 if move_timer >= _MOVEMENT_INTERVAL:
-                    move_timer -= _MOVEMENT_INTERVAL   # resto en vez de cero, igual que la hucha de Blinky
+                    # resto en vez de cero, igual que la hucha de Blinky
+                    move_timer -= _MOVEMENT_INTERVAL
                     if self.list_key:
-                        moved: bool = False     # giro anticipado: si la pendiente ya se puede, se ejecuta al instante
+                        # giro anticipado: si la pendiente ya se puede, se ejecuta al instante
+                        moved: bool = False
                         if len(self.list_key) == 2:
                             try:
-                                self.player._move(self.maze._bitmap, self.list_key[1])
+                                self.player._move(
+                                    self.maze._bitmap, self.list_key[1])
                                 self.list_key.pop(0)
                                 moved = True
                             except HitWallError:
@@ -272,7 +308,8 @@ class App:
                             # paso normal con la actual, si no acabamos de girar
                         if not moved:
                             try:
-                                self.player._move(self.maze._bitmap, self.list_key[0])
+                                self.player._move(
+                                    self.maze._bitmap, self.list_key[0])
                             except HitWallError:
                                 # pared: cae la actual y la pendiente manda en el proximo latido
                                 if len(self.list_key) == 2:
@@ -287,7 +324,7 @@ class App:
                         bitmap=self.maze._bitmap
                     )
             else:
-                self._engine._blit_menu_init(self._engine.menu_pause)
+                self._engine._blit_menu_pause(self._engine.menu_pause)
             running = self._handle_events()
             # actualiza frame
             pygame.display.flip()
