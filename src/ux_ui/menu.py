@@ -16,6 +16,9 @@ class ItemType(str, Enum):
     """
     START = "START"
     QUIT = "QUIT"
+    RESUME = "RESUME"
+    MAIN_MENU = "MAIN MENU"
+    
 
 
 class Item:
@@ -30,12 +33,21 @@ class Item:
     def __hash__(self):
         return hash(self._item_type)
 
-    def _render_item(self) -> None:
+    def _render_item(
+            self,
+            font_path: str | None = None,
+            size_font: int | None = None,
+            ) -> None:
         """
         """
         if not pygame.font.get_init():
             pygame.font.init()
-        font = pygame.font.SysFont(_FONT, _FONT_BODY_SIZE)
+
+        size: int = size_font if size_font is not None else _FONT_BODY_SIZE
+        if font_path is None:
+            font = pygame.font.SysFont(font_path, size)
+        else:
+            font = pygame.font.Font(font_path, size)
         self.sur = font.render(self._item_type, True, _FONT_COLOR)
 
 
@@ -63,12 +75,16 @@ class Menu:
         font = pygame.font.SysFont(_FONT, _FONT_BODY_SIZE)
         cls.selector = font.render(">", True, _FONT_COLOR)
 
-    def _render_item_list(self) -> None:
+    def _render_item_list(
+        self,
+        font_path: str | None = None,
+        size_font: int | None = None
+        ) -> None:
         """
         Crea las superficies de los items del menú y las almacena
         """
         for item in self._items:
-            item._render_item()
+            item._render_item(font_path, size_font)
 
     def _select_item(self, next_item: bool) -> None:
         """
@@ -91,5 +107,24 @@ class MenuInit(Menu):
             Item(ItemType.START),
             Item(ItemType.QUIT)
         ])
-        self._render_item_list()
+        self._render_item_list("assets/font/font_emulogic.ttf", 16)
         self._active_item = self._items[0]
+
+
+class MenuPause(Menu):
+    """
+    """
+    def __init__(self) -> None:
+        super().__init__()
+        self._items.extend([
+            Item(ItemType.RESUME),
+            Item(ItemType.MAIN_MENU)
+        ])
+        self._render_item_list("assets/font/font_emulogic.ttf", 16)
+        self._active_item = self._items[0]
+
+
+
+
+
+

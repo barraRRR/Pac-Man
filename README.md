@@ -358,6 +358,100 @@ Estado: el movimiento continuo y los giros anticipados ya funcionan en las prueb
 
 
 
+============pausa==============1. Qué dice el subject sobre la pausa
+La sección relevante, textual:
+
+Pause Menu
+
+Resume the game - Allows the player to return to the ongoing game.
+Return to the main menu - Allows the player to exit the current game and go back to the main menu.
+Y sobre teclas, esto es todo lo que hay:
+
+"Can move in 4 directions (up, down, left, right) using arrow keys or WASD (depending on your keyboard)."
+
+"Push SPACE to play" (pie de la imagen de ejemplo del menú principal)
+
+El subject NO fija ninguna tecla de pausa. No aparece la palabra en todo el documento salvo en el título de esa sección. Lo que sí hace es: exigir que el menú de pausa tenga exactamente esas 2 opciones
+
+
+Issue #69 — Plan de trabajo: menú de pausa
+Propósito: al pulsar ESPACIO durante la partida, detener temporalmente el juego y mostrar una pantalla de pausa con el logo habitual arriba, la partida congelada detrás de un velo gris o blanco, el título PAUSE y estas dos opciones:
+
+Resume the game
+Return to the main menu
+
+
+
+Como funciona la pausa:
+
+App controla el estado del juego con _pause; GraphicEngine se ocupa de dibujar.
+Durante la partida, ESPACIO abre la pausa. Mientras está pausada, ↑/↓ cambian la opción y ESPACIO confirma.
+MenuPause reutiliza la clase Menu y ofrece Resume y Main Menu.
+Resume pone _pause a False.
+Main Menu pone _pause a False y activa _return_to_menu. El bucle de juego termina al ver esa señal, y run() vuelve a mostrar el menú de inicio.
+Ya probaste que al elegir Main Menu se vuelve al menú inicial. Queda probar el ciclo completo y revisar qué estado debe reiniciarse al empezar otra partida, además de comprobar ESC/X y documentar las teclas.
+
+
+## feat(#69): menú de pausa completo y mejoras visuales de menús
+
+### Qué añade
+- **Pausa durante la partida**: SPACE pausa y reanuda. El juego se congela
+  del todo (player, fantasmas y timers quedan como están) y se muestran las
+  opciones sobre la escena congelada.
+- **MenuPause** (hereda de Menu, como MenuInit) con dos opciones: RESUME y
+  MAIN MENU. ItemType ampliado de forma aditiva.
+- **Volver al menú inicial**: al elegir MAIN MENU se descongela la pausa y se
+  activa la señal `_return_to_menu`; `run()` tiene un bucle exterior que
+  rompe el ciclo de niveles y vuelve al menú de inicio sin reiniciar el
+  programa. Probado el ciclo completo: partida → pausa → main menu → nueva
+  partida (sin arrastrar score, vidas ni teclas pendientes).
+- **Confirmación unificada con SPACE** en todos los menús: `_menu_loop`
+  cambia K_RETURN por K_SPACE, coherente con la pausa y con el subject
+  ("Push SPACE to play").
+
+### Mejoras visuales de los menús
+- **Fuente del proyecto** `assets/font/font_emulogic.ttf` en las opciones de
+  pausa: `Item._render_item` y `Menu._render_item_list` aceptan ahora
+  `font_path` y `size_font` opcionales; sin argumentos siguen usando la
+  fuente del sistema, así START/QUIT no cambian por defecto.
+- **Opciones centradas**: el blit usaba el centro de la ventana como esquina
+  del texto; ahora se resta la mitad del ancho de cada `item.sur` (arreglado
+  en `_blit_menu_init` y `_blit_menu_pause`).
+- **Separación entre opciones** subida a 60 px (`_ITEM_LINE_SPACING`).
+- **Panel opaco** detrás de las opciones de pausa: superficie del color del
+  fondo (`_BACKGROUND_COLOR`) medida a partir del ancho de la opción más
+  larga, pintada antes que los textos. Sin transparencia (solo
+  Surface/fill/blit, sin SRCALPHA).
+
+### Archivos tocados
+- `src/ux_ui/menu.py` — fuente y tamaño opcionales en Item/Menu, MenuPause.
+- `src/core/engine.py` — centrado, panel de pausa, spacing.
+- `src/core/app.py` — pausa, confirmación, return-to-menu, SPACE en menús.
+
+### Para comentar con el equipo
+- El spacing a 60 px es global: también separa START/QUIT en el menú inicial.
+- El centrado toca `_blit_menu_init` (código compartido).
+- Pendiente documentar las teclas elegidas en Instructions.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

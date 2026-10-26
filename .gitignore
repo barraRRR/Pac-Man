@@ -42,3 +42,5 @@ dmypy.json
 .vscode/
 # Temporary file for partial code execution
 tempCodeRunnerFile.py
+
+*:Zone.Identifier
