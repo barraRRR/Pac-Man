@@ -54,12 +54,6 @@ class Entity:
         self.pos.set_at(position)
         self._update_entity_map(True)
 
-    def kill(self, other: "Entity") -> None:
-        """
-        Elimina a la otra entidad
-        """
-        other.alive = False
-
     def _update_entity_map(self, add: bool) -> None:
         """
         Actualiza el dict de posiciones de las entidades
@@ -71,5 +65,12 @@ class Entity:
             Entity.entity_map[pos].append(self)
         elif not add and self in Entity.entity_map[pos]:
             Entity.entity_map[pos].remove(self)
+
+    def kill(self, other: "Entity") -> None:
+        """
+        Elimina a la otra entidad
+        """
+        other.alive = False
+        other._set_position(other.spawn_pos)
 
 

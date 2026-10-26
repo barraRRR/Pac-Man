@@ -1,8 +1,8 @@
 from enum import Enum
 from src.utils.utils import Coord, Color
-from src.core.entity import Entity
+from src.core.entity import Entity, State
 from src.core.ghost import Ghost
-from src.core.pacgum import PacGum
+from src.core.pacgum import PacGum, SuperPacGum
 from src.score.score import Score
 from src.utils.utils import Coord
 import pygame
@@ -49,6 +49,10 @@ class Player(Entity):
         if target.alive:
             self.kill(target)
             self._score.add(target.points)
+            if isinstance(target, SuperPacGum):
+                self.state = State.HUNT
+                Ghost.edible = True
+
 
     def resolve_tile(self) -> None:
         """

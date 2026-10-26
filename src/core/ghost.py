@@ -165,9 +165,12 @@ class Blinky(Ghost):
         self._timer_ms += dt
         if self._timer_ms >= self.speed:
             self._timer_ms -= self.speed
+            curr_target: Coord = (
+                target if self.edible == False else self.spawn_pos
+            )
             path: List[Coord] = self._find_path(
                 start=self.pos,
-                target=target,
+                target=curr_target,
                 bitmap=bitmap
             )
             if len(path) >= 2:
