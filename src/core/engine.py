@@ -459,6 +459,7 @@ class GraphicEngine():
             self.window.blit(item.sur, (x, y))
             if item == menu._active_item:
                 self.window.blit(menu.selector, (x - 10, y))
+        self._put_logo()
                 
     #Mantener, si no se usa borrar y modificar su llamada al init por si se une con la de arriba, son iguales, excepto personalizacion, comprobar
     def _blit_menu_pause(self, menu: MenuPause) -> None:
