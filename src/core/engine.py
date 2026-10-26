@@ -10,6 +10,7 @@ from src.score.score import Score, Title
 from src.utils.utils import Coord, Color, Logo
 from src.utils.class_maze import Maze
 from src.ux_ui.menu import Menu, MenuInit, MenuPause
+from src.ux_ui.instructions import Instructions
 
 """
 
@@ -520,6 +521,26 @@ class GraphicEngine():
         self.window.blit(title, (title_x, band_y + _INTRO_PAD))
         self.window.blit(sub, (sub_x, band_y + _INTRO_PAD + title.get_height() + _INTRO_GAP))
 
+    def _blit_instructions(self) -> None:
+        """Dibuja el logo y las instrucciones en filas sencillas."""
+        self.window.fill(_BACKGROUND_COLOR)
+        self._put_logo()
+
+        if not pygame.font.get_init():
+            pygame.font.init()
+
+        font = pygame.font.Font("assets/font/font_emulogic.ttf", 12)
+        text_color = (255, 255, 255, 255)
+        first_row_y = 240
+        row_spacing = 55
+
+        for index, (keys, description) in enumerate(
+            Instructions.get_entries()
+        ):
+            text = font.render(f"{keys}: {description}", True, text_color)
+            x = (_WINDOW_WIDTH - text.get_width()) // 2
+            y = first_row_y + index * row_spacing
+            self.window.blit(text, (x, y))
 
 
 
