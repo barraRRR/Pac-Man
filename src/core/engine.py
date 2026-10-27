@@ -75,6 +75,9 @@ _INSTR_ROW_SPACING = 70                # hueco entre filas
 _INSTR_PAIR_GAP = 30                   # hueco entre placa y texto
 _INSTR_HINT_Y = 700                    # pista de salida, zona del pie
 
+_TITLE_SIZE = 24
+
+
 class GraphicEngine():
     """
     """
@@ -530,6 +533,12 @@ class GraphicEngine():
         """Pega la pantalla de instrucciones renderizada por su objeto."""
         self._put_logo()
 
+        # ===TITULO===
+        title: Title = Title("INSTRUCTIONS", _TITLE_SIZE)
+        title_x: int = (_WINDOW_WIDTH - title.sur.get_width()) // 2
+        self.window.blit(title.sur, (title_x, 200))
+
+        # ===CONTENIDO===
         for index, (cap, text) in enumerate(self.instructions.rows):
             pair_w: int = cap.get_width() + _INSTR_PAIR_GAP + text.get_width()
             x: int = (_WINDOW_WIDTH - pair_w) // 2
@@ -545,6 +554,22 @@ class GraphicEngine():
         hint: Surface = self.instructions.hint
         self.window.blit(hint, ((_WINDOW_WIDTH - hint.get_width()) // 2,
                                 _INSTR_HINT_Y))
+
+    def _blit_highscores_title(self) -> None:
+        """Dibuja el logo y el título de la pantalla de puntuaciones."""
+        self._put_logo()
+
+        title: Title = Title("HIGH SCORES", _TITLE_SIZE)
+        title_x: int = (_WINDOW_WIDTH - title.sur.get_width()) // 2
+        title_y: int = 200
+        self.window.blit(title.sur, (title_x, title_y))
+
+
+
+
+
+
+
 
 
 

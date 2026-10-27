@@ -2,18 +2,21 @@ from pygame import Surface
 import pygame
 
 class Instructions:
-    """Guarda el contenido de la pantalla de instrucciones."""
-
+    """Guarda el contenido de la pantalla de instrucciones.
+    """
+    # Fuente del proyecto y tamaños
     _FONT_PATH = "assets/font/font_emulogic.ttf"
     _TEXT_SIZE = 12            # texto de las funciones
     _KEYCAP_SIZE = 10          # texto dentro de la placa
     _HINT_SIZE = 10            # pista de salida de abajo
-
+    # Colores:
     _TEXT_COLOR = (255, 255, 255, 255)
     _KEYCAP_COLOR = (255, 255, 255, 255)    # placa de la tecla
     _KEYCAP_TEXT_COLOR = (0, 0, 0, 255)     # texto sobre la placa
+    # Margen
     _KEYCAP_PAD_X = 14                      # margen horizontal dentro de la placa
     _KEYCAP_PAD_Y = 8                       # margen vertical dentro de la placa
+    
     _ENTRIES = {
         "ARROWS / WASD": "MOVE PAC-MAN",
         "SPACE": "PAUSE / CONFIRM",
