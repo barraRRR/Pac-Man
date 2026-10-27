@@ -70,10 +70,13 @@ _INTRO_PAD = 20          # Margen interior de la banda
 _INTRO_GAP = 30          # Hueco entre título y subtítulo
 
 # ==== INSTRUCCIONES ====
-_INSTR_FIRST_ROW_Y = 260               # primera fila, debajo del logo
+_INSTR_FIRST_ROW_Y = 290               # primera fila, debajo del logo
 _INSTR_ROW_SPACING = 70                # hueco entre filas
 _INSTR_PAIR_GAP = 30                   # hueco entre placa y texto
 _INSTR_HINT_Y = 700                    # pista de salida, zona del pie
+
+_TITLE_SIZE = 24
+
 
 class GraphicEngine():
     """
@@ -106,6 +109,10 @@ class GraphicEngine():
         self.menu_init: MenuInit = MenuInit()
         self.menu_pause: MenuPause = MenuPause()
         self.instructions: Instructions = Instructions()
+
+        # ***** TÍTULOS *****
+        self.instructions_title: Title = Title("INSTRUCTIONS", _TITLE_SIZE)
+        self.page_highscores_title: Title = Title("HIGH SCORES", _TITLE_SIZE)
 
         # ***** SCORE *****
         self.up_title: Title = Title("1UP")
@@ -530,6 +537,11 @@ class GraphicEngine():
         """Pega la pantalla de instrucciones renderizada por su objeto."""
         self._put_logo()
 
+        # ===TITULO===
+        title_x: int = (_WINDOW_WIDTH - self.instructions_title.sur.get_width()) // 2
+        self.window.blit(self.instructions_title.sur, (title_x, 200))
+
+        # ===CONTENIDO===
         for index, (cap, text) in enumerate(self.instructions.rows):
             pair_w: int = cap.get_width() + _INSTR_PAIR_GAP + text.get_width()
             x: int = (_WINDOW_WIDTH - pair_w) // 2
@@ -545,6 +557,21 @@ class GraphicEngine():
         hint: Surface = self.instructions.hint
         self.window.blit(hint, ((_WINDOW_WIDTH - hint.get_width()) // 2,
                                 _INSTR_HINT_Y))
+
+    def _blit_highscores_title(self) -> None:
+        """Dibuja el logo y el título de la pantalla de puntuaciones."""
+        self._put_logo()
+
+        title_x: int = (_WINDOW_WIDTH - self.page_highscores_title.sur.get_width()) // 2
+        title_y: int = 200
+        self.window.blit(self.page_highscores_title.sur, (title_x, title_y))
+
+
+
+
+
+
+
 
 
 

@@ -10,13 +10,13 @@ class Title:
     """
     Crea textos para mostrar en la interfaz
     """
-    def __init__(self, text: str) -> None:
-        self.sur: pygame.Surface = self._render(text)
+    def __init__(self, text: str, size: int = _FONT_BODY_SIZE) -> None:
+        self.sur: pygame.Surface = self._render(text, size)
 
-    def _render(self, text: str) -> pygame.Surface:
+    def _render(self, text: str, size: int = _FONT_BODY_SIZE) -> pygame.Surface:
         if not pygame.font.get_init():
             pygame.font.init()
-        font = pygame.font.Font(_FONT_PATH, _FONT_BODY_SIZE)        # Proteger
+        font = pygame.font.Font(_FONT_PATH, size)        # Proteger
         return font.render(text, True, _FONT_COLOR)
 
 

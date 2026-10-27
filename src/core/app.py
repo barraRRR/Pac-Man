@@ -131,7 +131,7 @@ class App:
                     return 1
                 """
             elif option == ItemType.HIGHSCORES:
-                pass  # Pantalla Top 10: siguiente bloque
+                self._highscores_loop()  # Pantalla Top 10: siguiente bloque
             elif option == ItemType.INSTRUCTIONS:
                 self._instructions_loop()
                 # pass  # Pantalla de controles y reglas: luego
@@ -315,6 +315,24 @@ class App:
             self._engine._blit_level_intro(number)  # banda encima de la escena
             for event in pygame.event.get():
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+                    waiting = False
+            pygame.display.flip()
+            self._engine.window.fill((0, 0, 0, 0))
+
+    def _highscores_loop(self) -> None:
+        """Muestra la pantalla de highscores hasta pulsar SPACE.
+
+        Misma idea que la intro de nivel: se repite el dibujo en cada
+        frame y se espera la barra para volver al menú principal.
+        """
+        waiting: bool = True
+        while waiting:
+            self.clock.tick(_FPS)
+            self._engine._blit_highscores_title()
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    waiting = False
+                elif event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
                     waiting = False
             pygame.display.flip()
             self._engine.window.fill((0, 0, 0, 0))
