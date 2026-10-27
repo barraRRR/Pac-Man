@@ -70,7 +70,7 @@ _INTRO_PAD = 20          # Margen interior de la banda
 _INTRO_GAP = 30          # Hueco entre título y subtítulo
 
 # ==== INSTRUCCIONES ====
-_INSTR_FIRST_ROW_Y = 260               # primera fila, debajo del logo
+_INSTR_FIRST_ROW_Y = 290               # primera fila, debajo del logo
 _INSTR_ROW_SPACING = 70                # hueco entre filas
 _INSTR_PAIR_GAP = 30                   # hueco entre placa y texto
 _INSTR_HINT_Y = 700                    # pista de salida, zona del pie
@@ -109,6 +109,10 @@ class GraphicEngine():
         self.menu_init: MenuInit = MenuInit()
         self.menu_pause: MenuPause = MenuPause()
         self.instructions: Instructions = Instructions()
+
+        # ***** TÍTULOS *****
+        self.instructions_title: Title = Title("INSTRUCTIONS", _TITLE_SIZE)
+        self.page_highscores_title: Title = Title("HIGH SCORES", _TITLE_SIZE)
 
         # ***** SCORE *****
         self.up_title: Title = Title("1UP")
@@ -534,9 +538,8 @@ class GraphicEngine():
         self._put_logo()
 
         # ===TITULO===
-        title: Title = Title("INSTRUCTIONS", _TITLE_SIZE)
-        title_x: int = (_WINDOW_WIDTH - title.sur.get_width()) // 2
-        self.window.blit(title.sur, (title_x, 200))
+        title_x: int = (_WINDOW_WIDTH - self.instructions_title.sur.get_width()) // 2
+        self.window.blit(self.instructions_title.sur, (title_x, 200))
 
         # ===CONTENIDO===
         for index, (cap, text) in enumerate(self.instructions.rows):
@@ -559,10 +562,9 @@ class GraphicEngine():
         """Dibuja el logo y el título de la pantalla de puntuaciones."""
         self._put_logo()
 
-        title: Title = Title("HIGH SCORES", _TITLE_SIZE)
-        title_x: int = (_WINDOW_WIDTH - title.sur.get_width()) // 2
+        title_x: int = (_WINDOW_WIDTH - self.page_highscores_title.sur.get_width()) // 2
         title_y: int = 200
-        self.window.blit(title.sur, (title_x, title_y))
+        self.window.blit(self.page_highscores_title.sur, (title_x, title_y))
 
 
 

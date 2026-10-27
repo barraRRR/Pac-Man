@@ -65,7 +65,3 @@ class Instructions:
                         (h - text.get_height()) // 2))
         return cap
 
-    @classmethod
-    def get_entries(cls) -> tuple[tuple[str, str], ...]:
-        """Devuelve las teclas y sus funciones en el orden de presentación."""
-        return tuple(cls._ENTRIES.items())
