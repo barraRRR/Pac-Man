@@ -61,7 +61,6 @@ class Player(Entity):
                 self.state = State.HUNT
                 Ghost.edible = True
 
-
     def resolve_tile(self) -> None:
         """
         Interactua con el resto de Entity de la casilla

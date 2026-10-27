@@ -577,6 +577,33 @@ Issue #88: pantalla de instrucciones con placas de teclas
 
 
 
+Problema de partida
+Los sprites del juego venían como GIF, pero Pygame al cargar un GIF con pygame.image.load solo muestra el primer fotograma. Para animar a Pac-Man y los fantasmas hacían falta las imágenes separadas.
+
+Qué hicimos
+Inspeccionamos los GIF originales con un script de Pillow: cuántos frames tiene cada uno, tamaños y duraciones (fantasmas: 2 frames a 100 ms; Pac-Man direcciones: 4 frames a 40 ms; muerte: 16 frames a 80 ms; los intermission quedan fuera de alcance).
+Analizamos la transparencia de los frames para decidir cómo guardarlos sin fondo.
+Acordamos un tamaño único: canvas de 15 × 15 px transparente para todos los frames, para que en el futuro se reescalen a la celda que toque sin deformar a los personajes (reducir luego siempre es mejor calidad que ampliar).
+Extrajimos 68 PNG desde 23 GIF, organizados por personaje y animación, con la transparencia conservada:
+text
+Copiar
+assets/animations/
+├── frames.json
+├── ghosts/
+│   ├── blinky_down/frame_00.png, frame_01.png
+│   ├── ... (4 direcciones x 4 fantasmas + scared + flashing)
+└── player/
+    ├── pac-man_down/, pac-man_up/, pac-man_left/, pac-man_right/
+    └── pac-man_death/ (16 frames)
+Pruebe:
+|
+Guardamos las duraciones en assets/animations/frames.json, porque luego harán falta para ritmar las animaciones (por ejemplo, esperar la secuencia de muerte antes del Game Over).
+Adaptamos el código de carga: Player y Ghost cargan ahora los frames como listas de Surface en lugar de una imagen por dirección.
+Corregimos fallos en ghost.py: la ruta assets/animations/ghost → assets/animations/ghosts (plural) y el @staticmethod que faltaba en _load_animation.
+Flujo de git: commit en la rama de la issue, merge de origin/main para traer lo de hoy (instrucciones y logo), PR y fusión.
+
+Las duraciones identificadas fueron 100 ms para los GIF de fantasmas, 40 ms para las animaciones direccionales de Pac-Man y 80 ms para cada fotograma de muerte.
+
 
 
 
