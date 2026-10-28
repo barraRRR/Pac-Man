@@ -35,3 +35,8 @@ class Score(Title):
     @property
     def points(self) -> int:
         return self._points
+
+    def reset(self) -> None:
+        """Vuelve el marcador a cero y refresca lo que se pinta en el HUD."""
+        self._points = 0
+        self.sur = self._render(text=str(self._points))

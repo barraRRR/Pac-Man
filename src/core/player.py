@@ -72,3 +72,12 @@ class Player(Entity):
             if ent == self:
                 continue
             self._eat(ent)
+
+    @property
+    def lives(self) -> int:
+        """Devuelve las vidas actuales del jugador."""
+        return self._lives
+
+    def _reset_lives(self, lives:int) -> None:
+        """Restaura las vidas al valor inicial de una partida nueva."""
+        self._lives = lives

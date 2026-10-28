@@ -122,6 +122,11 @@ class Ghost(Entity):
             if isinstance(ent, Player) and not self.edible and ent.alive:
                 ent._die()
 
+    def _reset(self) -> None:
+        """Deja el fantasma listo para una partida nueva: visible y con su reloj a cero."""
+        self.alive = True
+        self._timer_ms = 0
+
 
 class Blinky(Ghost):
     """

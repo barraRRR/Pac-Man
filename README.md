@@ -556,7 +556,6 @@ La llamada desde run() debe ser a self._level_intro(number) y solo mostrarse cua
 Opciones del menú principal
 Añadimos las cuatro opciones del subject: START GAME, VIEW HIGHSCORES, INSTRUCTIONS y EXIT.
 Propusimos cambiar el despacho de run() para que solo START inicie la partida.
-Importante: en la última versión comentada aquí, las ramas de Highscores e Instructions todavía tenían pass. Eso evita que lancen la partida, pero sus pantallas no están hechas todavía.
 Bug #80
 Reiniciar las direcciones pendientes al empezar un nivel, limpiando list_key.
 
@@ -608,10 +607,83 @@ Las duraciones identificadas fueron 100 ms para los GIF de fantasmas, 40 ms para
 
 
 
+# Pantalla High Scores y cambio de `security`
+
+Apuntes de lo que quedó hecho en la rama `87-diseñar-pantalla-highscore-y-traer-datos`. Lo escribo para acordarme de cómo funciona y para usarlo más adelante al mejorar el README. No es una explicación de todo el juego: solo de esta pantalla y del cambio de formato que añadimos después.
+
+## Cómo funciona la pantalla High Scores
+
+La idea es que cada parte haga su trabajo, sin mezclar la lógica de los datos con los gráficos:
+
+- `HighScore` guarda los datos en `HighScore.scores` y se encarga de leerlos del archivo.
+- `App` carga el ranking al arrancar y decide cuándo se muestra la pantalla.
+- `GraphicEngine` recibe la lista y se ocupa únicamente de dibujarla.
+
+En `App.__init__` se configura el nombre del archivo con `HighScore.filename = self.config.highscore_filename` y se llama a `HighScore.load()`. Así, cuando luego el jugador elige **VIEW HIGH SCORES**, los datos ya están cargados en memoria.
+
+En `App.run()`, esa opción llama a `_highscores_loop()`. Este método mantiene la pantalla activa en un bucle: en cada vuelta dibuja el título y las filas, revisa los eventos y actualiza la ventana. Al pulsar SPACE se sale de la pantalla; el cierre de la ventana también termina ese bucle.
+
+Lo importante que aprendí con el problema de que no aparecía nada es que no basta con llamar a una función de dibujo: hay que llamarla **dentro del bucle de pantalla y antes de `pygame.display.flip()`**. Si dibujamos las filas después de que `_highscores_loop()` ya haya terminado, ese dibujo no forma parte de los fotogramas que se muestran.
+
+El dibujo está dividido en dos métodos de `GraphicEngine`:
+
+- `_blit_highscores_title()` pega el logo y el título **HIGH SCORES**, centrado. El objeto del título ya se crea en `GraphicEngine.__init__`, no se vuelve a construir ahí cada vez que se pinta un fotograma.
+- `_blit_highscores_rows(scores)` recorre la lista que recibe. `enumerate(..., start=1)` genera el número de puesto; a la izquierda se dibuja el puesto y el nombre, y a la derecha la puntuación. La posición de la puntuación se calcula restando el ancho de su superficie al límite derecho, para que los números queden alineados.
+
+Al terminar, `_blit_highscores_rows` también dibuja abajo la indicación para salir, reutilizando `self.instructions.hint`. Si `scores` está vacío, el bucle que dibuja las filas simplemente no se ejecuta: se mantiene el logo, el título y la indicación de salida. No hace falta inventar un registro falso para que la pantalla se vea.
+
+`GraphicEngine` no lee el archivo ni decide quién entra en el Top 10. Solo pinta la lista que recibe. La responsabilidad de cargar y gestionar los datos sigue en `HighScore`.
+
+## Mejora posterior: el atributo `security`
+
+Después añadimos una mejora pequeña al objeto `HighScore`. No cambia cómo se ve la pantalla ni cómo se organiza el ranking; cambia únicamente **el formato en el que se guarda el archivo**.
+
+`HighScore.security` es un atributo de clase y por defecto vale `True`:
+
+- Con `True`, `save()` escribe el CSV ofuscado, como se hacía antes: aplica XOR con la contraseña y después base64.
+- Con `False`, `save()` escribe el CSV normal, legible directamente en un editor, por ejemplo `Vera,200`.
+
+El flag solo controla la **salida**. `load()` puede leer los dos formatos, independientemente de que `security` esté en `True` o en `False`. Primero comprueba si el contenido es base64 válido: si lo es, lo decodifica; si no, lo trata como CSV normal. Así, cambiar el formato de guardado no hace que dejemos de poder leer un archivo que ya estaba guardado en el otro formato.
+
+La escritura pasa por `_encode()`, que mira `security`. Por eso `save()` no necesita duplicar la lógica: construye el CSV y `_encode()` decide si lo deja legible o lo ofusca. La carga hace la detección y llama a `_decode()` cuando encuentra el formato ofuscado.
+
+Lo probé con `security = False` y un registro temporal de prueba. El archivo apareció como CSV normal, con líneas del estilo `Vera,200`; después la pantalla pudo cargar esos datos y mostrarlos. En la prueba salieron dos filas `TEST,100` porque el registro de prueba se ejecutó dos veces. Esa llamada era solo para probar y hay que quitarla del código de arranque si todavía sigue ahí.
+
+Importante para el README futuro: XOR + base64 es una ofuscación sencilla, no cifrado fuerte ni protección real de datos. Conviene describirla así, sin llamarla seguridad robusta.
+
+## Para acordarme
+
+La pantalla de High Scores ya puede cargar los datos existentes y mostrarlos; si no hay filas, la lista queda vacía sin añadir datos inventados. El cambio de `security` es una mejora aparte del trabajo visual: permite escoger el formato de escritura y conserva la lectura de los dos formatos. Cuando toque actualizar el README, habrá que explicar esta opción y aclarar que la ofuscación actual es ligera.
 
 
+Issue #100 — Vidas del juego
+Qué se ha hecho
 
+El sistema de vidas queda completo de lado a lado: gestión, muerte, reinicio de partida y HUD.
 
+Gestión centralizada en el Player
+
+El Player es el único dueño de las vidas (_lives), accesibles con una @property (player.lives). App no guarda copias: consulta siempre al jugador, así no puede desincronizarse. Player._reset_lives(n) devuelve las vidas al valor que manda la configuración.
+
+Detección de muerte y game over
+
+En cada latido del _game_loop, App compara las vidas antes y después de resolver las colisiones (el resolve_tile() del jugador y de los fantasmas). Si bajan, es que un fantasma se ha comido a Pac-Man. Al llegar a 0, se activa _return_to_menu y run() lleva de vuelta al menú principal.
+
+Partida nueva limpia (START)
+
+Al elegir START en el menú, se restauran las vidas (_reset_lives(config.lives)), el marcador vuelve a cero (score.reset()) y los fantasmas se resetean (Ghost.edible = False y _reset() en cada uno). Empezar una partida siempre parte del estado inicial.
+
+HUD: iconos de vidas
+
+_blit_elements del engine dibuja un icono por vida restante, arriba a la derecha y alineado a la derecha. Usa el frame "right" del jugador (sprite estático), escalado a 16 px con 4 px de separación. Los iconos reflejan en todo momento el valor de player.lives.
+
+Dirección fantasma tras morir
+
+El buffer de giros (list_key) se limpia al empezar cada nivel y al perder una vida, para que tras respawnear Pac-Man no "recuerde" la última tecla pulsada antes de morir.
+
+Cómo funciona (flujo completo)
+
+START → vidas = config.lives, marcador = 0, fantasmas reseteados → partida en marcha → un fantasma alcanza a Pac-Man → pierde una vida, el HUD quita un icono y list_key se limpia → con vidas restantes, la partida sigue → a 0 vidas, game over y vuelta al menú → START repite el ciclo desde cero.
 
 
 
