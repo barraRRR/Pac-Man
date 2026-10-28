@@ -556,7 +556,6 @@ La llamada desde run() debe ser a self._level_intro(number) y solo mostrarse cua
 Opciones del menú principal
 Añadimos las cuatro opciones del subject: START GAME, VIEW HIGHSCORES, INSTRUCTIONS y EXIT.
 Propusimos cambiar el despacho de run() para que solo START inicie la partida.
-Importante: en la última versión comentada aquí, las ramas de Highscores e Instructions todavía tenían pass. Eso evita que lancen la partida, pero sus pantallas no están hechas todavía.
 Bug #80
 Reiniciar las direcciones pendientes al empezar un nivel, limpiando list_key.
 

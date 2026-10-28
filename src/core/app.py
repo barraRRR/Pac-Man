@@ -108,6 +108,12 @@ class App:
                 break
                 # return 0
             elif option == ItemType.START:
+                # Partida nueva: vidas de vuelta al valor que manda la config.
+                self.player._reset_lives(self.config.lives)
+                self.score.reset()
+                Ghost.edible = False
+                for ghost in self.ghosts.values():
+                    ghost._reset()
                 for number, level in enumerate(self.config.level, start=1):
                     # try:
                     # Momento 1: preparar el nivel (mapa)
@@ -329,6 +335,7 @@ class App:
         while waiting:
             self.clock.tick(_FPS)
             self._engine._blit_highscores_title()
+            self._engine._blit_highscores_rows(HighScore.scores)
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     waiting = False
@@ -402,8 +409,14 @@ class App:
                                 if len(self.list_key) == 2:
                                     self.list_key.pop(0)
 
+                lives_before: int = self.player.lives
                 self.player.resolve_tile()
-                # Game over: sin vidas cortamos el bucle y run() lleva al menú
+                
+                    #eliminar direciones guardadas si pierdes una vida
+                if self.player.lives < lives_before:
+                    self.list_key.clear()
+
+                # Game over: sin vidas cortamos el bucle y run() lleva al menú, mas adelante a game over
                 if self.player.lives <= 0:          # <--------------   MODIFICAR SI SE QUIERE PROBAR COSAS DEL JUEGO  a -100 por ejemplo
                     print("Game over")
                     self._return_to_menu = True
@@ -416,8 +429,11 @@ class App:
                         bitmap=self.maze._bitmap
                     )
                     ghost.resolve_tile()
+
+
             else:
                 self._engine._blit_menu_pause(self._engine.menu_pause)
+            
             running = self._handle_events()
             # actualiza frame
             pygame.display.flip()
