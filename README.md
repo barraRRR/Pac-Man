@@ -608,7 +608,53 @@ Las duraciones identificadas fueron 100 ms para los GIF de fantasmas, 40 ms para
 
 
 
+# Pantalla High Scores y cambio de `security`
 
+Apuntes de lo que quedó hecho en la rama `87-diseñar-pantalla-highscore-y-traer-datos`. Lo escribo para acordarme de cómo funciona y para usarlo más adelante al mejorar el README. No es una explicación de todo el juego: solo de esta pantalla y del cambio de formato que añadimos después.
+
+## Cómo funciona la pantalla High Scores
+
+La idea es que cada parte haga su trabajo, sin mezclar la lógica de los datos con los gráficos:
+
+- `HighScore` guarda los datos en `HighScore.scores` y se encarga de leerlos del archivo.
+- `App` carga el ranking al arrancar y decide cuándo se muestra la pantalla.
+- `GraphicEngine` recibe la lista y se ocupa únicamente de dibujarla.
+
+En `App.__init__` se configura el nombre del archivo con `HighScore.filename = self.config.highscore_filename` y se llama a `HighScore.load()`. Así, cuando luego el jugador elige **VIEW HIGH SCORES**, los datos ya están cargados en memoria.
+
+En `App.run()`, esa opción llama a `_highscores_loop()`. Este método mantiene la pantalla activa en un bucle: en cada vuelta dibuja el título y las filas, revisa los eventos y actualiza la ventana. Al pulsar SPACE se sale de la pantalla; el cierre de la ventana también termina ese bucle.
+
+Lo importante que aprendí con el problema de que no aparecía nada es que no basta con llamar a una función de dibujo: hay que llamarla **dentro del bucle de pantalla y antes de `pygame.display.flip()`**. Si dibujamos las filas después de que `_highscores_loop()` ya haya terminado, ese dibujo no forma parte de los fotogramas que se muestran.
+
+El dibujo está dividido en dos métodos de `GraphicEngine`:
+
+- `_blit_highscores_title()` pega el logo y el título **HIGH SCORES**, centrado. El objeto del título ya se crea en `GraphicEngine.__init__`, no se vuelve a construir ahí cada vez que se pinta un fotograma.
+- `_blit_highscores_rows(scores)` recorre la lista que recibe. `enumerate(..., start=1)` genera el número de puesto; a la izquierda se dibuja el puesto y el nombre, y a la derecha la puntuación. La posición de la puntuación se calcula restando el ancho de su superficie al límite derecho, para que los números queden alineados.
+
+Al terminar, `_blit_highscores_rows` también dibuja abajo la indicación para salir, reutilizando `self.instructions.hint`. Si `scores` está vacío, el bucle que dibuja las filas simplemente no se ejecuta: se mantiene el logo, el título y la indicación de salida. No hace falta inventar un registro falso para que la pantalla se vea.
+
+`GraphicEngine` no lee el archivo ni decide quién entra en el Top 10. Solo pinta la lista que recibe. La responsabilidad de cargar y gestionar los datos sigue en `HighScore`.
+
+## Mejora posterior: el atributo `security`
+
+Después añadimos una mejora pequeña al objeto `HighScore`. No cambia cómo se ve la pantalla ni cómo se organiza el ranking; cambia únicamente **el formato en el que se guarda el archivo**.
+
+`HighScore.security` es un atributo de clase y por defecto vale `True`:
+
+- Con `True`, `save()` escribe el CSV ofuscado, como se hacía antes: aplica XOR con la contraseña y después base64.
+- Con `False`, `save()` escribe el CSV normal, legible directamente en un editor, por ejemplo `Vera,200`.
+
+El flag solo controla la **salida**. `load()` puede leer los dos formatos, independientemente de que `security` esté en `True` o en `False`. Primero comprueba si el contenido es base64 válido: si lo es, lo decodifica; si no, lo trata como CSV normal. Así, cambiar el formato de guardado no hace que dejemos de poder leer un archivo que ya estaba guardado en el otro formato.
+
+La escritura pasa por `_encode()`, que mira `security`. Por eso `save()` no necesita duplicar la lógica: construye el CSV y `_encode()` decide si lo deja legible o lo ofusca. La carga hace la detección y llama a `_decode()` cuando encuentra el formato ofuscado.
+
+Lo probé con `security = False` y un registro temporal de prueba. El archivo apareció como CSV normal, con líneas del estilo `Vera,200`; después la pantalla pudo cargar esos datos y mostrarlos. En la prueba salieron dos filas `TEST,100` porque el registro de prueba se ejecutó dos veces. Esa llamada era solo para probar y hay que quitarla del código de arranque si todavía sigue ahí.
+
+Importante para el README futuro: XOR + base64 es una ofuscación sencilla, no cifrado fuerte ni protección real de datos. Conviene describirla así, sin llamarla seguridad robusta.
+
+## Para acordarme
+
+La pantalla de High Scores ya puede cargar los datos existentes y mostrarlos; si no hay filas, la lista queda vacía sin añadir datos inventados. El cambio de `security` es una mejora aparte del trabajo visual: permite escoger el formato de escritura y conserva la lectura de los dos formatos. Cuando toque actualizar el README, habrá que explicar esta opción y aclarar que la ofuscación actual es ligera.
 
 
 
