@@ -9,7 +9,7 @@ import pygame
 import random
 
 
-ANI_SPEED = 200
+ANI_SPEED = 100
 
 
 class State(Enum):

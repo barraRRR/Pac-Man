@@ -160,6 +160,7 @@ class Blinky(Ghost):
                 bitmap=bitmap
             )
             if len(path) >= 2:
+                self.delta = self.pos._get_delta(path[1])
                 self._set_position(path[1])
 
 class Pinky(Ghost):

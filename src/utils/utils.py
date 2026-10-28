@@ -92,7 +92,7 @@ class Coord:
         elif dir == Dir.LEFT:
             self.x -= 1
 
-    def _get_delta(self, target: "Coord") -> int:
+    def _get_delta(self, target: "Coord") -> Dir:
         """
         Te dice hacia que direccion está target
         """
