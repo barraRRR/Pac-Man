@@ -656,7 +656,34 @@ Importante para el README futuro: XOR + base64 es una ofuscación sencilla, no c
 La pantalla de High Scores ya puede cargar los datos existentes y mostrarlos; si no hay filas, la lista queda vacía sin añadir datos inventados. El cambio de `security` es una mejora aparte del trabajo visual: permite escoger el formato de escritura y conserva la lectura de los dos formatos. Cuando toque actualizar el README, habrá que explicar esta opción y aclarar que la ofuscación actual es ligera.
 
 
+Issue #100 — Vidas del juego
+Qué se ha hecho
 
+El sistema de vidas queda completo de lado a lado: gestión, muerte, reinicio de partida y HUD.
+
+Gestión centralizada en el Player
+
+El Player es el único dueño de las vidas (_lives), accesibles con una @property (player.lives). App no guarda copias: consulta siempre al jugador, así no puede desincronizarse. Player._reset_lives(n) devuelve las vidas al valor que manda la configuración.
+
+Detección de muerte y game over
+
+En cada latido del _game_loop, App compara las vidas antes y después de resolver las colisiones (el resolve_tile() del jugador y de los fantasmas). Si bajan, es que un fantasma se ha comido a Pac-Man. Al llegar a 0, se activa _return_to_menu y run() lleva de vuelta al menú principal.
+
+Partida nueva limpia (START)
+
+Al elegir START en el menú, se restauran las vidas (_reset_lives(config.lives)), el marcador vuelve a cero (score.reset()) y los fantasmas se resetean (Ghost.edible = False y _reset() en cada uno). Empezar una partida siempre parte del estado inicial.
+
+HUD: iconos de vidas
+
+_blit_elements del engine dibuja un icono por vida restante, arriba a la derecha y alineado a la derecha. Usa el frame "right" del jugador (sprite estático), escalado a 16 px con 4 px de separación. Los iconos reflejan en todo momento el valor de player.lives.
+
+Dirección fantasma tras morir
+
+El buffer de giros (list_key) se limpia al empezar cada nivel y al perder una vida, para que tras respawnear Pac-Man no "recuerde" la última tecla pulsada antes de morir.
+
+Cómo funciona (flujo completo)
+
+START → vidas = config.lives, marcador = 0, fantasmas reseteados → partida en marcha → un fantasma alcanza a Pac-Man → pierde una vida, el HUD quita un icono y list_key se limpia → con vidas restantes, la partida sigue → a 0 vidas, game over y vuelta al menú → START repite el ciclo desde cero.
 
 
 

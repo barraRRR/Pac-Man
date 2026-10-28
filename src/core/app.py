@@ -434,7 +434,14 @@ class App:
                         bitmap=self.maze._bitmap
                     )
                     ghost.resolve_tile()
+                # Si perdió una vida durante este frame, borra la dirección pendiente.
+                if self.player.lives < lives_before:
+                    self.list_key.clear()
 
+                # Game over: sin vidas, volvemos al menú.
+                if self.player.lives <= 0:
+                    print("Game over")
+                    self._return_to_menu = True
 
             else:
                 self._engine._blit_menu_pause(self._engine.menu_pause)
