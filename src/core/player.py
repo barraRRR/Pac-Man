@@ -69,3 +69,9 @@ class Player(Entity):
             if ent == self:
                 continue
             self._eat(ent)
+
+    @property
+    def lives(self) -> int:
+        """Devuelve las vidas actuales del jugador."""
+        return self._lives
+

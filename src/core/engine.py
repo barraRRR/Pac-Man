@@ -460,6 +460,24 @@ class GraphicEngine():
                 self.window.blit(ghost.sur, ghost.pos.off_get(self.tile_size, _HEADER_AREA, self._cal_left_padding()))
         self.window.blit(self.player.sur, self.player.pos.off_get(self.tile_size, _HEADER_AREA, self._cal_left_padding()))
 
+        # --- vidas ---
+        # Vidas restantes como iconos estáticos, alineados a la derecha.
+        frames = self.player.images.get("right", [])
+        lives = self.player.lives
+
+        if frames and lives > 0:
+            icon_size = 16
+            gap = 4
+            total_width = lives * icon_size + (lives - 1) * gap
+            start_x = _WINDOW_WIDTH - _PADDING - total_width
+            icon = pygame.transform.scale(frames[0], (icon_size, icon_size))
+
+            for index in range(lives):
+                self.window.blit(
+                    icon,
+                    (start_x + index * (icon_size + gap), _1UP_SCORE_POS[1])
+                )
+
     def _blit_menu_init(self, menu: Menu) -> None:
         """
         Muestra el menú de inicio en pantalla

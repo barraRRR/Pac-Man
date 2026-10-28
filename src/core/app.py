@@ -403,7 +403,10 @@ class App:
                                     self.list_key.pop(0)
 
                 self.player.resolve_tile()
-
+                # Game over: sin vidas cortamos el bucle y run() lleva al menú
+                if self.player.lives <= 0:          # <--------------   MODIFICAR SI SE QUIERE PROBAR COSAS DEL JUEGO  a -100 por ejemplo
+                    print("Game over")
+                    self._return_to_menu = True
                 # ========GHOST============
                 for ghost in self.ghosts.values():      # movement
                     ghost._move(
