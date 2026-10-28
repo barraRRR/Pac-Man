@@ -13,6 +13,7 @@ from pathlib import Path
 
 
 PLAYER_COLOR = (243, 195, 0, 255)
+PLAYER_ANI_PATH = "assets/animations/player"
 
 
 class Player(Entity):
@@ -24,6 +25,8 @@ class Player(Entity):
         self.images: dict[str, list[Surface]] = self._load_images()
         self._score: Score = score
         self._lives: int = lives
+
+        self.ani_path: str = PLAYER_ANI_PATH
 
     @staticmethod
     def _load_images() -> dict[str, list[Surface]]:
