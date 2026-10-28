@@ -276,46 +276,7 @@ class GraphicEngine():
                 for t in range(self.tile_size):
                     self._put_pixel(surface, (x + t, y + i), color)
 
-    """
-    ╔═════════════════════════════════════════════════════════════════════════╗
-    ║                                  MAZE                                   ║
-    ╚═════════════════════════════════════════════════════════════════════════╝
-    """
 
-    def _render_maze(
-            self,
-            maze_surface: Surface,
-            bitmap: BitMap,
-            color: Color
-        ) -> None:
-        """
-        Render a maze grid to the screen.
-
-        Iterates through the maze 2D array and renders each cell as a tile.
-        Cells with value > 0 are drawn in white, others in background color.
-        Does not automatically flush the image; call flush_image() to display.
-
-        Args:
-            maze: 2D list where each element is an int representing a cell.
-        """
-        for y, row in enumerate(bitmap.grid):
-            for x, cell_value in enumerate(row):
-                self._render_cell(
-                    maze_surface, Coord((x, y)), cell_value, color
-                )
-
-    def _cal_left_padding(self) -> int:
-        """
-        """
-        return (_WINDOW_WIDTH - self.maze_px[0]) // 2
-
-    def _cal_maze_offset(
-            self,
-            h: int = _HEADER_AREA
-        ) -> Tuple[int, int]:
-        """
-        """
-        return (self._cal_left_padding(), h)
 
     """
     ╔═════════════════════════════════════════════════════════════════════════╗
@@ -353,38 +314,33 @@ class GraphicEngine():
         """
         Inicializa las entities en las posiciones iniciales del mapa
         """
-        self.player._init_surface(self.player.pos, self.tile_size)
+        self.player._load_frames(self.player.ani_path, self.tile_size)
         for ghost in self.ghosts.values():
-            ghost._init_surface(ghost.pos, self.tile_size)
+            ghost._load_frames(ghost.ani_path, self.tile_size)
         for pacgum in self.pacgum:
             pacgum._init_surface(pacgum.pos, self.tile_size)
 
-    def _free_entities(self) -> None:
+    def _put_entities(self) -> None:
         """
-        Libera la memoria de las surfaces de las entities
+        Dibuja las entities en el mapa
         """
-        self.player.sur.convert(self.player.sur, None)
+        self._init_entities()
+        """
+        self._render_entity_block(self.player)
+        
         for ghost in self.ghosts.values():
-            ghost.sur.convert(ghost.sur, None)
+            self._render_entity_block(ghost)
+        """
         for pacgum in self.pacgum:
-            pacgum.sur.convert(pacgum.sur, None)
-
-    """
-    ╔═════════════════════════════════════════════════════════════════════════╗
-    ║                                 MENU                                    ║
-    ╚═════════════════════════════════════════════════════════════════════════╝
-    """
-
-    def _init_menu_init(self) -> None:
-        """
-        Crea el menu de inicio
-        """
-        self.menu_init._render_item_list()
+            self._render_pacgum(pacgum)
+        
+        # map(self._render_entity_block, self.ghosts.values())
+        # map(self._render_pacgum, self.pacgum)
 
 
     """
     ╔═════════════════════════════════════════════════════════════════════════╗
-    ║                                UX-UI                                    ║
+    ║                               INTERFACE                                 ║
     ╚═════════════════════════════════════════════════════════════════════════╝
     """
 
@@ -411,54 +367,19 @@ class GraphicEngine():
             _PADDING
         )
         self.window.blit(scaled_logo, logo_pos)
+    
+    
+    """
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║                                 MENU                                    ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+    """
 
-    def _put_maze(
-            self,
-            new_maze: Maze,
-            color: Color | Tuple[int, int, int, int] = _WALL_COLOR
-        ) -> None:
+    def _init_menu_init(self) -> None:
         """
-        Imprime la ventana entera en pantalla
+        Crea el menu de inicio
         """
-        self._update_maze(new_maze)
-        self.maze.sur = Surface(self.maze_px, pygame.SRCALPHA)
-        self.maze.sur.fill((0, 0, 0, 0)) 
-        self._render_maze(self.maze.sur, self.maze._bitmap, color)
-
-    def _put_entities(self) -> None:
-        """
-        Dibuja las entities en el mapa
-        """
-        self._init_entities()
-        self._render_entity_block(self.player)
-        
-        for ghost in self.ghosts.values():
-            self._render_entity_block(ghost)
-        for pacgum in self.pacgum:
-            self._render_pacgum(pacgum)
-        
-        # map(self._render_entity_block, self.ghosts.values())
-        # map(self._render_pacgum, self.pacgum)
-
-    def _blit_elements(self) -> None:
-        """
-        """
-        self.window.blit(self.background, (0, 0))
-        self._put_logo()
-        self.window.blit(self.maze.sur, (self._cal_maze_offset()))
-        self.window.blit(self.score.sur, _1UP_SCORE_POS)
-        self.window.blit(self.up_title.sur, _1UP_POS)
-        self.window.blit(self.highscore_title.sur, _HIGHSCORE)
-        self.window.blit(self.highscore_int.sur, _HIGHSCORE_SCORE_POS)
-        for pacgum in self.pacgum:
-            if pacgum.alive:
-                self.window.blit(
-                    pacgum.sur,
-                    pacgum.pos.off_get(self.tile_size, _HEADER_AREA, self._cal_left_padding()))
-        for ghost in self.ghosts.values():
-            if ghost.alive:
-                self.window.blit(ghost.sur, ghost.pos.off_get(self.tile_size, _HEADER_AREA, self._cal_left_padding()))
-        self.window.blit(self.player.sur, self.player.pos.off_get(self.tile_size, _HEADER_AREA, self._cal_left_padding()))
+        self.menu_init._render_item_list()
 
     def _blit_menu_init(self, menu: Menu) -> None:
         """
@@ -567,7 +488,107 @@ class GraphicEngine():
         self.window.blit(self.page_highscores_title.sur, (title_x, title_y))
 
 
+    """
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║                                  MAZE                                   ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+    """
 
+    def _render_maze(
+            self,
+            maze_surface: Surface,
+            bitmap: BitMap,
+            color: Color
+        ) -> None:
+        """
+        Render a maze grid to the screen.
+
+        Iterates through the maze 2D array and renders each cell as a tile.
+        Cells with value > 0 are drawn in white, others in background color.
+        Does not automatically flush the image; call flush_image() to display.
+
+        Args:
+            maze: 2D list where each element is an int representing a cell.
+        """
+        for y, row in enumerate(bitmap.grid):
+            for x, cell_value in enumerate(row):
+                self._render_cell(
+                    maze_surface, Coord((x, y)), cell_value, color
+                )
+
+    def _cal_left_padding(self) -> int:
+        """
+        """
+        return (_WINDOW_WIDTH - self.maze_px[0]) // 2
+
+    def _cal_maze_offset(
+            self,
+            h: int = _HEADER_AREA
+        ) -> Tuple[int, int]:
+        """
+        """
+        return (self._cal_left_padding(), h)
+    
+    def _put_maze(
+            self,
+            new_maze: Maze,
+            color: Color | Tuple[int, int, int, int] = _WALL_COLOR
+        ) -> None:
+        """
+        Imprime la ventana entera en pantalla
+        """
+        self._update_maze(new_maze)
+        self.maze.sur = Surface(self.maze_px, pygame.SRCALPHA)
+        self.maze.sur.fill((0, 0, 0, 0)) 
+        self._render_maze(self.maze.sur, self.maze._bitmap, color)
+
+
+    """
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║                             RENDER_GHOSTS                               ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+    """
+
+
+
+
+
+    """
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║                             RENDER_PLAYER                               ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+    """
+
+
+
+
+    """
+    ╔═════════════════════════════════════════════════════════════════════════╗
+    ║                           RENDER_FULL_FRAME                             ║
+    ╚═════════════════════════════════════════════════════════════════════════╝
+    """
+
+
+
+    def _blit_elements(self, dt: int) -> None:
+        """
+        """
+        self.window.blit(self.background, (0, 0))
+        self._put_logo()
+        self.window.blit(self.maze.sur, (self._cal_maze_offset()))
+        self.window.blit(self.score.sur, _1UP_SCORE_POS)
+        self.window.blit(self.up_title.sur, _1UP_POS)
+        self.window.blit(self.highscore_title.sur, _HIGHSCORE)
+        self.window.blit(self.highscore_int.sur, _HIGHSCORE_SCORE_POS)
+        for pacgum in self.pacgum:
+            if pacgum.alive:
+                self.window.blit(
+                    pacgum.sur,
+                    pacgum.pos.off_get(self.tile_size, _HEADER_AREA, self._cal_left_padding()))
+        for ghost in self.ghosts.values():
+            if ghost.alive:
+                self.window.blit(ghost.get_frame(dt), ghost.pos.off_get(self.tile_size, _HEADER_AREA, self._cal_left_padding()))
+        self.window.blit(self.player.get_frame(dt), self.player.pos.off_get(self.tile_size, _HEADER_AREA, self._cal_left_padding()))
 
 
 

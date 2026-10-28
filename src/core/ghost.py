@@ -1,5 +1,5 @@
 from enum import Enum
-from src.utils.utils import Coord, Color, UP, RIGHT, DOWN, LEFT
+from src.utils.utils import Coord, Color, Dir
 from src.core.entity import Entity, State
 import pygame
 from pygame import Surface
@@ -22,6 +22,12 @@ PINKY_SPEED = 500
 INKY_SPEED = 500
 CLYDE_SPEED = 500
 
+# ASSETS PATHS
+BLINKY_ANI_PATH = "assets/animations/ghosts/blinky"
+PINKY_ANI_PATH = "assets/animations/ghosts/pinky"
+INKY_ANI_PATH = "assets/animations/ghosts/inky"
+CLYDE_ANI_PATH = "assets/animations/ghosts/clyde"
+
 
 class Ghost(Entity):
     """
@@ -35,45 +41,8 @@ class Ghost(Entity):
     def __init__(self, name: str, points: int) -> None:
         super().__init__()
         self.name: str = name
-        self.delta: Coord = Coord()
         self._timer_ms: int = 0
         self.points: int = points
-
-        # Imágenes propias de este fantasma, una por dirección.
-        self.images: dict[str, list[Surface]] = self._load_images(name)
-
-        # Imágenes compartidas para el estado de huida.
-        self.image_scared: list[Surface] = self._load_animation("scared_ghost")
-        self.image_flashing: list[Surface] = self._load_animation(
-            "flashing_scared_ghost"
-        )
-
-    @staticmethod
-    def _load_animation(animation_name: str) -> list[Surface]:
-        """Carga los frames PNG de una animación de fantasma."""
-        frames_dir = Path("assets/animations/ghosts") / animation_name
-        frame_paths = sorted(frames_dir.glob("frame_*.png"))
-
-        if not frame_paths:
-            raise FileNotFoundError(
-                f"No animation frames found in '{frames_dir}'"
-            )
-        return [
-            pygame.image.load(str(frame_path)) for frame_path in frame_paths
-        ]
-        
-
-    @staticmethod
-    def _load_images(name: str) -> dict[str, Surface]:
-        """Carga los frames PNG de cada dirección del fantasma."""
-        images = {}
-        directions = ("down", "left", "right", "up")
-
-        for dir in directions:
-            animation_name = f"{name.lower()}_{dir}"
-            images[dir] = Ghost._load_animation(animation_name)
-
-        return images
 
     def _find_path(
             self,
@@ -104,8 +73,8 @@ class Ghost(Entity):
                 found = True
                 break
 
-            for dir in [UP, RIGHT, DOWN, LEFT]:
-                if not bitmap.grid[curr_xy.y][curr_xy.x] & dir:
+            for dir in [Dir.UP, Dir.RIGHT, Dir.DOWN, Dir.LEFT]:
+                if not bitmap.grid[curr_xy.y][curr_xy.x] & dir.value:
                     new_xy = Coord(curr_xy.get())
                     new_xy.step(dir)
 
@@ -164,6 +133,9 @@ class Blinky(Ghost):
         self.color.set(BLINKY_COLOR)
         self.speed: int = BLINKY_SPEED
 
+        # ***** LOAD_ANIMATION *****
+        self.ani_path: str = BLINKY_ANI_PATH
+
     def _move(
             self,
             target: Coord,
@@ -199,6 +171,7 @@ class Pinky(Ghost):
         super().__init__(name="Pinky", points=points)
         self.color.set(PINKY_COLOR)
         self.speed: int = PINKY_SPEED
+        self.ani_path: str = PINKY_ANI_PATH
 
 
 class Inky(Ghost):
@@ -210,6 +183,7 @@ class Inky(Ghost):
         super().__init__(name="Inky", points=points)
         self.color.set(INKY_COLOR)
         self.speed: int = INKY_SPEED
+        self.ani_path: str = INKY_ANI_PATH
 
 
 class Clyde(Ghost):
@@ -221,3 +195,4 @@ class Clyde(Ghost):
         super().__init__(name="Clyde", points=points)
         self.color.set(CLYDE_COLOR)
         self.speed: int = CLYDE_SPEED
+        self.ani_path: str = CLYDE_ANI_PATH

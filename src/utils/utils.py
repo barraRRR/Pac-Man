@@ -1,11 +1,20 @@
 from typing import Tuple, Union, Dict
-from src.maze.bitmap import UP, RIGHT, DOWN, LEFT
 from src.utils.error import UnreachableTileError
 from pygame import Surface
 import pygame
+from enum import Enum
 
 
 _LOGO_PATH = "assets/logo/pacman_logo.png"
+
+
+class Dir(Enum):
+    UP = 1
+    RIGHT = 2
+    DOWN = 4
+    LEFT = 8
+    DEATH = "death"
+    SCARED = "scared"
 
 
 class Coord:
@@ -70,17 +79,17 @@ class Coord:
         else:
             self.x, self.y = xy
 
-    def step(self, dir: int) -> None:
+    def step(self, dir: Dir) -> None:
         """
         """
         # pdt implementa off boundaries
-        if dir == UP:
+        if dir == Dir.UP:
             self.y -= 1
-        elif dir == RIGHT:
+        elif dir == Dir.RIGHT:
             self.x += 1
-        elif dir == DOWN:
+        elif dir == Dir.DOWN:
             self.y += 1
-        elif dir == LEFT:
+        elif dir == Dir.LEFT:
             self.x -= 1
 
     def _get_delta(self, target: "Coord") -> int:
@@ -88,10 +97,10 @@ class Coord:
         Te dice hacia que direccion está target
         """
         directions = {
-            (0, -1): UP,
-            (1, 0): RIGHT,
-            (0, 1): DOWN,
-            (-1, 0): LEFT,
+            (0, -1): Dir.UP,
+            (1, 0): Dir.RIGHT,
+            (0, 1): Dir.DOWN,
+            (-1, 0): Dir.LEFT,
         }
         delta = directions.get(((target.x - self.x), (target.y - self.y)), -1)
         if delta == -1:

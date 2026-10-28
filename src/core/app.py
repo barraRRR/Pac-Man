@@ -8,7 +8,7 @@ from src.core.pacgum import PacGum, SuperPacGum
 from src.core.engine import GraphicEngine, _PADDING
 from src.maze.bitmap import BitMap, UP, RIGHT, DOWN, LEFT
 from src.score.score import Score
-from src.utils.utils import Coord, Color
+from src.utils.utils import Coord, Color, Dir
 from src.ux_ui.menu import Item, ItemType, Menu, MenuInit
 from typing import List, Dict, Callable
 from src.utils.error import HitWallError
@@ -48,6 +48,8 @@ class App:
         # Puntos acumulados; sube al comer.
         self.score: Score = Score()
 
+
+        pygame.init()
         # Entity instancies
         self.player: Player = Player(
             lives=self.config.lives,
@@ -68,7 +70,7 @@ class App:
             pacgum=self.pacgum,
             score=self.score
         )
-        self.list_key = []
+        self.list_key: Dir = []
         self._pause: bool = False
         self._return_to_menu: bool = False
 
@@ -96,7 +98,6 @@ class App:
 
     def run(self) -> int:
         """Recorre los niveles en orden y ejecuta los momentos del juego."""
-        pygame.init()
         self.clock: pygame.time.Clock = pygame.time.Clock()
         self._engine._init_window()
         while True:
@@ -202,16 +203,7 @@ class App:
         for entity in [self.player, *self.ghosts.values(), *self.pacgum]:
             entity._update_entity_map(True)
 
-        # TEMPORAL: comprobar que cada fantasma tiene sus sprites cargados. Quitar al cerrar la #51.
-        for name, ghost in self.ghosts.items():
-            print(
-                f"  {name}: {len(ghost.images)} sprites -> {ghost.images['right']}")
-
-        # TEMPORAL: comprobar sprites del player. Quitar al cerrar la #51.
-        print(
-            f"  player: {len(self.player.images)} sprites -> {self.player.images['right']}")
-
-    def _push_direction(self, dir: int) -> None:
+    def _push_direction(self, dir: Dir) -> None:
         """Apunta la direccion pulsada: si hay hueco se apila, si esta llena se sustituye la pendiente."""
         if dir in self.list_key:
             return
@@ -260,16 +252,16 @@ class App:
                         if self._pause:
                             self._engine.menu_pause._select_item(False)
                         else:
-                            self._push_direction(UP)
+                            self._push_direction(Dir.UP)
                     elif event.key in (pygame.K_RIGHT, pygame.K_d):
-                        self._push_direction(RIGHT)
+                        self._push_direction(Dir.RIGHT)
                     elif event.key in (pygame.K_DOWN, pygame.K_s):
                         if self._pause:
                             self._engine.menu_pause._select_item(True)
                         else:
-                            self._push_direction(DOWN)
+                            self._push_direction(Dir.DOWN)
                     elif event.key in (pygame.K_LEFT, pygame.K_a):
-                        self._push_direction(LEFT)
+                        self._push_direction(Dir.LEFT)
 
                 except HitWallError:
                     # return False #definir
@@ -310,8 +302,8 @@ class App:
 
         waiting: bool = True
         while waiting:
-            self.clock.tick(_FPS)
-            self._engine._blit_elements()           # escena + HUD, como en juego
+            dt: int = self.clock.tick(_FPS)
+            self._engine._blit_elements(dt)           # escena + HUD, como en juego
             self._engine._blit_level_intro(number)  # banda encima de la escena
             for event in pygame.event.get():
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
@@ -372,7 +364,7 @@ class App:
 
         while running and not self._return_to_menu:
             dt: int = self.clock.tick(_FPS)
-            self._engine._blit_elements()  # blit siemrpe pinta
+            self._engine._blit_elements(dt)  # blit siemrpe pinta
 
             if not self._pause:
                 # ========PLAYER============
