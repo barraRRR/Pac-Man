@@ -36,6 +36,8 @@ class HighScore:
     SAVE_ATTEMPTS = 3
     RETRY_SECONDS = 1
 
+    security: bool = True
+
     @classmethod
     def clean_name(cls, name: str) -> str:
         """Deja el nombre listo para guardar, aplicando las reglas acordadas.
@@ -96,7 +98,14 @@ class HighScore:
 
     @classmethod
     def _encode(cls, text: str) -> str:
-        """Ofusca un texto: UTF-8, XOR con la contraseña y base64."""
+        """Convierte el CSV al formato de salida que pide security.
+
+        True lo ofusca (UTF-8, XOR con la contraseña y base64); False
+        lo devuelve tal cual, porque el archivo se queda en claro.
+        """
+        if not cls.security:
+            return text
+
         encrypter: bytes = cls._xor(text.encode("utf-8"))
         return base64.b64encode(encrypter).decode("ascii")
 
@@ -117,14 +126,29 @@ class HighScore:
             return None
 
     @classmethod
-    def load(cls,) -> list[dict[str, str | int]]:
+    def _is_encoded(cls, raw: str) -> bool:
+        """Comprueba si el contenido del archivo está ofuscado.
+
+        Se mira si el texto es base64 válido. Un CSV normal escrito
+        por save() nunca lo es: lleva comas, y la coma no existe en
+        el alfabeto base64.
+        """
+        try:
+            base64.b64decode(raw.encode("ascii"), validate = True)
+            return True
+        except ValueError:
+            return False
+
+    @classmethod
+    def load(cls) -> list[dict[str, str | int]]:
         """Carga el ranking desde el archivo de puntuaciones.
 
-        El archivo lo escribe siempre save() con datos ya limpios y
-        validados al registrarse, así que aquí no se revalida nada.
-        Si el archivo no existe, el ranking empieza vacío. Si no se
-        puede leer o decodificar, se avisa en inglés y empieza vacío:
-        el archivo se regenerará en el próximo guardado.
+        Lee los dos formatos: si el contenido es base64 válido lo
+        desofusca, y si no lo trata como CSV normal. Así security
+        decide solo cómo se ESCRIBE: un archivo antiguo se sigue
+        leyendo aunque el flag cambie. Si el archivo no existe, el
+        ranking empieza vacío; si está dañado, se avisa en inglés
+        y empieza vacío.
         """
 
         patch: Path = Path(cls.SCORES_FOLDER) / cls.filename
@@ -132,9 +156,16 @@ class HighScore:
             cls.scores = []
             return cls.scores
         try:
-            text = cls._decode(patch.read_text(encoding="ascii"))
-            if text is None:
-                raise ValueError("File is corrupted or not base64.")
+            raw: str = patch.read_text(encoding="ascii")
+
+            # base64 válido = ofuscado; si no, CSV en claro.
+            if cls._is_encoded(raw):
+                text = cls._decode(raw)
+                if text is None:
+                    raise ValueError("File is corrupted or not base64.")
+            else:
+                text = raw
+        
             rows: list[dict[str, str | int]] = []
             for row in csv.reader(text.splitlines()):
                 if not row:
@@ -233,6 +264,8 @@ class HighScore:
         return True
 
 
+        
+            
 
 
 

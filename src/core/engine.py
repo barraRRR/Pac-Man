@@ -584,6 +584,33 @@ class GraphicEngine():
         title_y: int = 200
         self.window.blit(self.page_highscores_title.sur, (title_x, title_y))
 
+    def _blit_highscores_rows(
+        self,
+        scores: List[Dict[str, str | int]]
+    ) -> None:
+        """
+        """
+        first_row_y: int = 300
+        row_spaccing: int = 35
+        left_x:int = 70
+        right_x: int = 530
+
+        for index, record in enumerate(scores, start = 1):
+            name: Title = Title(f"{index}. {record['name']}")
+            score: Title = Title(str(record["score"]))
+            y: int = first_row_y + (index - 1) * row_spaccing
+
+            self.window.blit(name.sur, (left_x, y))
+            score_x: int = right_x - score.sur.get_width()
+            self.window.blit(score.sur, (score_x, y))
+            pass
+
+        # ---- exit--
+        hint: Surface = self.instructions.hint
+        self.window.blit(
+            hint,
+            ((_WINDOW_WIDTH - hint.get_width()) // 2, _INSTR_HINT_Y)
+        )
 
 
 

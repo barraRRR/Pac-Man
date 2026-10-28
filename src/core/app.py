@@ -75,8 +75,10 @@ class App:
         # HighScore: el nombre del archivo lo manda la config y el ranking
         # se carga una sola vez al arrancar (alta en #35, conexión con App).
         HighScore.filename = self.config.highscore_filename
+        HighScore.security = False   # TEMPORAL: probar salida en claro
         HighScore.load()
         print(f"  highscores loaded: {len(HighScore.scores)}")
+        # HighScore.register("TEST", 100)   # TEMPORAL: probar guardado, quitar
 
     @property
     def blinky(self) -> Blinky:
@@ -138,6 +140,8 @@ class App:
                 """
             elif option == ItemType.HIGHSCORES:
                 self._highscores_loop()  # Pantalla Top 10: siguiente bloque
+                # self._engine._blit_highscores_rows(HighScore.scores)
+                
             elif option == ItemType.INSTRUCTIONS:
                 self._instructions_loop()
                 # pass  # Pantalla de controles y reglas: luego
@@ -336,6 +340,7 @@ class App:
             self.clock.tick(_FPS)
             self._engine._blit_highscores_title()
             self._engine._blit_highscores_rows(HighScore.scores)
+            
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     waiting = False
