@@ -28,6 +28,7 @@ PINKY_ANI_PATH = "assets/animations/ghosts/pinky"
 INKY_ANI_PATH = "assets/animations/ghosts/inky"
 CLYDE_ANI_PATH = "assets/animations/ghosts/clyde"
 
+SCARED_GHOST = "assets/animations/ghosts/scared_ghost"
 
 class Ghost(Entity):
     """
@@ -179,6 +180,18 @@ class Pinky(Ghost):
         self.speed: int = PINKY_SPEED
         self.ani_path: str = PINKY_ANI_PATH
 
+    def _move(
+        self,
+        target: Coord,
+        dt: int,
+        tile_size: int,
+        bitmap: BitMap,
+        fps: int = 60
+    ) -> None:
+        """
+        """
+        if self.alive == False:
+            self._die()
 
 class Inky(Ghost):
     """

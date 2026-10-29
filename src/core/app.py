@@ -22,6 +22,9 @@ from src.ux_ui.instructions import Instructions
 _FPS = 60
 _MOVEMENT_INTERVAL = 220
 
+# Duracion del efecto de la super-pacgum (10 s de prueba)
+_SUPER_PACGUM_DURATION_MS = 10000
+
 _UI_SIZE = (600, 800)
 
 
@@ -73,6 +76,8 @@ class App:
         self.list_key: Dir = []
         self._pause: bool = False
         self._return_to_menu: bool = False
+        # Tiempo acumulado del efecto de la super-pacgum (ms)
+        self._super_timer_ms: int = 0
 
         # HighScore: el nombre del archivo lo manda la config y el ranking
         # se carga una sola vez al arrancar (alta en #35, conexión con App).
@@ -426,6 +431,14 @@ class App:
                         bitmap=self.maze._bitmap
                     )
                     ghost.resolve_tile()
+
+                # ====SUPER PACGUM====
+                if Ghost.edible:
+                    self._super_timer_ms += dt
+                    if self._super_timer_ms >= _SUPER_PACGUM_DURATION_MS:
+                        Ghost.edible = False
+                        self._super_timer_ms = 0
+                
                 # Si perdió una vida durante este frame, borra la dirección pendiente.
                 if self.player.lives < lives_before:
                     self.list_key.clear()
