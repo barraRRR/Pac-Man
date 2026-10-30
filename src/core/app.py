@@ -120,6 +120,7 @@ class App:
                 self.player._reset_lives(self.config.lives)
                 self.score.reset()
                 Ghost.edible = False
+                self._super_timer_ms = 0
                 for ghost in self.ghosts.values():
                     ghost._reset()
                 for number, level in enumerate(self.config.level, start=1):
@@ -162,6 +163,7 @@ class App:
             width=level.width,
             height=level.height,
         )
+        Ghost.path_map.clear()   # mapa nuevo: caduca la cache de caminos BFS
         Coord._set_frontier(self.maze.frontier)
         print(f"\nLevel {number}:")
 
@@ -193,19 +195,23 @@ class App:
 
     def _spawn_entities(self) -> None:
         """
-        Momento 2: colocar Pac-Man y fantasmas (aún no existe)
+        Coloca a Pac-Man, los fantasmas y las pacgums del nivel.
         """
         # colocamos al player
         self.player.pos.set_at(self.pacman_start)
         self.player.spawn_pos.set_at(self.pacman_start)
 
-        # colocamos a los fantasmas cogiendo los puntos aleatoriamente
+        # Salida aleatoria por fantasma y estado limpio al empezar el nivel.
         random_ghost_spawn = random.sample(self.ghost_spawns, 4)
         for ghost, spawn in zip(self.ghosts.values(), random_ghost_spawn):
             ghost.pos.set_at(spawn)
             ghost.spawn_pos.set_at(spawn)
+            ghost._reset()
+        
+            # Todos los fantasmas guardan las salidas del nivel (huida por cuartos).
+            ghost._ghost_spawns = self.ghost_spawns
 
-        # limpiamos antes de colocar.  --> Reparado por Javi
+        # limpiamos antes de colocar.
         self.pacgum.clear()
         for spawn in self.super_pacgum_spawns:
             self.pacgum.append(SuperPacGum(
@@ -428,7 +434,7 @@ class App:
                         target=self.player.pos,
                         dt=dt,
                         tile_size=self._engine.tile_size,
-                        bitmap=self.maze._bitmap
+                        bitmap=self.maze._bitmap,
                     )
                     ghost.resolve_tile()
 
@@ -462,3 +468,13 @@ class App:
         """
         # cierra el programa
         pygame.quit()
+
+
+
+
+
+
+
+
+
+
