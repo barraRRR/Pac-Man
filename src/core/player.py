@@ -52,10 +52,14 @@ class Player(Entity):
 
     def _eat(self, target: Entity) -> None:
         """
+        Come pacgum, Fantasmas, superPacgum, de todo.
         """
-        if isinstance(target, Ghost) and not target.edible:
-            self._die()
-            return
+        if isinstance(target, Ghost):
+            if not target.alive:
+                return
+            if not target.edible:
+                self._die()
+                return
 
         if target.alive:
             self.kill(target)

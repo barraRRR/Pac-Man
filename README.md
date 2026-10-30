@@ -686,7 +686,47 @@ Cómo funciona (flujo completo)
 START → vidas = config.lives, marcador = 0, fantasmas reseteados → partida en marcha → un fantasma alcanza a Pac-Man → pierde una vida, el HUD quita un icono y list_key se limpia → con vidas restantes, la partida sigue → a 0 vidas, game over y vuelta al menú → START repite el ciclo desde cero.
 
 
+29/10/2026
 
+## IA de los fantasmas: Pinky y la super-pacgum
+
+### Cómo se mueve Pinky: caza por predicción
+
+Pinky no persigue la casilla de Pac-Man, sino la casilla donde cree que Pac-Man va a estar. La predicción la hace `_predict_pinky_target()`:
+
+1. Parte de una copia de la posición real de Pac-Man.
+2. Avanza siguiendo su dirección actual hasta 4 casillas.
+3. En el primer cruce donde el giro pendiente (la segunda tecla del búfer `list_key`) es posible, gira.
+4. Si se encuentra una pared antes de completar las 4 casillas, la predicción se detiene ahí: Pinky apunta a la última casilla alcanzable de la ruta prevista.
+
+Si App no le pasa direcciones, Pinky cae en la caza directa: BFS a la casilla real de Pac-Man.
+
+El movimiento usa el latido común de los fantasmas: un paso cada `speed` ms (Pinky: 500 ms). El camino lo calcula `_find_path()` (BFS con caché) y avanza una casilla por latido.
+
+![Pinky predice hasta 4 pasos](assets/Pinky.png)
+
+### La huida por cuartos (super-pacgum)
+
+Cuando el jugador come una super-pacgum, `Ghost.edible` se activa y App cuenta los 10 s de efecto (`_super_timer_ms`). Durante ese tiempo los fantasmas no cazan: huyen por cuartos. El comportamiento vive en la clase base `Ghost`, así que lo comparten todos:
+
+1. El mapa se divide en 4 cuartos (`_get_quadrant`).
+2. El ancla de huida es la salida de fantasma del cuarto diagonal al de Pac-Man (`_get_opposite_spawn`): Pac-Man arriba-izquierda, huida a abajo-derecha.
+3. BFS hasta el ancla. Al llegar, alterna entre el ancla y una casilla transitable al azar a 1–3 pasos (`_get_nearby_cell`): como todos huyen al mismo cuarto, la excursión aleatoria evita la fila india.
+4. Si Pac-Man cambia de cuarto, se recalcula el ancla y el fantasma cambia de esquina.
+5. Al acabar el efecto, cada fantasma vuelve a su caza.
+
+App entrega las salidas del nivel a los cuatro fantasmas en `_spawn_entities()` (`ghost._ghost_spawns = self.ghost_spawns`) y llama a `_reset()` por fantasma, que limpia el ciclo de huida en cada nivel; `Ghost.edible` y el temporizador también vuelven a cero al empezar nivel.
+
+Dar de alta un fantasma en la huida son dos líneas dentro de su `_move()`:
+
+    if self.edible:
+        self._move_superpacgum(target, dt, tile_size, bitmap)
+        return
+
+- Blinky (300 ms/paso) antes huía hacia su `spawn_pos`; ahora usa la misma huida por cuartos, y su velocidad hace que se despegue antes que los demás.
+- Pinky, Inky y Clyde (500 ms/paso) ya la usan. La caza propia de Inky y Clyde queda para quien la lleve: de momento su `_move` cubre respawn y huida.
+
+Estado: probado en partida — los cuatro huyen a la esquina opuesta al comer una super y vuelven a cazar al agotarse el efecto. Falta conectar la predicción de Pinky con el búfer real de teclas (`directions=self.list_key` en la llamada de App) y el chase de Inky y Clyde.
 
 
 
