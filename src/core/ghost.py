@@ -37,6 +37,7 @@ class Ghost(Entity):
         List[Coord]
     ] = {}
     edible: bool = False
+    current_corridor: List[Coord] = []
 
     def __init__(self, name: str, points: int) -> None:
         super().__init__()
@@ -48,13 +49,16 @@ class Ghost(Entity):
             self,
             start: Coord,
             target: Coord,
-            bitmap: BitMap
+            bitmap: BitMap,
+            scared: bool
             )-> List[Coord]:
         """Find shortest path from entry to exit using BFS.
 
         Returns:
             List of coordinates from entry to exit, or empty list if no path.
         """
+        from src.core.player import Player          # Ver si esto está bien así para evitar los import loops
+
         if start == target:
             return []
         cache_key = (start.get(), target.get())
@@ -68,6 +72,12 @@ class Ghost(Entity):
 
         while queue:
             curr_xy: Coord = queue.popleft()
+
+            if scared and any(
+                isinstance(entity, Player)
+                for entity in self.entity_map.get(curr_xy.get(), [])
+            ):
+                continue
 
             if curr_xy == target:
                 found = True
@@ -95,6 +105,25 @@ class Ghost(Entity):
         self.path_map[cache_key] = path
         return path
 
+    def _project_corridor(self, bitmap: BitMap) -> None:
+        """
+        """
+        ...
+
+    def _get_far_corner(self, player_pos: Tuple[int, int], map_len: int) -> Coord:
+        """
+        Según por dónde se encuentre el player en el mapa, devuelve la esquina más alejada
+        """
+        center = Coord((map_len // 2, map_len // 2))
+        # Corners
+        ul = (0, 0)
+        ur = (0, map_len - 1)
+        bl = (map_len - 1, 0)
+        br = (map_len - 1, map_len - 1)
+
+        def get_quarter(
+        
+
     def _move(
             self,
             target: Coord,
@@ -104,6 +133,7 @@ class Ghost(Entity):
             fps: int = 60
         ) -> None:
         pass
+
 
     def _die(self) -> None:
         """
