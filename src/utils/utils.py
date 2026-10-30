@@ -96,6 +96,7 @@ class Coord:
         """
         Te dice hacia que direccion está target
         """
+
         directions = {
             (0, -1): Dir.UP,
             (1, 0): Dir.RIGHT,

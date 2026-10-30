@@ -1,6 +1,7 @@
 from enum import Enum
 from src.utils.utils import Coord, Color, Dir
 from src.core.entity import Entity, State
+from src.utils.error import UnreachableTileError
 import pygame
 from pygame import Surface
 from src.maze.bitmap import BitMap
@@ -43,6 +44,7 @@ class Ghost(Entity):
         self.name: str = name
         self._timer_ms: int = 0
         self.points: int = points
+        self.current_corridor: List[Coord] = []
 
     def _find_path(
             self,
@@ -105,10 +107,45 @@ class Ghost(Entity):
         ) -> None:
         pass
 
+    def _update_delta(self, step: Coord) -> None:
+        """
+        Actualiza el delta según la siguiente casilla
+        """
+        try:
+            self.delta = self.pos._get_delta(step)
+        except UnreachableTileError:
+            pass
+
+    def _get_corridor(self, path: List[Coord]) -> None:
+        """
+        Devuelve la lista de casillas del pasillo que tiene por delante
+        """
+        self.current_corridor.clear()
+        if len(path) < 2:
+            return
+
+        corridor_direction = self.pos._get_delta(path[1])
+        self.delta = corridor_direction
+        self.current_corridor.append(path[0])
+
+        for previous, step in zip(path, path[1:]):
+            step_direction = previous._get_delta(step)
+            if step_direction != corridor_direction:
+                break
+            self.current_corridor.append(step)
+
+    def _follow_corridor(self) -> None:
+        """
+        """
+        self._set_position(self.current_corridor[1])
+        self._update_delta(self.current_corridor[1])
+        self.current_corridor.pop(0)
+
     def _die(self) -> None:
         """
         El jugador alcanza o es aclanzado por un Ghost not edible
         """
+        self.current_corridor.clear()
         self._set_position(self.spawn_pos)
         self.alive = True
         # implementar cooldown
@@ -126,6 +163,7 @@ class Ghost(Entity):
         """Deja el fantasma listo para una partida nueva: visible y con su reloj a cero."""
         self.alive = True
         self._timer_ms = 0
+        self.current_corridor.clear()
 
 
 class Blinky(Ghost):
@@ -159,14 +197,19 @@ class Blinky(Ghost):
             curr_target: Coord = (
                 target if self.edible == False else self.spawn_pos
             )
-            path: List[Coord] = self._find_path(
-                start=self.pos,
-                target=curr_target,
-                bitmap=bitmap
-            )
-            if len(path) >= 2:
-                self.delta = self.pos._get_delta(path[1])
-                self._set_position(path[1])
+            if len(self.current_corridor) >= 2:
+                self._follow_corridor()
+
+            else:
+                self._get_corridor(
+                    self._find_path(
+                        start=self.pos,
+                        target=curr_target,
+                        bitmap=bitmap
+                    )
+                )
+                if len(self.current_corridor) >= 2:
+                    self._follow_corridor()
 
 class Pinky(Ghost):
     """
@@ -202,3 +245,75 @@ class Clyde(Ghost):
         self.color.set(CLYDE_COLOR)
         self.speed: int = CLYDE_SPEED
         self.ani_path: str = CLYDE_ANI_PATH
+
+    def _move(
+        self,
+        target: Coord,
+        dt: int,
+        tile_size: int,
+        bitmap: BitMap,
+        fps: int = 60
+    ) -> None:
+        """
+        """
+
+    def _move(
+            self,
+            target: Coord,
+            dt: int,
+            tile_size: int,
+            bitmap: BitMap,
+            fps: int = 60
+        ) -> None:
+        """
+        """
+        if self.alive == False:
+            self._die()
+        self._timer_ms += dt
+        if self._timer_ms >= self.speed:
+            self._timer_ms -= self.speed
+
+            path_to_target: List[Coord] = self._find_path(
+                start=self.pos,
+                target=target,
+                bitmap=bitmap
+            )
+            curr_target: Coord = (
+                self.spawn_pos if self.edible == True or
+                len(path_to_target) < 8
+                else target
+            )
+            if len(self.current_corridor) >= 2:
+                self._follow_corridor()
+
+            else:
+                path_to_target = (
+                    path_to_target if curr_target == target else
+                    self._find_path(
+                        start=self.pos,
+                        target=curr_target,
+                        bitmap=bitmap
+                    )
+                )
+                self._get_corridor(path_to_target)
+                if len(self.current_corridor) >= 2:
+                    self._follow_corridor()
+
+
+"""
+def direct_chase(ghost: Ghost, target: Coord, bitmap: BitMap) -> None:
+
+    if len(ghost.current_corridor) >= 2:
+        ghost._follow_corridor()
+
+    else:
+        ghost._get_corridor(
+            ghost._find_path(
+                start=ghost.pos,
+                target=target,
+                bitmap=bitmap
+            )
+        )
+        if len(ghost.current_corridor) >= 2:
+            ghost._follow_corridor()
+"""
