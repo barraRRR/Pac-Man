@@ -769,8 +769,6 @@ de reaparecer en su salida.
 ## Pruebas
 - Comprobado que, al comer todas las pacgums, el juego pasa al siguiente nivel.
 
-## Pendiente
-- Añadir y probar la pantalla de felicitación antes de iniciar el siguiente nivel.
 
 
 
