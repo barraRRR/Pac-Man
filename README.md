@@ -762,12 +762,24 @@ de reaparecer en su salida.
 
 
 ## Cambios
-- El nivel termina cuando ya no queda ninguna pacgum viva.
-- Se tienen en cuenta tanto las pacgums normales como las super-pacgums.
-- Al completar el nivel, el juego continúa automáticamente con el siguiente nivel configurado.
+- El nivel se completa cuando se han comido todas las pacgums, incluidas las super-pacgums.
+- Se muestra una banda con el mensaje `CONGRATULATIONS!` al completar el nivel.
+- La pantalla espera a que se pulse SPACE antes de continuar.
+- Después de la felicitación, se prepara el siguiente nivel y se muestra su pantalla de inicio.
 
 ## Pruebas
-- Comprobado que, al comer todas las pacgums, el juego pasa al siguiente nivel.
+- Comprobar que el nivel no termina mientras quede alguna pacgum viva.
+- Comprobar que, al comerlas todas, aparece la felicitación.
+- Comprobar que al pulsar SPACE se pasa al siguiente nivel.## Cambios
+- El nivel se completa cuando se han comido todas las pacgums, incluidas las super-pacgums.
+- Se muestra una banda con el mensaje `CONGRATULATIONS!` al completar el nivel.
+- La pantalla espera a que se pulse SPACE antes de continuar.
+- Después de la felicitación, se prepara el siguiente nivel y se muestra su pantalla de inicio.
+
+## Pruebas
+- Comprobar que el nivel no termina mientras quede alguna pacgum viva.
+- Comprobar que, al comerlas todas, aparece la felicitación.
+- Comprobar que al pulsar SPACE se pasa al siguiente nivel.
 
 
 
