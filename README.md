@@ -761,7 +761,16 @@ de reaparecer en su salida.
 
 
 
+## Cambios
+- El nivel termina cuando ya no queda ninguna pacgum viva.
+- Se tienen en cuenta tanto las pacgums normales como las super-pacgums.
+- Al completar el nivel, el juego continúa automáticamente con el siguiente nivel configurado.
 
+## Pruebas
+- Comprobado que, al comer todas las pacgums, el juego pasa al siguiente nivel.
+
+## Pendiente
+- Añadir y probar la pantalla de felicitación antes de iniciar el siguiente nivel.
 
 
 

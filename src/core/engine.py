@@ -455,6 +455,33 @@ class GraphicEngine():
         self.window.blit(title, (title_x, band_y + _INTRO_PAD))
         self.window.blit(sub, (sub_x, band_y + _INTRO_PAD + title.get_height() + _INTRO_GAP))
 
+    def _blit_level_complete(self) -> None:
+        """Dibuja la banda de nivel completado a todo el ancho de la ventana.
+
+        Igual que la intro de nivel pero con "CONGRATULATIONS!" como título
+        y "(space)" centrado como pista, sobre la escena del nivel acabado.
+        """
+        if not pygame.font.get_init():
+            pygame.font.init()
+        title_font = pygame.font.Font(_INTRO_FONT_PATH, _INTRO_TITLE_SIZE)
+        sub_font = pygame.font.Font(_INTRO_FONT_PATH, _INTRO_SUB_SIZE)
+        title: Surface = title_font.render("CONGRATULATIONS!", True, _INTRO_TEXT_COLOR)
+        sub: Surface = sub_font.render("'space'", True, _INTRO_TEXT_COLOR)
+
+        # banda a todo el ancho, alto = margen + titulo + hueco + subtitulo + margen
+        band_h: int = (_INTRO_PAD + title.get_height()
+                    + _INTRO_GAP + sub.get_height() + _INTRO_PAD)
+        band_y: int = (_WINDOW_HEIGHT - band_h) // 2
+        band: Surface = Surface((_WINDOW_WIDTH, band_h))
+        band.fill(_BACKGROUND_COLOR)
+        self.window.blit(band, (0, band_y))
+
+        # textos centrados, como en la intro: se resta media superficie
+        title_x: int = (_WINDOW_WIDTH - title.get_width()) // 2
+        sub_x: int = (_WINDOW_WIDTH - sub.get_width()) // 2
+        self.window.blit(title, (title_x, band_y + _INTRO_PAD))
+        self.window.blit(sub, (sub_x, band_y + _INTRO_PAD + title.get_height() + _INTRO_GAP))
+
     def _blit_instructions(self) -> None:
         """Pega la pantalla de instrucciones renderizada por su objeto."""
         self._put_logo()

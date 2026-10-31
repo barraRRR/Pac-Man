@@ -132,6 +132,9 @@ class App:
                         self._level_intro(number)
                     self._game_loop()      # Momento 3: mover, comer, morir (aún no existe)
 
+                    if not self._return_to_menu and self._level_completed():
+                        self._congratulations()
+
                     if self._return_to_menu:
                         self._return_to_menu = False
                         break
@@ -169,6 +172,10 @@ class App:
 
         self.current_level = number
         self.list_key.clear()   # nivel nuevo: sin giros pendientes del anterior
+        # Ghost.editable = False
+        # self._super_timer_ms = 0
+        # self._pause = False
+
         self.pacman_start = self.maze.center_comecocos()
         reachable = self.maze.reachable_cells(self.pacman_start)
         self.ghost_spawns = self.maze.select_ghost_spawns(reachable)
@@ -332,6 +339,23 @@ class App:
             pygame.display.flip()
             self._engine.window.fill((0, 0, 0, 0))
 
+    def _congratulations(self) -> None:
+        """Muestra la banda de nivel completado y espera SPACE.
+
+        Igual que _level_intro pero sin preparar nada: se repinta la
+        escena tal como quedó al comerse la ultima pacgum.
+        """
+        waiting: bool = True
+        while waiting:
+            dt: int = self.clock.tick(_FPS)
+            self._engine._blit_elements(dt)
+            self._engine._blit_level_complete()
+            for event in pygame.event.get():
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+                    waiting = False
+            pygame.display.flip()
+            self._engine.window.fill((0, 0, 0, 0))
+            
     def _highscores_loop(self) -> None:
         """Muestra la pantalla de highscores hasta pulsar SPACE.
 
@@ -385,7 +409,7 @@ class App:
         running = True
         move_timer: int = 0
 
-        while running and not self._return_to_menu:
+        while running and not self._return_to_menu and not self._level_completed():
             dt: int = self.clock.tick(_FPS)
             self._engine._blit_elements(dt)  # blit siemrpe pinta
 
@@ -470,6 +494,9 @@ class App:
         # cierra el programa
         pygame.quit()
 
+    def _level_completed(self) -> bool:
+        """True cuando ya no queda ninguna pacgum viva en el nivel."""
+        return all(not pacgum.alive for pacgum in self.pacgum)
 
 
 
