@@ -84,6 +84,7 @@ class App:
         HighScore.filename = self.config.highscore_filename
         HighScore.security = False   # TEMPORAL: probar salida en claro
         HighScore.load()
+        self._engine._set_highscore(HighScore.top())
         print(f"  highscores loaded: {len(HighScore.scores)}")
         # HighScore.register("TEST", 100)   # TEMPORAL: probar guardado, quitar
 

@@ -663,7 +663,13 @@ class GraphicEngine():
                     (start_x + index * (icon_size + gap), _1UP_SCORE_POS[1])
                 )
 
+    def _set_highscore(self, points: int) -> None:
+        """Pinta en el HUD el HIGH SCORE que le entrega App.
 
+        App es quien conoce el ranking (Engine nunca importa HighScore);
+        aqui solo se regenera la superficie del texto con el nuevo valor.
+        """
+        self.highscore_int = Title(str(points).zfill(4))
 
 
 
