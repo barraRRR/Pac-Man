@@ -264,7 +264,16 @@ class HighScore:
         return True
 
 
-        
+    @classmethod
+    def top(cls) -> int:
+        """Devuelve la mejor puntuación del ranking, o 0 si está vacío.
+
+        El ranking siempre queda ordenado de mayor a menor, así que la
+        primera fila es el récord que pinta el HUD del juego.
+        """
+        if not cls.scores:
+            return 0
+        return int(cls.scores[0]["score"])
             
 
 
