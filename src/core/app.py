@@ -442,9 +442,26 @@ class App:
                                     self.list_key.pop(0)
 
                 lives_before: int = self.player.lives
+
+                # Super-pacgums vivas antes de comer (#110)
+                super_pacgums_before: int = sum(
+                    isinstance(pacgum, SuperPacGum) and pacgum.alive
+                    for pacgum in self.pacgum
+                )
+
                 self.player.resolve_tile()
+
+                # Super-pacgums vivas despues de comer (#110)
+                super_pacgums_after: int = sum(
+                    isinstance(pacgum, SuperPacGum) and pacgum.alive
+                    for pacgum in self.pacgum
+                )
+
+                if super_pacgums_after < super_pacgums_before:
+                    # Se acaba de comer una super: el efecto vuelve a empezar
+                    self._super_timer_ms = 0
                 
-                    #eliminar direciones guardadas si pierdes una vida
+                #eliminar direciones guardadas si pierdes una vida
                 if self.player.lives < lives_before:
                     self.list_key.clear()
 
