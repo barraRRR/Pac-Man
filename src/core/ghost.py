@@ -274,10 +274,12 @@ class Ghost(Entity):
     ) -> None:
         """Huida por cuartos mientras dura la super-pacgum."""
 
+        self.current_corridor.clear()
+
         # Sin salidas del nivel no hay destino posible: quieto.
         if not self._ghost_spawns:
             return
-        
+
         # Mismo latido que la caza: un paso cada `speed` ms.
         self._timer_ms += dt
         if self._timer_ms < self.speed:
@@ -340,7 +342,8 @@ class Blinky(Ghost):
         dt: int,
         tile_size: int,
         bitmap: BitMap,
-        fps: int = 60
+        fps: int = 60,
+        directions: List[Dir] | None = None
     ) -> None:
         """
         """
@@ -480,7 +483,7 @@ class Inky(Ghost):
         fps: int = 60,
         directions: List[Dir] | None = None
     ) -> None:
-        """Mueve a Pinky: respawn, huida con la super-pacgum o caza por BFS."""
+        """Mueve a Inky: respawn, huida con la super-pacgum o pinza con Blinky."""
         # sollo corre su reloj10 s.
         if not self.alive:
             self._update_respawn(dt)
@@ -490,6 +493,81 @@ class Inky(Ghost):
         if self.edible:
             self._move_superpacgum(target, dt, tile_size, bitmap)
             return
+
+        # un paso de BFS cada `speed` ms hacia el punto de emboscada.
+        self._timer_ms += dt
+        if self._timer_ms >= self.speed:
+            self._timer_ms -= self.speed
+            curr_target: Coord = self._get_inky_target(target, directions, bitmap)
+            path: List[Coord] = self._find_path(
+                start=self.pos,
+                target=curr_target,
+                bitmap=bitmap
+            )
+            # el punto doblado puede caer en pared o fuera del mapa:
+            # sin ruta posible, Inky caza directo como Blinky.
+            if len(path) < 2:
+                path = self._find_path(
+                    start=self.pos,
+                    target=target,
+                    bitmap=bitmap
+                )
+            if len(path) >= 2:
+                self.delta = self.pos._get_delta(path[1])
+                self._set_position(path[1])
+
+    def _find_blinky(self) -> Coord | None:
+        """Localiza a Blinky en el mapa de entidades y copia su posicion.
+        Mismo acceso entre iguales que usa resolve_tile con el jugador:
+        Inky no mira dentro de App ni de Maze.
+        """
+        for entities in Entity.entity_map.values():
+            for ent in entities:
+                if isinstance(ent, Blinky):
+                    return Coord(ent.pos.get())
+        return None
+    
+    def _get_pacman_ahead(
+        self,
+        target: Coord,
+        directions: List[Dir] | None,
+        bitmap: BitMap
+    ) -> Coord | None:
+        """Avanza hasta dos casillas desde Pac-Man en su direccion actual,
+        parando en pared. Devuelve None si no se conoce su direccion."""
+        if not directions:
+            return None
+        # Copia: la prediccion no puede pisar la posicion real del jugador.
+        pac_ahead: Coord = Coord(target.get())
+        current_direction: Dir = directions[0]
+        for _ in range(2):
+            # Pared en esa direccion: el punto de mira se queda aqui.
+            if bitmap.grid[pac_ahead.y][pac_ahead.x] & current_direction.value:
+                break
+            pac_ahead.step(current_direction)
+        return pac_ahead
+    
+    def _get_inky_target(
+        self,
+        target: Coord,
+        directions: List[Dir] | None,
+        bitmap: BitMap
+    ) -> Coord:
+        """Calcula el punto de emboscada: el vector de Blinky a dos casillas
+        por delante de Pac-Man, doblado desde Blinky (Inky clasico)."""
+        blinky_pos: Coord | None = self._find_blinky()
+        pac_ahead: Coord | None = self._get_pacman_ahead(
+            target, directions, bitmap
+        )
+
+        # Sin socio o sin rumbo conocido, no hay pinza: caza directa.
+        if blinky_pos is None or pac_ahead is None:
+            return target
+
+        # Vector de Blinky al punto de mira, doblado desde Blinky.
+        vector: Coord = pac_ahead - blinky_pos
+        return blinky_pos + vector + vector
+    
 
 class Clyde(Ghost):
     """
@@ -519,7 +597,8 @@ class Clyde(Ghost):
             dt: int,
             tile_size: int,
             bitmap: BitMap,
-            fps: int = 60
+            fps: int = 60,
+            directions: List[Dir] | None = None
         ) -> None:
         """
         """

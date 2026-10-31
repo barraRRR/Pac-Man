@@ -729,7 +729,35 @@ Dar de alta un fantasma en la huida son dos líneas dentro de su `_move()`:
 Estado: probado en partida — los cuatro huyen a la esquina opuesta al comer una super y vuelven a cazar al agotarse el efecto. Falta conectar la predicción de Pinky con el búfer real de teclas (`directions=self.list_key` en la llamada de App) y el chase de Inky y Clyde.
 
 
+### Inky — la pinza con Blinky
 
+Inky (cian) no persigue a Pac-Man directamente: prepara una emboscada
+combinando la posición de Pac-Man con la de Blinky (el "Bashful" clásico).
+
+**Cálculo del objetivo** (un paso de BFS cada `speed` ms):
+
+1. Se calcula `P2`, el punto dos casillas por delante de Pac-Man en su
+   dirección actual, sin atravesar paredes.
+2. Se traza el vector desde Blinky (`B`) hasta `P2`.
+3. Se duplica ese vector proyectándolo desde Blinky:
+   `objetivo = B + 2 * (P2 - B)`.
+4. Inky avanza hacia ese punto por BFS.
+
+Así, si Blinky está lejos, Inky se desvía y rodea; si Blinky está cerca
+de Pac-Man, el objetivo se dispara más allá del jugador y la pinza
+cierra junto con el rojo.
+
+**Casos especiales:**
+
+- Si Blinky no está en el mapa (se localiza por `Entity.entity_map`) o
+  no se conoce la dirección de Pac-Man, Inky caza directo como Blinky.
+- Si el punto doblado cae en pared o fuera del mapa (ruta vacía),
+  vuelve también a la caza directa.
+
+**Como el resto de fantasmas:** con la super-pacgum activa huye por
+cuartos hacia la esquina opuesta a Pac-Man (`_move_superpacgum` de la
+clase `Ghost`) y, si se lo comen, espera 10 s fuera del tablero antes
+de reaparecer en su salida.
 
 
 
