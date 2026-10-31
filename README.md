@@ -781,6 +781,40 @@ de reaparecer en su salida.
 - Comprobar que, al comerlas todas, aparece la felicitación.
 - Comprobar que al pulsar SPACE se pasa al siguiente nivel.
 
+## Problema
+
+Si estabas en el tiempo de la super-pacgum y te comías otra, no volvía a empezar ni se acumulaba: parecía como si no te la hubieras comido.
+
+## Causa
+
+El contador `self._super_timer_ms` de `App._game_loop` solo se pone a 0 cuando el efecto **expira**. Al comer una segunda super, `Ghost.edible` ya estaba a `True`, así que entraba en el mismo `if` de siempre y seguía contando el tiempo que le quedaba de la primera: la segunda super no hacía nada.
+
+## Solución
+
+En `App._game_loop`, se cuentan las super-pacgums vivas justo antes y justo después de `self.player.resolve_tile()` (que es donde Pac-Man come). Si el número baja, es que se acaba de comer una, y `self._super_timer_ms` vuelve a 0: los fantasmas huyen otros 10 s.
+
+No se toca el bloque del temporizador que suma `dt` y corta a los 10 s.
+
+## Cómo probarlo
+
+1. Come una super-pacgum y espera 4-5 segundos (los fantasmas huyen).
+2. Come una segunda super durante ese tiempo.
+3. Los fantasmas deben seguir huyendo 10 s completos desde la segunda, no solo los ~5 s que quedaban.
+
+Fixes #110
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
