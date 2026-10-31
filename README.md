@@ -805,6 +805,19 @@ Fixes #110
 
 
 
+# Mostrar el récord en el HUD
+
+Se añadió `HighScore.top()` para obtener la puntuación más alta del ranking.
+Si el ranking está vacío, devuelve `0`.
+
+Al iniciar la aplicación, `App` carga el ranking y pasa la puntuación más alta
+a `GraphicEngine`. El motor muestra el valor en el HUD con cuatro dígitos;
+por ejemplo, `500` se muestra como `0500`.git branc
+
+
+
+
+
 
 
 
