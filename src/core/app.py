@@ -435,6 +435,7 @@ class App:
                         dt=dt,
                         tile_size=self._engine.tile_size,
                         bitmap=self.maze._bitmap,
+                        directions=self.list_key,
                     )
                     ghost.resolve_tile()
 
