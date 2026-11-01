@@ -1,7 +1,7 @@
 from src.utils.class_config import Config, Level
 from src.utils.class_maze import Maze
 from src.utils.class_config import Config
-from src.core.player import Player
+from src.core.player import Player, PLAYER_DEATH_DURATION_MS
 from src.core.entity import Entity
 from src.core.ghost import Ghost, Blinky, Pinky, Inky, Clyde
 from src.core.pacgum import PacGum, SuperPacGum
@@ -78,6 +78,8 @@ class App:
         self._return_to_menu: bool = False
         # Tiempo acumulado del efecto de la super-pacgum (ms)
         self._super_timer_ms: int = 0
+        self._death_timer_ms: int = 0
+        self._death_in_progress: bool = False
 
         # HighScore: el nombre del archivo lo manda la config y el ranking
         # se carga una sola vez al arrancar (alta en #35, conexión con App).
@@ -231,6 +233,27 @@ class App:
         Entity.entity_map.clear()
         for entity in [self.player, *self.ghosts.values(), *self.pacgum]:
             entity._update_entity_map(True)
+
+    def _start_player_death(self) -> None:
+        """Oculta los fantasmas mientras Pac-Man reproduce su muerte."""
+        self._death_in_progress = True
+        self._death_timer_ms = 0
+        for ghost in self.ghosts.values():
+            ghost.alive = False
+            ghost.current_corridor.clear()
+
+    def _update_player_death(self, dt: int) -> None:
+        """Reproduce la muerte y recoloca los fantasmas en sus esquinas."""
+        self._death_timer_ms += dt
+        if self._death_timer_ms < PLAYER_DEATH_DURATION_MS:
+            return
+
+        for ghost in self.ghosts.values():
+            ghost._set_position(ghost.spawn_pos)
+            ghost._reset()
+        self.player.finish_death()
+        self._death_timer_ms = 0
+        self._death_in_progress = False
 
     def _push_direction(self, dir: Dir) -> None:
         """Apunta la direccion pulsada: si hay hueco se apila, si esta llena se sustituye la pendiente."""
@@ -414,7 +437,12 @@ class App:
             dt: int = self.clock.tick(_FPS)
             self._engine._blit_elements(dt)  # blit siemrpe pinta
 
-            if not self._pause:
+            if self._death_in_progress:
+                self._update_player_death(dt)
+                if not self._death_in_progress and self.player.lives <= 0:
+                    print("Game over")
+                    self._return_to_menu = True
+            elif not self._pause:
                 # ========PLAYER============
                 # movimiento del player: un paso cada _MOVEMENT_INTERVAL ms
                 move_timer += dt
@@ -465,24 +493,24 @@ class App:
                 #eliminar direciones guardadas si pierdes una vida
                 if self.player.lives < lives_before:
                     self.list_key.clear()
+                    self._start_player_death()
 
-                # Game over: sin vidas cortamos el bucle y run() lleva al menú, mas adelante a game over
-                if self.player.lives <= 0:          # <--------------   MODIFICAR SI SE QUIERE PROBAR COSAS DEL JUEGO  a -100 por ejemplo
-                    print("Game over")
-                    self._return_to_menu = True
                 # ========GHOST============
-                for ghost in self.ghosts.values():      # movement
-                    ghost._move(
-                        target=self.player.pos,
-                        dt=dt,
-                        tile_size=self._engine.tile_size,
-                        bitmap=self.maze._bitmap,
-                        directions=self.list_key,
-                    )
-                    ghost.resolve_tile()
+                if not self._death_in_progress:
+                    for ghost in self.ghosts.values():      # movement
+                        ghost._move(
+                            target=self.player.pos,
+                            dt=dt,
+                            tile_size=self._engine.tile_size,
+                            bitmap=self.maze._bitmap,
+                            directions=self.list_key,
+                        )
+                        ghost.resolve_tile()
+                        if self._death_in_progress:
+                            break
 
                 # ====SUPER PACGUM====
-                if Ghost.edible:
+                if Ghost.edible and not self._death_in_progress:
                     self._super_timer_ms += dt
                     if self._super_timer_ms >= _SUPER_PACGUM_DURATION_MS:
                         Ghost.edible = False
@@ -491,9 +519,11 @@ class App:
                 # Si perdió una vida durante este frame, borra la dirección pendiente.
                 if self.player.lives < lives_before:
                     self.list_key.clear()
+                    if not self._death_in_progress:
+                        self._start_player_death()
 
                 # Game over: sin vidas, volvemos al menú.
-                if self.player.lives <= 0:
+                if self.player.lives <= 0 and not self._death_in_progress:
                     print("Game over")
                     self._return_to_menu = True
 
@@ -515,9 +545,6 @@ class App:
     def _level_completed(self) -> bool:
         """True cuando ya no queda ninguna pacgum viva en el nivel."""
         return all(not pacgum.alive for pacgum in self.pacgum)
-
-
-
 
 
 
