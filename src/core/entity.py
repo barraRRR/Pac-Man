@@ -76,7 +76,10 @@ class Entity:
             self.delta = Dir.RIGHT
 
         frames = self._frames.get(self.delta)
-        # proteger bien
+        if not frames:
+            frames = self._frames.get(Dir.RIGHT, [])
+        if not frames:
+            return self.sur
 
         if self._cur_direction != self.delta or self._cur_frame is None:
             self._cur_direction = self.delta
@@ -86,10 +89,23 @@ class Entity:
         self._timer_frame += dt
         if self._timer_frame >= ANI_SPEED:
             self._timer_frame %= ANI_SPEED
-            self._frame_index = (self._frame_index + 1) % len(frames)
+            if self.delta == Dir.DEATH:
+                self._frame_index = min(self._frame_index + 1, len(frames) - 1)
+            else:
+                self._frame_index = (self._frame_index + 1) % len(frames)
             self._cur_frame = frames[self._frame_index]
 
         return self._cur_frame
+
+    def animation_finished(self) -> bool:
+        """Indica si una animacion no circular ha llegado a su ultimo frame."""
+        frames = self._frames.get(self.delta, [])
+        return (
+            self.delta == Dir.DEATH
+            and bool(frames)
+            and self._frame_index == len(frames) - 1
+            and self._timer_frame >= ANI_SPEED
+        )
 
 
     def _init_surface(self, coord: Coord, tile_size: int) -> None:

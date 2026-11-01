@@ -1,6 +1,6 @@
 from enum import Enum
-from src.utils.utils import Coord, Color
-from src.core.entity import Entity, State
+from src.utils.utils import Coord, Color, Dir
+from src.core.entity import Entity, State, ANI_SPEED
 from src.core.ghost import Ghost
 from src.core.pacgum import PacGum, SuperPacGum
 from src.score.score import Score
@@ -14,6 +14,7 @@ from pathlib import Path
 
 PLAYER_COLOR = (243, 195, 0, 255)
 PLAYER_ANI_PATH = "assets/animations/player"
+PLAYER_DEATH_DURATION_MS = 16 * ANI_SPEED
 
 
 class Player(Entity):
@@ -25,6 +26,7 @@ class Player(Entity):
         self.images: dict[str, list[Surface]] = self._load_images()
         self._score: Score = score
         self._lives: int = lives
+        self._dying: bool = False
 
         self.ani_path: str = PLAYER_ANI_PATH
 
@@ -46,9 +48,32 @@ class Player(Entity):
         """
         El jugador alcanza o es aclanzado por un Ghost not edible
         """
+        if self._dying:
+            return
         self._lives -= 1
+        self._dying = True
+        self.alive = False
+        self.delta = Dir.DEATH
+        self._cur_direction = None
+        self._cur_frame = None
+        self._frame_index = 0
+        self._timer_frame = 0
+
+    def finish_death(self) -> None:
+        """Termina la animacion y deja al jugador listo para continuar."""
         self._set_position(self.spawn_pos)
         self.alive = True
+        self._dying = False
+        self.delta = Dir.RIGHT
+        self._cur_direction = None
+        self._cur_frame = None
+        self._frame_index = 0
+        self._timer_frame = 0
+
+    @property
+    def dying(self) -> bool:
+        """Indica si el jugador esta reproduciendo su animacion de muerte."""
+        return self._dying
 
     def _eat(self, target: Entity) -> None:
         """
