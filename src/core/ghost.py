@@ -581,17 +581,6 @@ class Clyde(Ghost):
         self.ani_path: str = CLYDE_ANI_PATH
 
     def _move(
-        self,
-        target: Coord,
-        dt: int,
-        tile_size: int,
-        bitmap: BitMap,
-        fps: int = 60
-    ) -> None:
-        """
-        """
-
-    def _move(
             self,
             target: Coord,
             dt: int,
@@ -602,8 +591,15 @@ class Clyde(Ghost):
         ) -> None:
         """
         """
-        if self.alive == False:
-            self._die()
+        if not self.alive:
+            self._update_respawn(dt)
+            return
+
+        # mientras dura la super-pacgum, huida por cuartos.
+        if self.edible:
+            self._move_superpacgum(target, dt, tile_size, bitmap)
+            return
+        
         self._timer_ms += dt
         if self._timer_ms >= self.speed:
             self._timer_ms -= self.speed
