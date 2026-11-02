@@ -110,6 +110,8 @@ class App:
         """Recorre los niveles en orden y ejecuta los momentos del juego."""
         self.clock: pygame.time.Clock = pygame.time.Clock()
         self._engine._init_window()
+        Ghost._load_scared_frames()
+
         while True:
             option: ItemType = self._menu_loop(
                 self._engine.menu_init,
@@ -175,9 +177,11 @@ class App:
 
         self.current_level = number
         self.list_key.clear()   # nivel nuevo: sin giros pendientes del anterior
-        # Ghost.editable = False
-        # self._super_timer_ms = 0
-        # self._pause = False
+        Ghost.edible = False
+        self._super_timer_ms = 0
+        self._pause = False
+
+        
 
         self.pacman_start = self.maze.center_comecocos()
         reachable = self.maze.reachable_cells(self.pacman_start)
@@ -512,8 +516,17 @@ class App:
                 # ====SUPER PACGUM====
                 if Ghost.edible and not self._death_in_progress:
                     self._super_timer_ms += dt
+
+                    # Durante los últimos 2 segundos, los fantasmas se ven blancos.
+                    warning_time_ms: int = 2_000
+                    Ghost.show_white = (
+                        self._super_timer_ms
+                        >= _SUPER_PACGUM_DURATION_MS - warning_time_ms
+                    )
+
                     if self._super_timer_ms >= _SUPER_PACGUM_DURATION_MS:
                         Ghost.edible = False
+                        Ghost.show_white = False
                         self._super_timer_ms = 0
                 
                 # Si perdió una vida durante este frame, borra la dirección pendiente.

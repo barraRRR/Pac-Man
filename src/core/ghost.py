@@ -1,6 +1,6 @@
 from enum import Enum
 from src.utils.utils import Coord, Color, Dir
-from src.core.entity import Entity, State
+from src.core.entity import Entity, State, ANI_SPEED
 from src.utils.error import UnreachableTileError
 import pygame
 from pygame import Surface
@@ -44,6 +44,13 @@ class Ghost(Entity):
     RESPAWN_DURATION_MS: int = 10_000
     RESPAWN_FLASH_DURATION_MS: int = 5_000
 
+    _frames_scared: List[Surface] = []
+    _frames_flashing: List[Surface] = []
+
+    _scaled_scared_frames: Dict[Tuple[int, int], Tuple[List[Surface], List[Surface]]] = {}
+    show_white: bool = False
+
+
     def __init__(self, name: str, points: int) -> None:
         super().__init__()
         self.name: str = name
@@ -55,6 +62,70 @@ class Ghost(Entity):
         self._ghost_spawns: List[Tuple[int, int]] = []
         self._flee_spawn: Coord | None = None   # ancla: salida del cuarto opuesto
         self._flee_target: Coord | None = None  # destino actual de la huida
+        self._scared_frame_timer_ms: int = 0
+        self._scared_frame_index: int = 0
+
+    @classmethod
+    def _load_scared_frames(cls) -> None:
+        """Carga una unica vez los frames asustados que comparten los 4 fantasmas."""
+        if cls._frames_scared:
+            return
+
+        frames: List[Surface] = []
+        for png in sorted(Path(SCARED_GHOST).glob("*.png")):
+            frames.append(pygame.image.load(str(png)).convert_alpha())
+
+        if not frames:
+            print(f"[WARN] No scared frames found in {SCARED_GHOST}")
+            return
+
+        cls._frames_scared = frames[0::2]    # azules: frames 00 y 02
+        cls._frames_flashing = frames[1::2]  # blancos: frames 01 y 03
+
+    def get_frame(self, dt: int) -> Surface:
+        """Devuelve el frame asustado azul o blanco, escalado al tamaño normal."""
+        if not self.edible or not self._frames_scared:
+            return super().get_frame(dt)
+
+        if self.delta is None:
+            self.delta = Dir.RIGHT
+
+        normal_frames = self._frames.get(self.delta)
+        if not normal_frames:
+            return super().get_frame(dt)
+
+        frame_size = normal_frames[0].get_size()
+
+        if frame_size not in Ghost._scaled_scared_frames:
+            blue_frames = [
+                pygame.transform.scale(frame, frame_size)
+                for frame in Ghost._frames_scared
+            ]
+            white_frames = [
+                pygame.transform.scale(frame, frame_size)
+                for frame in Ghost._frames_flashing
+            ]
+            Ghost._scaled_scared_frames[frame_size] = (
+                blue_frames,
+                white_frames,
+            )
+
+        blue_frames, white_frames = Ghost._scaled_scared_frames[frame_size]
+        frames = (
+            white_frames
+            if Ghost.show_white and white_frames
+            else blue_frames
+        )
+
+        self._scared_frame_timer_ms += dt
+        if self._scared_frame_timer_ms >= ANI_SPEED:
+            self._scared_frame_timer_ms %= ANI_SPEED
+            self._scared_frame_index = (
+                self._scared_frame_index + 1
+            ) % len(frames)
+
+        return frames[self._scared_frame_index]
+
 
     def _find_path(
             self,
