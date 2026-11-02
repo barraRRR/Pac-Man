@@ -6,67 +6,72 @@
 
 
 ```
+.
 ├── Makefile
 ├── README.md
 ├── assets
 │   ├── Attract Mode & HUD Assets.png
+│   ├── Pinky.png
 │   ├── animations
 │   │   ├── frames.json
 │   │   ├── ghosts
-│   │   │   ├── blinky_down
-│   │   │   │   ├── frame_00.png
-│   │   │   │   └── frame_01.png
-│   │   │   ├── blinky_left
-│   │   │   │   ├── frame_00.png
-│   │   │   │   └── frame_01.png
-│   │   │   ├── blinky_right
-│   │   │   │   ├── frame_00.png
-│   │   │   │   └── frame_01.png
-│   │   │   ├── blinky_up
-│   │   │   │   ├── frame_00.png
-│   │   │   │   └── frame_01.png
-│   │   │   ├── clyde_down
-│   │   │   │   ├── frame_00.png
-│   │   │   │   └── frame_01.png
-│   │   │   ├── clyde_left
-│   │   │   │   ├── frame_00.png
-│   │   │   │   └── frame_01.png
-│   │   │   ├── clyde_right
-│   │   │   │   ├── frame_00.png
-│   │   │   │   └── frame_01.png
-│   │   │   ├── clyde_up
-│   │   │   │   ├── frame_00.png
-│   │   │   │   └── frame_01.png
-│   │   │   ├── flashing_scared_ghost
-│   │   │   │   ├── frame_00.png
-│   │   │   │   └── frame_01.png
-│   │   │   ├── inky_down
-│   │   │   │   ├── frame_00.png
-│   │   │   │   └── frame_01.png
-│   │   │   ├── inky_left
-│   │   │   │   ├── frame_00.png
-│   │   │   │   └── frame_01.png
-│   │   │   ├── inky_right
-│   │   │   │   ├── frame_00.png
-│   │   │   │   └── frame_01.png
-│   │   │   ├── inky_up
-│   │   │   │   ├── frame_00.png
-│   │   │   │   └── frame_01.png
-│   │   │   ├── pinky_down
-│   │   │   │   ├── frame_00.png
-│   │   │   │   └── frame_01.png
-│   │   │   ├── pinky_left
-│   │   │   │   ├── frame_00.png
-│   │   │   │   └── frame_01.png
-│   │   │   ├── pinky_right
-│   │   │   │   ├── frame_00.png
-│   │   │   │   └── frame_01.png
-│   │   │   ├── pinky_up
-│   │   │   │   ├── frame_00.png
-│   │   │   │   └── frame_01.png
+│   │   │   ├── blinky
+│   │   │   │   ├── blinky_down
+│   │   │   │   │   ├── frame_00.png
+│   │   │   │   │   └── frame_01.png
+│   │   │   │   ├── blinky_left
+│   │   │   │   │   ├── frame_00.png
+│   │   │   │   │   └── frame_01.png
+│   │   │   │   ├── blinky_right
+│   │   │   │   │   ├── frame_00.png
+│   │   │   │   │   └── frame_01.png
+│   │   │   │   └── blinky_up
+│   │   │   │       ├── frame_00.png
+│   │   │   │       └── frame_01.png
+│   │   │   ├── clyde
+│   │   │   │   ├── clyde_down
+│   │   │   │   │   ├── frame_00.png
+│   │   │   │   │   └── frame_01.png
+│   │   │   │   ├── clyde_left
+│   │   │   │   │   ├── frame_00.png
+│   │   │   │   │   └── frame_01.png
+│   │   │   │   ├── clyde_right
+│   │   │   │   │   ├── frame_00.png
+│   │   │   │   │   └── frame_01.png
+│   │   │   │   └── clyde_up
+│   │   │   │       ├── frame_00.png
+│   │   │   │       └── frame_01.png
+│   │   │   ├── inky
+│   │   │   │   ├── inky_down
+│   │   │   │   │   ├── frame_00.png
+│   │   │   │   │   └── frame_01.png
+│   │   │   │   ├── inky_left
+│   │   │   │   │   ├── frame_00.png
+│   │   │   │   │   └── frame_01.png
+│   │   │   │   ├── inky_right
+│   │   │   │   │   ├── frame_00.png
+│   │   │   │   │   └── frame_01.png
+│   │   │   │   └── inky_up
+│   │   │   │       ├── frame_00.png
+│   │   │   │       └── frame_01.png
+│   │   │   ├── pinky
+│   │   │   │   ├── pinky_down
+│   │   │   │   │   ├── frame_00.png
+│   │   │   │   │   └── frame_01.png
+│   │   │   │   ├── pinky_left
+│   │   │   │   │   ├── frame_00.png
+│   │   │   │   │   └── frame_01.png
+│   │   │   │   ├── pinky_right
+│   │   │   │   │   ├── frame_00.png
+│   │   │   │   │   └── frame_01.png
+│   │   │   │   └── pinky_up
+│   │   │   │       ├── frame_00.png
+│   │   │   │       └── frame_01.png
 │   │   │   └── scared_ghost
 │   │   │       ├── frame_00.png
-│   │   │       └── frame_01.png
+│   │   │       ├── frame_01.png
+│   │   │       ├── frame_02.png
+│   │   │       └── frame_03.png
 │   │   └── player
 │   │       ├── pac-man_death
 │   │       │   ├── frame_00.png
@@ -114,6 +119,8 @@
 │   └── visualization.png
 ├── config.json
 ├── en.subject.pdf
+├── highscore
+│   └── highscore.csv
 ├── pac-man.py
 ├── pyproject.toml
 ├── scripts
@@ -139,6 +146,7 @@
 │   │   ├── error.py
 │   │   └── utils.py
 │   └── ux_ui
+│       ├── instructions.py
 │       └── menu.py
 ├── tests
 │   └── test_highscore.py
@@ -150,7 +158,7 @@
     │   └── mazegenerator-2.1.0.dist-info
     └── mazegenerator-2.1.0-py3-none-any.whl
 
-43 directories, 101 files
+47 directories, 104 files
 ```
 tree -I '.venv|.git'
 
@@ -818,7 +826,18 @@ por ejemplo, `500` se muestra como `0500`.git branc
 
 
 
+Sprites asustados de los fantasmas
+Los cuatro fantasmas comparten los sprites de assets/animations/ghosts/scared_ghost. Ghost._load_scared_frames() carga las imágenes una sola vez y las separa por orden: los frames pares (00, 02) son azules y los impares (01, 03) son blancos.
 
+Cuando un fantasma está asustado, Ghost.get_frame(dt) selecciona qué grupo de imágenes devolver. Los sprites se escalan al tamaño de los frames normales del fantasma y se guardan en una caché para reutilizar el resultado.
+
+La duración del efecto se ajusta en app.py:
+
+_SUPER_PACGUM_DURATION_MS = 10000 define los 10 segundos del efecto.
+warning_time_ms = 2_000 define cuánto dura el aviso blanco: los últimos 2 segundos.
+App actualiza el temporizador mientras dura el efecto. Cuando entra en esos últimos segundos, activa Ghost.show_white; al finalizar, desactiva el estado asustado y el aviso blanco. Si se come otra super-pacgum durante el efecto, el temporizador vuelve a empezar.
+
+En cada ciclo de dibujo, el motor gráfico obtiene el frame del fantasma llamando a get_frame(dt). Por eso el cambio de show_white hace que se dibujen los frames blancos; no se imprimen mensajes en pantalla. Al terminar el efecto, get_frame() vuelve a devolver los sprites normales.
 
 
 
