@@ -108,6 +108,8 @@ class App:
         """Recorre los niveles en orden y ejecuta los momentos del juego."""
         self.clock: pygame.time.Clock = pygame.time.Clock()
         self._engine._init_window()
+        Ghost._load_scared_frames()
+
         while True:
             option: ItemType = self._menu_loop(
                 self._engine.menu_init,
@@ -173,9 +175,9 @@ class App:
 
         self.current_level = number
         self.list_key.clear()   # nivel nuevo: sin giros pendientes del anterior
-        # Ghost.editable = False
-        # self._super_timer_ms = 0
-        # self._pause = False
+        Ghost.editable = False
+        self._super_timer_ms = 0
+        self._pause = False
 
         self.pacman_start = self.maze.center_comecocos()
         reachable = self.maze.reachable_cells(self.pacman_start)
