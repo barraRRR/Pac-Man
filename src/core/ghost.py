@@ -44,12 +44,11 @@ class Ghost(Entity):
     RESPAWN_DURATION_MS: int = 10_000
     RESPAWN_FLASH_DURATION_MS: int = 5_000
 
-    edible: bool = False
     _frames_scared: List[Surface] = []
     _frames_flashing: List[Surface] = []
 
-    _scaled_scared_frames: Dict[Tuple[int, int], List[Surface]] = {}
-
+    _scaled_scared_frames: Dict[Tuple[int, int], Tuple[List[Surface], List[Surface]]] = {}
+    show_white: bool = False
 
 
     def __init__(self, name: str, points: int) -> None:
@@ -84,7 +83,7 @@ class Ghost(Entity):
         cls._frames_flashing = frames[1::2]  # blancos: frames 01 y 03
 
     def get_frame(self, dt: int) -> Surface:
-        """Devuelve los frames asustados escalados o los normales."""
+        """Devuelve el frame asustado azul o blanco, escalado al tamaño normal."""
         if not self.edible or not self._frames_scared:
             return super().get_frame(dt)
 
@@ -98,12 +97,25 @@ class Ghost(Entity):
         frame_size = normal_frames[0].get_size()
 
         if frame_size not in Ghost._scaled_scared_frames:
-            Ghost._scaled_scared_frames[frame_size] = [
+            blue_frames = [
                 pygame.transform.scale(frame, frame_size)
                 for frame in Ghost._frames_scared
             ]
+            white_frames = [
+                pygame.transform.scale(frame, frame_size)
+                for frame in Ghost._frames_flashing
+            ]
+            Ghost._scaled_scared_frames[frame_size] = (
+                blue_frames,
+                white_frames,
+            )
 
-        frames = Ghost._scaled_scared_frames[frame_size]
+        blue_frames, white_frames = Ghost._scaled_scared_frames[frame_size]
+        frames = (
+            white_frames
+            if Ghost.show_white and white_frames
+            else blue_frames
+        )
 
         self._scared_frame_timer_ms += dt
         if self._scared_frame_timer_ms >= ANI_SPEED:
@@ -113,6 +125,7 @@ class Ghost(Entity):
             ) % len(frames)
 
         return frames[self._scared_frame_index]
+
 
     def _find_path(
             self,

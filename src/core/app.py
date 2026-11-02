@@ -488,8 +488,17 @@ class App:
                 # ====SUPER PACGUM====
                 if Ghost.edible:
                     self._super_timer_ms += dt
+
+                    # Durante los últimos 2 segundos, los fantasmas se ven blancos.
+                    warning_time_ms: int = 2_000
+                    Ghost.show_white = (
+                        self._super_timer_ms
+                        >= _SUPER_PACGUM_DURATION_MS - warning_time_ms
+                    )
+
                     if self._super_timer_ms >= _SUPER_PACGUM_DURATION_MS:
                         Ghost.edible = False
+                        Ghost.show_white = False
                         self._super_timer_ms = 0
                 
                 # Si perdió una vida durante este frame, borra la dirección pendiente.
