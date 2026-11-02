@@ -175,9 +175,11 @@ class App:
 
         self.current_level = number
         self.list_key.clear()   # nivel nuevo: sin giros pendientes del anterior
-        Ghost.editable = False
+        Ghost.edible = False
         self._super_timer_ms = 0
         self._pause = False
+
+        
 
         self.pacman_start = self.maze.center_comecocos()
         reachable = self.maze.reachable_cells(self.pacman_start)
