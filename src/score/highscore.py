@@ -4,7 +4,9 @@ import string
 import sys
 from pathlib import Path
 import time
+from src.utils.title import Title
 
+PLAYER_MAX_LEN_NAME = 10
 
 class HighScore:
     """Sistema de puntuaciones del juego.
@@ -276,9 +278,52 @@ class HighScore:
         return int(cls.scores[0]["score"])
             
 
+class Score(Title):
+    """
+    Registra el score de la partida en curso
+    """
+    def __init__(self) -> None:
+        self._points: int = 0
+        super().__init__(text=str(self._points))
+
+    def add(self, points) -> None:
+        self._points += points
+        self.sur = self._render(text=str(self._points))
+
+    @property
+    def points(self) -> int:
+        return self._points
+
+    def reset(self) -> None:
+        """Vuelve el marcador a cero y refresca lo que se pinta en el HUD."""
+        self._points = 0
+        self.sur = self._render(text=str(self._points))
 
 
-
+class PlayerName(Title):
+    def __init__(self) -> None:
+        super().__init__(text="")
+        self._name = "|"
+    
+    def set_name(self, new: str) -> bool:
+        if len(new) > PLAYER_MAX_LEN_NAME + 1:
+            return False
+    
+        self._name = new
+        self.text = new
+        self.sur = self._render(text=new)
+        return True
+    
+    def build_name(self, char: str) -> bool:
+        return self.set_name(self._name + char)
+    
+    
+    def delete_last(self) -> bool:
+        return self.set_name(self._name[:-2])
+    
+    
+    def get_name(self) -> str:
+        return self._name
 
 
 

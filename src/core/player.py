@@ -3,7 +3,7 @@ from src.utils.utils import Coord, Color, Dir
 from src.core.entity import Entity, State, ANI_SPEED
 from src.core.ghost import Ghost
 from src.core.pacgum import PacGum, SuperPacGum
-from src.score.score import Score
+from src.score.highscore import Score
 from src.utils.utils import Coord
 import pygame
 from pygame import Surface
