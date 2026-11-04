@@ -1,13 +1,14 @@
 import pygame
 from pygame import Surface
 from typing import Tuple, List, Dict
-from src.maze.bitmap import BitMap, UP, RIGHT, DOWN, LEFT
+from src.maze.bitmap import BitMap
 from src.core.entity import Entity
 from src.core.player import Player
 from src.core.ghost import Ghost, Blinky, Pinky, Inky, Clyde
 from src.core.pacgum import PacGum, SuperPacGum
-from src.score.score import Score, Title
-from src.utils.utils import Coord, Color, Logo
+from src.score.highscore import Score, PlayerName
+from src.utils.title import Title
+from src.utils.utils import Coord, Color, Logo, Dir
 from src.utils.class_maze import Maze
 from src.ux_ui.menu import Menu, MenuInit, MenuPause
 from src.ux_ui.instructions import Instructions
@@ -109,6 +110,7 @@ class GraphicEngine():
         self.menu_init: MenuInit = MenuInit()
         self.menu_pause: MenuPause = MenuPause()
         self.instructions: Instructions = Instructions()
+        self.band: Surface = None
 
         # ***** TÍTULOS *****
         self.instructions_title: Title = Title("INSTRUCTIONS", _TITLE_SIZE)
@@ -248,35 +250,24 @@ class GraphicEngine():
         x = coord.x * self.tile_size
         y = coord.y * self.tile_size
 
-        # Draw walls based on bits
-        if value & 1:  # NORTH
-            for i in range(self.tile_size):
-                for t in range(self.line):
-                    self._put_pixel(surface, (x + i, y + t), color)
+        walls = {
+            Dir.UP: lambda i, t: (x + i, y + t),
+            Dir.RIGHT: lambda i, t: (x + self.tile_size - 1 - t, y + i),
+            Dir.DOWN: lambda i, t: (x + i, y + self.tile_size - 1 - t),
+            Dir.LEFT: lambda i, t: (x + t, y + i),
+        }
 
-        if value & 2:  # EAST
-            for i in range(self.tile_size):
-                for t in range(self.line):
-                    self._put_pixel(surface,
-                                    (x + self.tile_size - 1 - t, y + i), color)
-
-        if value & 4:  # SOUTH
-            for i in range(self.tile_size):
-                for t in range(self.line):
-                    self._put_pixel(surface,
-                                    (x + i, y + self.tile_size - 1 - t), color)
-
-        if value & 8:  # WEST
-            for i in range(self.tile_size):
-                for t in range(self.line):
-                    self._put_pixel(surface, (x + t, y + i), color)
-
-        if value == 15:  # CLOSED
+        # CLOSED
+        if value == 15:
             for i in range(self.tile_size):
                 for t in range(self.tile_size):
                     self._put_pixel(surface, (x + t, y + i), color)
-
-
+        else:
+            for dir, get_coords in walls.items():
+                if value & dir.value:
+                    for i in range(self.tile_size):
+                        for t in range(self.line):
+                            self._put_pixel(surface, get_coords(i, t), color)
 
     """
     ╔═════════════════════════════════════════════════════════════════════════╗
@@ -427,60 +418,47 @@ class GraphicEngine():
             if item == menu._active_item:
                 self.window.blit(menu.selector, (item.xy[0] - 10, item.xy[1]))
 
-    def _blit_level_intro(self, number: int) -> None:
+    @staticmethod
+    def _get_band_size(total_h: int) -> Tuple[int, int]:
+        band_h: int = (_INTRO_PAD + total_h + _INTRO_GAP + _INTRO_PAD)
+        band_y: int = (_WINDOW_HEIGHT - band_h) // 2
+        return (band_h, band_y)
+
+    @staticmethod
+    def _get_title_x(title: Title) -> int:
+        return (_WINDOW_WIDTH - title.sur.get_width()) // 2
+
+    def _blit_cropped_bg(
+            self,
+            band_h: int,
+            band_y: int
+            ) -> None:
+        if self.band is None:
+            self.band: Surface = Surface((_WINDOW_WIDTH, band_h))
+        self.band.fill(_BACKGROUND_COLOR)
+        self.window.blit(self.band, (0, band_y))
+    
+    def _blit_level_info(self, title_str: str, sub_str: str) -> None:
         """Dibuja la banda de inicio de nivel a todo el ancho de la ventana.
 
         Muestra "LEVEL <n>" en grande y "Push SPACE to play" en letra
         pequeña, sobre una banda opaca que ocupa el ancho completo,
         igual que la tira del menú de pausa pero extendida.
+
+        HE JUNTADO VARIAS FUNCIONES EN UNA - REFACTOR
         """
-        if not pygame.font.get_init():
-            pygame.font.init()
-        title_font = pygame.font.Font(_INTRO_FONT_PATH, _INTRO_TITLE_SIZE)
-        sub_font = pygame.font.Font(_INTRO_FONT_PATH, _INTRO_SUB_SIZE)
-        title: Surface = title_font.render(f"LEVEL {number}", True, _INTRO_TEXT_COLOR)
-        sub: Surface = sub_font.render("Push SPACE to play", True, _INTRO_TEXT_COLOR)
+        title: Title = Title(text=title_str, size=_INTRO_TITLE_SIZE, color=_INTRO_TEXT_COLOR)
+        sub: Title = Title(text=sub_str, size=_INTRO_SUB_SIZE, color=_INTRO_TEXT_COLOR)
 
         # banda a todo el ancho, alto = margen + titulo + hueco + subtitulo + margen
-        band_h: int = (_INTRO_PAD + title.get_height()
-                    + _INTRO_GAP + sub.get_height() + _INTRO_PAD)
-        band_y: int = (_WINDOW_HEIGHT - band_h) // 2
-        band: Surface = Surface((_WINDOW_WIDTH, band_h))
-        band.fill(_BACKGROUND_COLOR)
-        self.window.blit(band, (0, band_y))
-
+        band_h, band_y = self._get_band_size(title.sur.get_height() + sub.sur.get_height())
+        self._blit_cropped_bg(
+            band_h=band_h,
+            band_y=band_y
+        )
         # textos centrados, como en los menus: se resta media superficie
-        title_x: int = (_WINDOW_WIDTH - title.get_width()) // 2
-        sub_x: int = (_WINDOW_WIDTH - sub.get_width()) // 2
-        self.window.blit(title, (title_x, band_y + _INTRO_PAD))
-        self.window.blit(sub, (sub_x, band_y + _INTRO_PAD + title.get_height() + _INTRO_GAP))
-
-    def _blit_level_complete(self) -> None:
-        """Dibuja la banda de nivel completado a todo el ancho de la ventana.
-
-        Igual que la intro de nivel pero con "CONGRATULATIONS!" como título
-        y "(space)" centrado como pista, sobre la escena del nivel acabado.
-        """
-        if not pygame.font.get_init():
-            pygame.font.init()
-        title_font = pygame.font.Font(_INTRO_FONT_PATH, _INTRO_TITLE_SIZE)
-        sub_font = pygame.font.Font(_INTRO_FONT_PATH, _INTRO_SUB_SIZE)
-        title: Surface = title_font.render("CONGRATULATIONS!", True, _INTRO_TEXT_COLOR)
-        sub: Surface = sub_font.render("'space'", True, _INTRO_TEXT_COLOR)
-
-        # banda a todo el ancho, alto = margen + titulo + hueco + subtitulo + margen
-        band_h: int = (_INTRO_PAD + title.get_height()
-                    + _INTRO_GAP + sub.get_height() + _INTRO_PAD)
-        band_y: int = (_WINDOW_HEIGHT - band_h) // 2
-        band: Surface = Surface((_WINDOW_WIDTH, band_h))
-        band.fill(_BACKGROUND_COLOR)
-        self.window.blit(band, (0, band_y))
-
-        # textos centrados, como en la intro: se resta media superficie
-        title_x: int = (_WINDOW_WIDTH - title.get_width()) // 2
-        sub_x: int = (_WINDOW_WIDTH - sub.get_width()) // 2
-        self.window.blit(title, (title_x, band_y + _INTRO_PAD))
-        self.window.blit(sub, (sub_x, band_y + _INTRO_PAD + title.get_height() + _INTRO_GAP))
+        self.window.blit(title.sur, (self._get_title_x(title), band_y + _INTRO_PAD))
+        self.window.blit(sub.sur, (self._get_title_x(sub), band_y + _INTRO_PAD + title.sur.get_height() + _INTRO_GAP))
 
     def _blit_instructions(self) -> None:
         """Pega la pantalla de instrucciones renderizada por su objeto."""
@@ -542,6 +520,7 @@ class GraphicEngine():
             hint,
             ((_WINDOW_WIDTH - hint.get_width()) // 2, _INSTR_HINT_Y)
         )
+
 
     """
     ╔═════════════════════════════════════════════════════════════════════════╗

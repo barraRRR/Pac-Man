@@ -7,7 +7,6 @@ from src.core.ghost import Ghost, Blinky, Pinky, Inky, Clyde
 from src.core.pacgum import PacGum, SuperPacGum
 from src.core.engine import GraphicEngine, _PADDING
 from src.maze.bitmap import BitMap, UP, RIGHT, DOWN, LEFT
-from src.score.score import Score
 from src.utils.utils import Coord, Color, Dir
 from src.ux_ui.menu import Item, ItemType, Menu, MenuInit
 from typing import List, Dict, Callable
@@ -15,8 +14,9 @@ from src.utils.error import HitWallError
 import sys
 import pygame
 import random
-from src.score.highscore import HighScore
+from src.score.highscore import HighScore, Score, PlayerName
 from src.ux_ui.instructions import Instructions
+from enum import Enum
 
 
 _FPS = 60
@@ -28,29 +28,34 @@ _SUPER_PACGUM_DURATION_MS = 10000
 _UI_SIZE = (600, 800)
 
 
+class AppState(Enum):
+    INIT = "init"
+    NEWLEVEL = "newlevel"
+    RUN = "run"
+    PAUSE = "pause"
+    CONGRAT = "congratulations"
+    GAMEOVER = "gameover"
+    PLAYER_NAME = "player_name"
+    HIGHSCORE = "highscore"
+
+
 class App:
     """Coordina la lógica del juego y prepara el estado de cada nivel."""
 
     def __init__(self, config: Config) -> None:
         """Construye la App con la configuración y deja el estado vacío."""
         self.config: Config = config                                  # Configuración ya validada y acotada.
-        # Adaptador del laberinto; semilla para el nivel 1.
         self.maze: Maze = Maze(config.seed)
-        # Salida de Pac-Man (x, y); None hasta generar un nivel.
         self.pacman_start: tuple[int, int] | None = None
-        # Salidas de los 4 fantasmas (x, y).
         self.ghost_spawns: list[tuple[int, int]] = []
-        # Las 4 super-pacgums, una por esquina (x, y).
         self.super_pacgum_spawns: list[tuple[int, int]] = []
-        # Pacgums normales colocadas (x, y).
         self.pacgum_spawns: list[tuple[int, int]] = []
-        # Número del nivel en curso (0 = ninguno iniciado).
         self.current_level: int = 0
-        # Vidas restantes; el game loop las gasta.
         self.lives: int = config.lives
-        # Puntos acumulados; sube al comer.
         self.score: Score = Score()
+        self.player_name: PlayerName = PlayerName()
 
+        self.state: AppState = AppState.INIT
 
         pygame.init()
         # Entity instancies
@@ -122,6 +127,9 @@ class App:
                 # return 0
             elif option == ItemType.START:
                 # Partida nueva: vidas de vuelta al valor que manda la config.
+                self._return_to_menu = False
+                self.state = AppState.RUN
+                self.player_name.set_name("")
                 self.player._reset_lives(self.config.lives)
                 self.score.reset()
                 Ghost.edible = False
@@ -137,11 +145,17 @@ class App:
                         self._level_intro(number)
                     self._game_loop()      # Momento 3: mover, comer, morir (aún no existe)
 
+                    if self.state == AppState.PLAYER_NAME:
+                        self._enter_player_name()
+                        if self.state == AppState.HIGHSCORE:
+                            self._highscores_loop()
+                        self._return_to_menu = True
+                        break
+
                     if not self._return_to_menu and self._level_completed():
                         self._congratulations()
 
                     if self._return_to_menu:
-                        self._return_to_menu = False
                         break
                 else:
                     break
@@ -180,9 +194,6 @@ class App:
         Ghost.edible = False
         self._super_timer_ms = 0
         self._pause = False
-
-        
-
         self.pacman_start = self.maze.center_comecocos()
         reachable = self.maze.reachable_cells(self.pacman_start)
         self.ghost_spawns = self.maze.select_ghost_spawns(reachable)
@@ -274,56 +285,45 @@ class App:
         option = self._engine.menu_pause._active_item._item_type
         if option == ItemType.RESUME:
             self._pause = False
+            self.state = AppState.RUN
             print("Game resumed")
         elif option == ItemType.MAIN_MENU:
             self._pause = False  # aquí u a donde vamos, apreniciar todo
+            self.state = AppState.INIT
             self._return_to_menu = True
             print("Return to main menu")
 
-    def _handle_events(self) -> bool:
-        """Gestiona los eventos de pygame y traduce las teclas a direcciones.
+    def _toggle_pause(self) -> None:
+        """Pausa la partida o confirma la opción seleccionada."""
+        if self._pause:
+            self._confirm_menu_pause()
+        else:
+            self._pause = True
+            self.state = AppState.PAUSE
+            print("Game pause")
 
-        La tecla no mueve a Pac-Man: apunta su direccion en list_key.
-        Devuelve False si se pide cerrar el juego (boton X o ESC),
-        True mientras la partida siga en marcha.
-        """
+    def _handle_events(
+        self,
+        key_dict: Dict[int, Callable[[], None]],
+    ) -> bool:
+        """Ejecuta la acción asociada a cada tecla pulsada."""
         for event in pygame.event.get():
-            # pulsar el boton X con el raton
             if event.type == pygame.QUIT:
                 return False
-            # pulsar la tecla ESC
-            elif event.type == pygame.KEYDOWN:
-                try:
-                    if event.key == pygame.K_ESCAPE:
-                        return False
-                    # Barra pausa y confirma la elección
-                    elif event.key == pygame.K_SPACE:
-                        # self._pause = not self._pause
-                        if self._pause:
-                            self._confirm_menu_pause()
-                        else:
-                            self._pause = True
-                            print("Game pause")
-                    elif event.key in (pygame.K_UP, pygame.K_w):
-                        if self._pause:
-                            self._engine.menu_pause._select_item(False)
-                        else:
-                            self._push_direction(Dir.UP)
-                    elif event.key in (pygame.K_RIGHT, pygame.K_d):
-                        self._push_direction(Dir.RIGHT)
-                    elif event.key in (pygame.K_DOWN, pygame.K_s):
-                        if self._pause:
-                            self._engine.menu_pause._select_item(True)
-                        else:
-                            self._push_direction(Dir.DOWN)
-                    elif event.key in (pygame.K_LEFT, pygame.K_a):
-                        self._push_direction(Dir.LEFT)
+            if event.type != pygame.KEYDOWN:
+                continue
+            if event.key == pygame.K_ESCAPE:
+                return False
 
+            action = key_dict.get(event.key)
+            if action is not None:
+                try:
+                    action()
                 except HitWallError:
-                    # return False #definir
                     pass
 
         return True
+
 
     def _menu_loop(self, menu: Menu, func: Callable[[Menu], None]) -> ItemType:
         """
@@ -360,7 +360,7 @@ class App:
         while waiting:
             dt: int = self.clock.tick(_FPS)
             self._engine._blit_elements(dt)           # escena + HUD, como en juego
-            self._engine._blit_level_intro(number)  # banda encima de la escena
+            self._engine._blit_level_info(title_str=f"LEVEL {number}", sub_str="Push SPACE to play")  # banda encima de la escena
             for event in pygame.event.get():
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
                     waiting = False
@@ -377,13 +377,41 @@ class App:
         while waiting:
             dt: int = self.clock.tick(_FPS)
             self._engine._blit_elements(dt)
-            self._engine._blit_level_complete()
+            self._engine._blit_level_info(title_str="CONGRATULATIONS!", sub_str="'space'")
             for event in pygame.event.get():
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
                     waiting = False
             pygame.display.flip()
             self._engine.window.fill((0, 0, 0, 0))
-            
+
+    def _enter_player_name(self) -> None:
+        """Muestra la pantalla de nombre hasta confirmar o cancelar."""
+        self.player_name.set_name("")
+        self.state = AppState.PLAYER_NAME
+
+        while self.state == AppState.PLAYER_NAME:
+            dt: int = self.clock.tick(_FPS)
+            self._engine._blit_elements(dt)
+            self._engine._blit_level_info(
+                title_str="ENTER NAME",
+                sub_str=self.player_name.get_name(),
+            )
+            if not self._handle_events(get_keys(self)):
+                self.state = AppState.INIT
+                self._return_to_menu = True
+                break
+            pygame.display.flip()
+            self._engine.window.fill((0, 0, 0, 0))
+
+    def _finish_player_name(self) -> None:
+        """Guarda la puntuación y termina la entrada del nombre."""
+        HighScore.register(
+            self.player_name.get_name(),
+            self.score.points,
+        )
+        self.state = AppState.HIGHSCORE
+        
+
     def _highscores_loop(self) -> None:
         """Muestra la pantalla de highscores hasta pulsar SPACE.
 
@@ -403,6 +431,7 @@ class App:
                     waiting = False
             pygame.display.flip()
             self._engine.window.fill((0, 0, 0, 0))
+        self.state = AppState.INIT
 
     def _instructions_loop(self) -> None:
         """Muestra la pantalla de instrucciones hasta pulsar SPACE.
@@ -426,12 +455,10 @@ class App:
         """
         TO-DO
         """
-
-        # render de surfaces
         self._engine._update_maze(self.maze)
-        # self._engine._put_background()
         self._engine._put_maze(self.maze)
         self._engine._put_entities()
+        self.state = AppState.RUN
 
         # mantiene el programa en ejecución hasta que haya un evento de cierre
         running = True
@@ -445,7 +472,8 @@ class App:
                 self._update_player_death(dt)
                 if not self._death_in_progress and self.player.lives <= 0:
                     print("Game over")
-                    self._return_to_menu = True
+                    self.state = AppState.PLAYER_NAME
+                    running = False
             elif not self._pause:
                 # ========PLAYER============
                 # movimiento del player: un paso cada _MOVEMENT_INTERVAL ms
@@ -537,13 +565,15 @@ class App:
 
                 # Game over: sin vidas, volvemos al menú.
                 if self.player.lives <= 0 and not self._death_in_progress:
-                    print("Game over")
-                    self._return_to_menu = True
+                    self.state = AppState.PLAYER_NAME
+                    running = False
+
 
             else:
                 self._engine._blit_menu_pause(self._engine.menu_pause)
             
-            running = self._handle_events()
+            if running:
+                running = self._handle_events(get_keys(self))
             # actualiza frame
             pygame.display.flip()
             self._engine.window.fill((0, 0, 0, 0))
@@ -561,6 +591,56 @@ class App:
 
 
 
+def get_keys(app: App) -> Dict[int, Callable[[], None]]:
+    """Devuelve las acciones de teclado correspondientes a una pantalla."""
+    if app.state == AppState.INIT:
+        menu = app._engine.menu_init
+        return {
+            pygame.K_UP: lambda: menu._select_item(False),
+            pygame.K_w: lambda: menu._select_item(False),
+            pygame.K_DOWN: lambda: menu._select_item(True),
+            pygame.K_s: lambda: menu._select_item(True),
+        }
 
+    if app.state == AppState.RUN:
+        return {
+            pygame.K_UP: lambda: app._push_direction(Dir.UP),
+            pygame.K_w: lambda: app._push_direction(Dir.UP),
+            pygame.K_RIGHT: lambda: app._push_direction(Dir.RIGHT),
+            pygame.K_d: lambda: app._push_direction(Dir.RIGHT),
+            pygame.K_DOWN: lambda: app._push_direction(Dir.DOWN),
+            pygame.K_s: lambda: app._push_direction(Dir.DOWN),
+            pygame.K_LEFT: lambda: app._push_direction(Dir.LEFT),
+            pygame.K_a: lambda: app._push_direction(Dir.LEFT),
+            pygame.K_SPACE: app._toggle_pause,
+        }
 
+    if app.state == AppState.PAUSE:
+        menu = app._engine.menu_pause
+        return {
+            pygame.K_UP: lambda: menu._select_item(False),
+            pygame.K_w: lambda: menu._select_item(False),
+            pygame.K_DOWN: lambda: menu._select_item(True),
+            pygame.K_s: lambda: menu._select_item(True),
+            pygame.K_SPACE: app._toggle_pause,
+        }
+    
+    if app.state == AppState.PLAYER_NAME:
+        keys = {
+            getattr(pygame, f"K_{char}"):
+            lambda char=char: app.player_name.build_name(char)
+            for char in "abcdefghijklmnopqrstuvwxyz0123456789"
+        }
+        keys[pygame.K_BACKSPACE] = app.player_name.delete_last
+        keys[pygame.K_RETURN] = app._finish_player_name
+        return keys
 
+    if app.state in (
+        AppState.NEWLEVEL,
+        AppState.CONGRAT,
+        AppState.GAMEOVER,
+        AppState.HIGHSCORE,
+    ):
+        return {}
+
+    raise ValueError(f"Unknown application state: {app.state}")
