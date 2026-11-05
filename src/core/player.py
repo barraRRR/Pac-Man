@@ -52,6 +52,8 @@ class Player(Entity):
         """
         El jugador alcanza o es aclanzado por un Ghost not edible
         """
+        if self.invincible:
+            return
         if self._dying:
             return
         self._lives -= 1
