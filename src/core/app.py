@@ -27,6 +27,9 @@ _SUPER_PACGUM_DURATION_MS = 10000
 
 _UI_SIZE = (600, 800)
 
+# Nombre que se guarda si el jugador no escribe ninguno.
+_DEFAULT_PLAYER_NAME = "PLAYER"
+
 
 class AppState(Enum):
     INIT = "init"
@@ -132,6 +135,7 @@ class App:
                 self.player_name.set_name("")
                 self.player._reset_lives(self.config.lives)
                 self.score.reset()
+                self.player.invincible = False
                 Ghost.edible = False
                 self._super_timer_ms = 0
                 for ghost in self.ghosts.values():
@@ -144,6 +148,17 @@ class App:
                     if number != 1:
                         self._level_intro(number)
                     self._game_loop()      # Momento 3: mover, comer, morir (aún no existe)
+
+                    # Último nivel superado (ganado o saltado con ESC): toca guardar el nombre.
+                    if (number == len(self.config.level)
+                        and self.state == AppState.RUN
+                        and not self._return_to_menu
+                    ):
+                        if self._level_completed():
+                            self._congratulations()
+                        self.state = AppState.PLAYER_NAME
+
+
 
                     if self.state == AppState.PLAYER_NAME:
                         self._enter_player_name()
@@ -159,14 +174,7 @@ class App:
                         break
                 else:
                     break
-                """
-                except Exception:
-                    print(
-                        f"Error: Could not generate level {number}.",
-                        file=sys.stderr,
-                    )
-                    return 1
-                """
+
             elif option == ItemType.HIGHSCORES:
                 self._highscores_loop()  # Pantalla Top 10: siguiente bloque
                 # self._engine._blit_highscores_rows(HighScore.scores)
@@ -320,7 +328,10 @@ class App:
             if event.type != pygame.KEYDOWN:
                 continue
             if event.key == pygame.K_ESCAPE:
-                return False
+                # ESC solo salta de nivel en partida y con el modo truco activo.
+                if self.state == AppState.RUN and self.player.invincible:
+                    return False
+                continue
 
             action = key_dict.get(event.key)
             if action is not None:
@@ -410,13 +421,16 @@ class App:
             self._engine.window.fill((0, 0, 0, 0))
 
     def _finish_player_name(self) -> None:
-        """Guarda la puntuación y termina la entrada del nombre."""
-        HighScore.register(
-            self.player_name.get_name(),
-            self.score.points,
-        )
+        """Guarda la puntuación y termina la entrada del nombre.
+
+        Si el nombre queda vacío tras limpiarlo (nada escrito o solo
+        espacios), se guarda con el nombre por defecto.
+        """
+        name: str = self.player_name.get_name()
+        if not HighScore.clean_name(name):
+            name = _DEFAULT_PLAYER_NAME
+        HighScore.register(name, self.score.points)
         self.state = AppState.HIGHSCORE
-        
 
     def _highscores_loop(self) -> None:
         """Muestra la pantalla de highscores hasta pulsar SPACE.
