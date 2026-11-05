@@ -302,6 +302,13 @@ class App:
             self.state = AppState.PAUSE
             print("Game pause")
 
+    # ==== MODO TRUCO ====
+    def _toggle_invincible(self) -> None:
+        """Activa o desactiva la invencibilidad del jugador (issue #124)."""
+        self.player.invincible = not self.player.invincible
+        state = "ON" if self.player.invincible else "OFF"
+        print(f"Cheat mode - invincible: {state}")
+        
     def _handle_events(
         self,
         key_dict: Dict[int, Callable[[], None]],
@@ -323,7 +330,6 @@ class App:
                     pass
 
         return True
-
 
     def _menu_loop(self, menu: Menu, func: Callable[[Menu], None]) -> ItemType:
         """
@@ -613,6 +619,7 @@ def get_keys(app: App) -> Dict[int, Callable[[], None]]:
             pygame.K_LEFT: lambda: app._push_direction(Dir.LEFT),
             pygame.K_a: lambda: app._push_direction(Dir.LEFT),
             pygame.K_SPACE: app._toggle_pause,
+            pygame.K_k: app._toggle_invincible,
         }
 
     if app.state == AppState.PAUSE:

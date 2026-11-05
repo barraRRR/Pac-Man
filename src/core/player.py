@@ -30,6 +30,10 @@ class Player(Entity):
 
         self.ani_path: str = PLAYER_ANI_PATH
 
+        # ==== MODO TRUCO ====
+        # Si es True, los fantasmas no pueden matar a Pac-Man (issue #124).
+        self.invincible: bool = False
+
     @staticmethod
     def _load_images() -> dict[str, list[Surface]]:
         """Carga los frames PNG de cada animacion del jugador."""
@@ -83,6 +87,8 @@ class Player(Entity):
             if not target.alive:
                 return
             if not target.edible:
+                if self.inivincible:
+                    return
                 self._die()
                 return
 
