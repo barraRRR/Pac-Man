@@ -324,6 +324,9 @@ class PlayerName(Title):
     
     def get_name(self) -> str:
         return self._name
+    
+    def get_prompt(self) -> str:
+        return self._name + "|"
 
 
 

@@ -20,8 +20,6 @@ from enum import Enum
 
 
 _FPS = 60
-_MOVEMENT_INTERVAL = 220
-
 # Duracion del efecto de la super-pacgum (10 s de prueba)
 _SUPER_PACGUM_DURATION_MS = 10000
 
@@ -394,7 +392,7 @@ class App:
             self._engine._blit_elements(dt)
             self._engine._blit_level_info(
                 title_str="ENTER NAME",
-                sub_str=self.player_name.get_name(),
+                sub_str=self.player_name.get_prompt(),
             )
             if not self._handle_events(get_keys(self)):
                 self.state = AppState.INIT
@@ -462,8 +460,6 @@ class App:
 
         # mantiene el programa en ejecución hasta que haya un evento de cierre
         running = True
-        move_timer: int = 0
-
         while running and not self._return_to_menu and not self._level_completed():
             dt: int = self.clock.tick(_FPS)
             self._engine._blit_elements(dt)  # blit siemrpe pinta
@@ -476,11 +472,8 @@ class App:
                     running = False
             elif not self._pause:
                 # ========PLAYER============
-                # movimiento del player: un paso cada _MOVEMENT_INTERVAL ms
-                move_timer += dt
-                if move_timer >= _MOVEMENT_INTERVAL:
-                    # resto en vez de cero, igual que la hucha de Blinky
-                    move_timer -= _MOVEMENT_INTERVAL
+                # El reloj de Entity conserva el tiempo sobrante entre frames.
+                for _ in range(self.player.movement_ticks(dt)):
                     if self.list_key:
                         # giro anticipado: si la pendiente ya se puede, se ejecuta al instante
                         moved: bool = False

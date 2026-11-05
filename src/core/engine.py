@@ -372,7 +372,6 @@ class GraphicEngine():
         """
         self.menu_init._render_item_list()
 
-
     def _blit_menu_init(self, menu: Menu) -> None:
         """
         Muestra el menú de inicio en pantalla
@@ -438,7 +437,17 @@ class GraphicEngine():
         self.band.fill(_BACKGROUND_COLOR)
         self.window.blit(self.band, (0, band_y))
     
-    def _blit_level_info(self, title_str: str, sub_str: str) -> None:
+    def _blit_level_info(
+            self,
+            title_str: str,
+            sub_str: str,
+            hint_str: str = None,
+            title_size: int = _INTRO_TITLE_SIZE,
+            sub_size: int = _INTRO_SUB_SIZE,
+            hint_size: int = _INTRO_SUB_SIZE,
+            dt: int = None,
+            prompt : bool = False
+            ) -> None:
         """Dibuja la banda de inicio de nivel a todo el ancho de la ventana.
 
         Muestra "LEVEL <n>" en grande y "Push SPACE to play" en letra
@@ -447,11 +456,14 @@ class GraphicEngine():
 
         HE JUNTADO VARIAS FUNCIONES EN UNA - REFACTOR
         """
-        title: Title = Title(text=title_str, size=_INTRO_TITLE_SIZE, color=_INTRO_TEXT_COLOR)
-        sub: Title = Title(text=sub_str, size=_INTRO_SUB_SIZE, color=_INTRO_TEXT_COLOR)
+        title: Title = Title(text=title_str, size=title_size, color=_INTRO_TEXT_COLOR)
+        sub: Title = Title(text=sub_str, size=sub_size, color=_INTRO_TEXT_COLOR)
+        if hint_str:
+            hint: Title = Title(text=hint_str, size=hint_size, color=_INTRO_TEXT_COLOR)
+        hint_h = hint.sur.get_height() if hint_str else 0
 
         # banda a todo el ancho, alto = margen + titulo + hueco + subtitulo + margen
-        band_h, band_y = self._get_band_size(title.sur.get_height() + sub.sur.get_height())
+        band_h, band_y = self._get_band_size(title.sur.get_height() + sub.sur.get_height() + hint_h)
         self._blit_cropped_bg(
             band_h=band_h,
             band_y=band_y
@@ -459,6 +471,8 @@ class GraphicEngine():
         # textos centrados, como en los menus: se resta media superficie
         self.window.blit(title.sur, (self._get_title_x(title), band_y + _INTRO_PAD))
         self.window.blit(sub.sur, (self._get_title_x(sub), band_y + _INTRO_PAD + title.sur.get_height() + _INTRO_GAP))
+        if hint_str:
+            self.window.blit(hint.sur, (self._get_title_x(hint), band_y + _INTRO_PAD + title.sur.get_height() + (_INTRO_GAP * 2)))
 
     def _blit_instructions(self) -> None:
         """Pega la pantalla de instrucciones renderizada por su objeto."""

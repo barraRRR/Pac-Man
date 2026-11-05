@@ -1,3 +1,4 @@
+from collections.abc import Callable
 from typing import Tuple, Union, Dict
 from src.utils.error import UnreachableTileError
 from pygame import Surface
@@ -149,3 +150,24 @@ class Logo:
         """
         cls.img = pygame.image.load(path)
         cls.img.convert()
+
+
+def make_interval_ticker(interval: float) -> Callable[[float], int]:
+    """
+    resucitamos los closures para crear un acumulador de movimiento
+    """
+    if interval <= 0:
+        raise ValueError("interval must be greater than zero")
+
+    accumulator = 0.0
+    
+    def update(dt: float) -> int:
+        nonlocal accumulator
+        accumulator += dt
+        ticks = 0
+        while accumulator >= interval:
+            accumulator -= interval
+            ticks += 1
+        return ticks
+        
+    return update
