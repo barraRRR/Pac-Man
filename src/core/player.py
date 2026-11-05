@@ -87,7 +87,7 @@ class Player(Entity):
             if not target.alive:
                 return
             if not target.edible:
-                if self.inivincible:
+                if self.invincible:
                     return
                 self._die()
                 return
