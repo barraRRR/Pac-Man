@@ -115,6 +115,8 @@ class GraphicEngine():
         # ***** TÍTULOS *****
         self.instructions_title: Title = Title("INSTRUCTIONS", _TITLE_SIZE)
         self.page_highscores_title: Title = Title("HIGH SCORES", _TITLE_SIZE)
+        self.time_title: Title = Title("00:00", size=14)
+        self._time_text: str = "00:00"
 
         # ***** SCORE *****
         self.up_title: Title = Title("1UP")
@@ -604,7 +606,7 @@ class GraphicEngine():
 
 
 
-    def _blit_elements(self, dt: int) -> None:
+    def _blit_elements(self, dt: int, level: int = 1) -> None:
         """
         """
         self.window.blit(self.background, (0, 0))
@@ -642,6 +644,22 @@ class GraphicEngine():
                     (start_x + index * (icon_size + gap), _1UP_SCORE_POS[1])
                 )
 
+        # Reloj
+        time_x = (
+            self._cal_left_padding()
+            + self.maze_px[0]
+            - self.time_title.sur.get_width()
+        )
+        time_y = _HEADER_AREA + self.maze_px[1] + 12
+        self.window.blit(self.time_title.sur, (time_x, time_y))
+
+        # Nivel
+        level_preview: Title = Title(f"LEVEL {level}", size=14)
+        self.window.blit(
+            level_preview.sur,
+            (self._cal_left_padding(), time_y)
+        )
+
     def _set_highscore(self, points: int) -> None:
         """Pinta en el HUD el HIGH SCORE que le entrega App.
 
@@ -650,7 +668,19 @@ class GraphicEngine():
         """
         self.highscore_int = Title(str(points).zfill(4))
 
+    def _set_time(self, seconds: int) -> None:
+        """Pinta en el HUD el tiempo restante que le entrega App.
 
+        App cuenta los segundos; aqui solo se convierten a MM:SS y se
+        regenera la superficie cuando el valor cambia.
+        """
+        minutes = seconds // 60
+        rest = seconds % 60
+        text = f"{minutes:02d}:{rest:02d}"
+
+        if text != self._time_text:
+            self._time_text = text
+            self.time_title = Title(text, size=14)
 
 
 
