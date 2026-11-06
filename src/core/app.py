@@ -88,6 +88,7 @@ class App:
         self._super_timer_ms: int = 0
         self._death_timer_ms: int = 0
         self._death_in_progress: bool = False
+        self._level_timer_ms: int = 0 #Tiempo de juego por nivel
 
         # HighScore: el nombre del archivo lo manda la config y el ranking
         # se carga una sola vez al arrancar (alta en #35, conexión con App).
@@ -96,7 +97,6 @@ class App:
         HighScore.load()
         self._engine._set_highscore(HighScore.top())
         print(f"  highscores loaded: {len(HighScore.scores)}")
-        # HighScore.register("TEST", 100)   # TEMPORAL: probar guardado, quitar
 
     @property
     def blinky(self) -> Blinky:
@@ -201,6 +201,8 @@ class App:
         self.list_key.clear()   # nivel nuevo: sin giros pendientes del anterior
         Ghost.edible = False
         self._super_timer_ms = 0
+        self._level_timer_ms = 0
+        self._engine._set_time(self.remaining_seconds)
         self._pause = False
         self.pacman_start = self.maze.center_comecocos()
         reachable = self.maze.reachable_cells(self.pacman_start)
@@ -376,7 +378,7 @@ class App:
         waiting: bool = True
         while waiting:
             dt: int = self.clock.tick(_FPS)
-            self._engine._blit_elements(dt)           # escena + HUD, como en juego
+            self._engine._blit_elements(dt, number)          # escena + HUD, como en juego
             self._engine._blit_level_info(title_str=f"LEVEL {number}", sub_str="Push SPACE to play")  # banda encima de la escena
             for event in pygame.event.get():
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
@@ -393,7 +395,7 @@ class App:
         waiting: bool = True
         while waiting:
             dt: int = self.clock.tick(_FPS)
-            self._engine._blit_elements(dt)
+            self._engine._blit_elements(dt, self.current_level)
             self._engine._blit_level_info(title_str="CONGRATULATIONS!", sub_str="'space'")
             for event in pygame.event.get():
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
@@ -408,7 +410,7 @@ class App:
 
         while self.state == AppState.PLAYER_NAME:
             dt: int = self.clock.tick(_FPS)
-            self._engine._blit_elements(dt)
+            self._engine._blit_elements(dt, self.current_level)
             self._engine._blit_level_info(
                 title_str="ENTER NAME",
                 sub_str=self.player_name.get_name(),
@@ -471,6 +473,15 @@ class App:
             pygame.display.flip()
             self._engine.window.fill((0, 0, 0, 0))
 
+    @property
+    def remaining_seconds(self) -> int:
+        """Devuelve los segundos restantes del nivel, sin bajar de cero."""
+        remaining_ms = max(
+            0,
+            self.config.level_max_time * 1000 - self._level_timer_ms
+        )
+        return (remaining_ms + 999) // 1000
+
     def _game_loop(self):
         """
         TO-DO
@@ -486,7 +497,18 @@ class App:
 
         while running and not self._return_to_menu and not self._level_completed():
             dt: int = self.clock.tick(_FPS)
-            self._engine._blit_elements(dt)  # blit siemrpe pinta
+
+            if not self._pause and not self._death_in_progress:
+                self._level_timer_ms += dt
+                time_limit_ms = self.config.level_max_time * 1000
+
+                if self._level_timer_ms >= time_limit_ms:
+                    print("Time limit reached - game over")
+                    self.state = AppState.PLAYER_NAME
+                    running = False
+            self._engine._set_time(self.remaining_seconds)
+
+            self._engine._blit_elements(dt, self.current_level)  # blit siemrpe pinta
 
             if self._death_in_progress:
                 self._update_player_death(dt)

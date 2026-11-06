@@ -885,3 +885,43 @@ revisor no arrastra el modo truco de una partida a la siguiente.
 3. Pulsa **ESC** hasta el último nivel y una vez más: aparece `ENTER NAME`.
 4. Pulsa **K** otra vez (`OFF`): los fantasmas vuelven a quitar vidas y
    ESC deja de saltar de nivel.
+
+
+
+#### Temporizador por nivel
+
+Cada nivel tiene un límite de tiempo configurable mediante `level_max_time`. Con un valor de `90`, el jugador dispone de un minuto y treinta segundos por nivel.
+
+- El nivel actual se muestra debajo del laberinto, a la izquierda.
+- El tiempo restante se muestra debajo del laberinto, a la derecha, con formato `MM:SS`.
+- La cuenta atrás se detiene durante las pausas y la animación de muerte del jugador.
+- El temporizador se reinicia al preparar cada nivel, antes de mostrar su pantalla de introducción.
+- Si se agota el tiempo, termina la partida y se solicita el nombre del jugador para guardar su puntuación.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
