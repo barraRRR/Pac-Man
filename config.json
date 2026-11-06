@@ -1,12 +1,16 @@
 {
     "highscore_filename": "highscore.csv",
     "level": [
-        { "width": 21, "height": 15 },
-        { "width": 9,  "height": 7  },
-        { "width": 15, "height": 15 },
-        { "width": 5,  "height": 5  },
-        { "width": 25, "height": 21 },
-        { "width": 11, "height": 13 }
+        { "width": 40,   "height": 8 },        // tira horizontal válida
+        { "width": 10,   "height": 99 },       // torre en el mínimo de ancho y el máximo de alto
+        { "width": 99,   "height": 99 },       // mapa gigante en el límite
+        { "width": 10,   "height": 10 },       // mínimo exacto
+        { "width": 3,    "height": 25 },       // ancho por debajo del mínimo
+        { "width": 150,  "height": 5 },        // se pasa por arriba y por abajo
+        { "width": -20,  "height": 1000 },     // negativo y enorme
+        { "width": "abc", "height": 20 },      // texto no numérico
+        { "width": 12.7, "height": null },     // float y null
+        { "width": "30", "height": true }      // número como string y booleano
     ],
     "lives": 3,
     "pacgum": 1,
