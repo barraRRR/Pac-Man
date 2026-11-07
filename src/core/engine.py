@@ -114,7 +114,7 @@ class GraphicEngine():
 
         # ***** TÍTULOS *****
         self.instructions_title: Title = Title("INSTRUCTIONS", _TITLE_SIZE)
-        self.page_highscores_title: Title = Title("HIGH SCORES", _TITLE_SIZE)
+        self.page_highscores_title: Title = None
         self.time_title: Title = Title("00:00", size=14)
         self._time_text: str = "00:00"
 
@@ -123,6 +123,8 @@ class GraphicEngine():
         self.highscore_title: Title = Title("HIGH SCORE")
         self.highscore_int: Title = Title("0000")
         self.score: Score = score
+
+
 
     """
     ╔═════════════════════════════════════════════════════════════════════════╗
@@ -505,9 +507,11 @@ class GraphicEngine():
         """Dibuja el logo y el título de la pantalla de puntuaciones."""
         self._put_logo()
 
+        if self.page_highscores_title is None:
+            self.page_highscores_title = Title("HIGH SCORE")
         title_x: int = (_WINDOW_WIDTH - self.page_highscores_title.sur.get_width()) // 2
         title_y: int = 200
-        self.window.blit(self.page_highscores_title.sur, (title_x, title_y))
+        self.page_highscores_title.blit_title(self.window, (title_x, title_y))
 
     def _blit_highscores_rows(
         self,
