@@ -5,8 +5,12 @@ import sys
 from pathlib import Path
 import time
 from src.utils.title import Title
+from src.utils.utils import make_interval_ticker
+
 
 PLAYER_MAX_LEN_NAME = 10
+PROMPT_INTERVAL = 300
+
 
 class HighScore:
     """Sistema de puntuaciones del juego.
@@ -303,7 +307,10 @@ class Score(Title):
 class PlayerName(Title):
     def __init__(self) -> None:
         super().__init__(text="")
-        self._name = "|"
+        self._name = ""
+        self.prompt = "|"
+        self.timer = make_interval_ticker(PROMPT_INTERVAL)
+        self.prompt_visible: bool = True
     
     def set_name(self, new: str) -> bool:
         if len(new) > PLAYER_MAX_LEN_NAME + 1:
@@ -317,16 +324,21 @@ class PlayerName(Title):
     def build_name(self, char: str) -> bool:
         return self.set_name(self._name + char)
     
-    
     def delete_last(self) -> bool:
         return self.set_name(self._name[:-2])
     
-    
     def get_name(self) -> str:
         return self._name
+
+    def define_visible_prompt(self) -> None:
+        self.prompt = "|" if self.prompt_visible else " "
     
-    def get_prompt(self) -> str:
-        return self._name + "|"
+    def get_prompt(self, dt: int) -> str:
+        ticks = self.timer(dt)
+        for _ in range(ticks):
+            self.prompt_visible = not self.prompt_visible
+            self.define_visible_prompt()
+        return self._name + self.prompt
 
 
 

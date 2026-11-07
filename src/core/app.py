@@ -392,7 +392,7 @@ class App:
             self._engine._blit_elements(dt)
             self._engine._blit_level_info(
                 title_str="ENTER NAME",
-                sub_str=self.player_name.get_prompt(),
+                sub_str=self.player_name.get_prompt(dt),
             )
             if not self._handle_events(get_keys(self)):
                 self.state = AppState.INIT
