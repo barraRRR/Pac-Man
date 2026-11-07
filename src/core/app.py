@@ -156,8 +156,6 @@ class App:
                             self._congratulations()
                         self.state = AppState.PLAYER_NAME
 
-
-
                     if self.state == AppState.PLAYER_NAME:
                         self._enter_player_name()
                         if self.state == AppState.HIGHSCORE:
@@ -438,19 +436,21 @@ class App:
         Misma idea que la intro de nivel: se repite el dibujo en cada
         frame y se espera la barra para volver al menú principal.
         """
-        waiting: bool = True
+        waiting = True
         while waiting:
             self.clock.tick(_FPS)
+
+            self._engine.window.blit(self._engine.background, (0, 0))
             self._engine._blit_highscores_title()
             self._engine._blit_highscores_rows(HighScore.scores)
-            
+
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     waiting = False
                 elif event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
                     waiting = False
+
             pygame.display.flip()
-            self._engine.window.fill((0, 0, 0, 0))
         self.state = AppState.INIT
 
     def _instructions_loop(self) -> None:
@@ -462,14 +462,15 @@ class App:
         waiting: bool = True
         while waiting:
             self.clock.tick(_FPS)
+            self._engine.window.blit(self._engine.background, (0, 0))
             self._engine._blit_instructions()
+
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     waiting = False
                 elif event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
                     waiting = False
             pygame.display.flip()
-            self._engine.window.fill((0, 0, 0, 0))
 
     @property
     def remaining_seconds(self) -> int:
