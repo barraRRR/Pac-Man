@@ -313,7 +313,7 @@ class PlayerName(Title):
         self.prompt_visible: bool = True
     
     def set_name(self, new: str) -> bool:
-        if len(new) > PLAYER_MAX_LEN_NAME + 1:
+        if len(new) > PLAYER_MAX_LEN_NAME:
             return False
     
         self._name = new

@@ -25,6 +25,9 @@ _SUPER_PACGUM_DURATION_MS = 10000
 
 _UI_SIZE = (600, 800)
 
+# Nombre que se guarda si el jugador no escribe ninguno.
+_DEFAULT_PLAYER_NAME = "PLAYER"
+
 
 class AppState(Enum):
     INIT = "init"
@@ -83,6 +86,7 @@ class App:
         self._super_timer_ms: int = 0
         self._death_timer_ms: int = 0
         self._death_in_progress: bool = False
+        self._level_timer_ms: int = 0 #Tiempo de juego por nivel
 
         # HighScore: el nombre del archivo lo manda la config y el ranking
         # se carga una sola vez al arrancar (alta en #35, conexión con App).
@@ -91,7 +95,6 @@ class App:
         HighScore.load()
         self._engine._set_highscore(HighScore.top())
         print(f"  highscores loaded: {len(HighScore.scores)}")
-        # HighScore.register("TEST", 100)   # TEMPORAL: probar guardado, quitar
 
     @property
     def blinky(self) -> Blinky:
@@ -130,6 +133,7 @@ class App:
                 self.player_name.set_name("")
                 self.player._reset_lives(self.config.lives)
                 self.score.reset()
+                self.player.invincible = False
                 Ghost.edible = False
                 self._super_timer_ms = 0
                 for ghost in self.ghosts.values():
@@ -142,6 +146,17 @@ class App:
                     if number != 1:
                         self._level_intro(number)
                     self._game_loop()      # Momento 3: mover, comer, morir (aún no existe)
+
+                    # Último nivel superado (ganado o saltado con ESC): toca guardar el nombre.
+                    if (number == len(self.config.level)
+                        and self.state == AppState.RUN
+                        and not self._return_to_menu
+                    ):
+                        if self._level_completed():
+                            self._congratulations()
+                        self.state = AppState.PLAYER_NAME
+
+
 
                     if self.state == AppState.PLAYER_NAME:
                         self._enter_player_name()
@@ -157,14 +172,7 @@ class App:
                         break
                 else:
                     break
-                """
-                except Exception:
-                    print(
-                        f"Error: Could not generate level {number}.",
-                        file=sys.stderr,
-                    )
-                    return 1
-                """
+
             elif option == ItemType.HIGHSCORES:
                 self._highscores_loop()  # Pantalla Top 10: siguiente bloque
                 # self._engine._blit_highscores_rows(HighScore.scores)
@@ -191,6 +199,8 @@ class App:
         self.list_key.clear()   # nivel nuevo: sin giros pendientes del anterior
         Ghost.edible = False
         self._super_timer_ms = 0
+        self._level_timer_ms = 0
+        self._engine._set_time(self.remaining_seconds)
         self._pause = False
         self.pacman_start = self.maze.center_comecocos()
         reachable = self.maze.reachable_cells(self.pacman_start)
@@ -300,6 +310,13 @@ class App:
             self.state = AppState.PAUSE
             print("Game pause")
 
+    # ==== MODO TRUCO ====
+    def _toggle_invincible(self) -> None:
+        """Activa o desactiva la invencibilidad del jugador (issue #124)."""
+        self.player.invincible = not self.player.invincible
+        state = "ON" if self.player.invincible else "OFF"
+        print(f"Cheat mode - invincible: {state}")
+        
     def _handle_events(
         self,
         key_dict: Dict[int, Callable[[], None]],
@@ -311,7 +328,10 @@ class App:
             if event.type != pygame.KEYDOWN:
                 continue
             if event.key == pygame.K_ESCAPE:
-                return False
+                # ESC solo salta de nivel en partida y con el modo truco activo.
+                if self.state == AppState.RUN and self.player.invincible:
+                    return False
+                continue
 
             action = key_dict.get(event.key)
             if action is not None:
@@ -321,7 +341,6 @@ class App:
                     pass
 
         return True
-
 
     def _menu_loop(self, menu: Menu, func: Callable[[Menu], None]) -> ItemType:
         """
@@ -357,7 +376,7 @@ class App:
         waiting: bool = True
         while waiting:
             dt: int = self.clock.tick(_FPS)
-            self._engine._blit_elements(dt)           # escena + HUD, como en juego
+            self._engine._blit_elements(dt, number)          # escena + HUD, como en juego
             self._engine._blit_level_info(title_str=f"LEVEL {number}", sub_str="Push SPACE to play")  # banda encima de la escena
             for event in pygame.event.get():
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
@@ -374,7 +393,7 @@ class App:
         waiting: bool = True
         while waiting:
             dt: int = self.clock.tick(_FPS)
-            self._engine._blit_elements(dt)
+            self._engine._blit_elements(dt, self.current_level)
             self._engine._blit_level_info(title_str="CONGRATULATIONS!", sub_str="'space'")
             for event in pygame.event.get():
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
@@ -389,7 +408,7 @@ class App:
 
         while self.state == AppState.PLAYER_NAME:
             dt: int = self.clock.tick(_FPS)
-            self._engine._blit_elements(dt)
+            self._engine._blit_elements(dt, self.current_level)
             self._engine._blit_level_info(
                 title_str="ENTER NAME",
                 sub_str=self.player_name.get_prompt(dt),
@@ -402,13 +421,16 @@ class App:
             self._engine.window.fill((0, 0, 0, 0))
 
     def _finish_player_name(self) -> None:
-        """Guarda la puntuación y termina la entrada del nombre."""
-        HighScore.register(
-            self.player_name.get_name(),
-            self.score.points,
-        )
+        """Guarda la puntuación y termina la entrada del nombre.
+
+        Si el nombre queda vacío tras limpiarlo (nada escrito o solo
+        espacios), se guarda con el nombre por defecto.
+        """
+        name: str = self.player_name.get_name()
+        if not HighScore.clean_name(name):
+            name = _DEFAULT_PLAYER_NAME
+        HighScore.register(name, self.score.points)
         self.state = AppState.HIGHSCORE
-        
 
     def _highscores_loop(self) -> None:
         """Muestra la pantalla de highscores hasta pulsar SPACE.
@@ -449,6 +471,15 @@ class App:
             pygame.display.flip()
             self._engine.window.fill((0, 0, 0, 0))
 
+    @property
+    def remaining_seconds(self) -> int:
+        """Devuelve los segundos restantes del nivel, sin bajar de cero."""
+        remaining_ms = max(
+            0,
+            self.config.level_max_time * 1000 - self._level_timer_ms
+        )
+        return (remaining_ms + 999) // 1000
+
     def _game_loop(self):
         """
         TO-DO
@@ -462,7 +493,18 @@ class App:
         running = True
         while running and not self._return_to_menu and not self._level_completed():
             dt: int = self.clock.tick(_FPS)
-            self._engine._blit_elements(dt)  # blit siemrpe pinta
+
+            if not self._pause and not self._death_in_progress:
+                self._level_timer_ms += dt
+                time_limit_ms = self.config.level_max_time * 1000
+
+                if self._level_timer_ms >= time_limit_ms:
+                    print("Time limit reached - game over")
+                    self.state = AppState.PLAYER_NAME
+                    running = False
+            self._engine._set_time(self.remaining_seconds)
+
+            self._engine._blit_elements(dt, self.current_level)  # blit siemrpe pinta
 
             if self._death_in_progress:
                 self._update_player_death(dt)
@@ -606,6 +648,7 @@ def get_keys(app: App) -> Dict[int, Callable[[], None]]:
             pygame.K_LEFT: lambda: app._push_direction(Dir.LEFT),
             pygame.K_a: lambda: app._push_direction(Dir.LEFT),
             pygame.K_SPACE: app._toggle_pause,
+            pygame.K_k: app._toggle_invincible,
         }
 
     if app.state == AppState.PAUSE:

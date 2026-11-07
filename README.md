@@ -842,3 +842,86 @@ En cada ciclo de dibujo, el motor gráfico obtiene el frame del fantasma llamand
 
 
 
+## Modo truco (cheat mode)
+
+El subject (VI.5) pide un modo truco para facilitar la revisión por pares.
+Se activa y desactiva con la tecla **K** durante la partida, y la consola
+imprime `Cheat mode - invincible: ON` u `OFF`. Incluye dos funciones:
+
+### Invencibilidad
+
+`Player` tiene el atributo `invincible`. Con él activo:
+
+- `Player._die()` sale en su primera línea, así que no se pierde ninguna
+  vida ni se reproduce la muerte. Está al principio a propósito: los
+  fantasmas también llaman a `_die()` desde su propio `resolve_tile()`, y
+  de esta forma se cubren todos los caminos de colisión con un solo `if`.
+- `Player._eat()` ignora a los fantasmas no comestibles, así que el jugador
+  los atraviesa sin consecuencias.
+- Con la super-pacgum, el jugador puede comerse a los fantasmas y sumar
+  puntos como siempre.
+
+### Saltar nivel
+
+Con el modo truco activo, **ESC** termina el nivel actual y pasa al
+siguiente. Sin el modo truco, ESC no hace nada en partida. Tampoco hace
+nada en la pausa ni en la pantalla del nombre.
+
+El salto no cuenta como "nivel completado": no aparece la banda
+`CONGRATULATIONS!` ni se suman puntos. Si se salta el último nivel, se
+sigue el mismo camino que al ganar o perder: pantalla de nombre,
+highscores y menú principal. Así el revisor puede llegar rápido al final
+del juego y comprobar que el highscore se guarda.
+
+### Reinicio
+
+El modo se desactiva al empezar cada partida nueva desde el menú. Un
+revisor no arrastra el modo truco de una partida a la siguiente.
+
+### Cómo probarlo
+
+1. Pulsa **K** y comprueba que la consola indica `ON`.
+2. Deja que un fantasma te toque: no pierdes vidas.
+3. Pulsa **ESC** hasta el último nivel y una vez más: aparece `ENTER NAME`.
+4. Pulsa **K** otra vez (`OFF`): los fantasmas vuelven a quitar vidas y
+   ESC deja de saltar de nivel.
+
+
+
+#### Temporizador por nivel
+
+Cada nivel tiene un límite de tiempo configurable mediante `level_max_time`. Con un valor de `90`, el jugador dispone de un minuto y treinta segundos por nivel.
+
+- El nivel actual se muestra debajo del laberinto, a la izquierda.
+- El tiempo restante se muestra debajo del laberinto, a la derecha, con formato `MM:SS`.
+- La cuenta atrás se detiene durante las pausas y la animación de muerte del jugador.
+- El temporizador se reinicia al preparar cada nivel, antes de mostrar su pantalla de introducción.
+- Si se agota el tiempo, termina la partida y se solicita el nombre del jugador para guardar su puntuación.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
