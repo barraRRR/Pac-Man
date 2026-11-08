@@ -71,7 +71,7 @@ _INTRO_PAD = 20          # Margen interior de la banda
 _INTRO_GAP = 30          # Hueco entre título y subtítulo
 
 # ==== INSTRUCCIONES ====
-_INSTR_FIRST_ROW_Y = 290               # primera fila, debajo del logo
+_INSTR_FIRST_ROW_Y = 350               # primera fila, debajo del logo
 _INSTR_ROW_SPACING = 70                # hueco entre filas
 _INSTR_PAIR_GAP = 30                   # hueco entre placa y texto
 _INSTR_HINT_Y = 700                    # pista de salida, zona del pie
@@ -111,9 +111,10 @@ class GraphicEngine():
         self.menu_pause: MenuPause = MenuPause()
         self.instructions: Instructions = Instructions()
         self.band: Surface = None
+        self.credits: Title = None
 
         # ***** TÍTULOS *****
-        self.instructions_title: Title = Title("INSTRUCTIONS", _TITLE_SIZE)
+        self.instructions_title: Title = Title("INSTRUCTIONS")
         self.page_highscores_title: Title = None
         self.time_title: Title = Title("00:00", size=14)
         self._time_text: str = "00:00"
@@ -123,7 +124,6 @@ class GraphicEngine():
         self.highscore_title: Title = Title("HIGH SCORE")
         self.highscore_int: Title = Title("0000")
         self.score: Score = score
-
 
 
     """
@@ -380,16 +380,20 @@ class GraphicEngine():
         """
         Muestra el menú de inicio en pantalla
         """
+        if self.credits is None:
+            self.credits = Title("Created by aitorres and jbarreir © 2026", 8)
         self.window.blit(self.background, (0, 0))
         for i, item in enumerate(menu._items):
-            x, y = _WINDOW_CENTER
+            # x, y = _WINDOW_CENTER
+            x, y = (_WINDOW_CENTER[0], 330)
             y += (i * _ITEM_LINE_SPACING)
             x -= item.sur.get_width() // 2
             item.xy = (x, y)
             self.window.blit(item.sur, (x, y))
             if item == menu._active_item:
-                self.window.blit(menu.selector, (x - 10, y))
+                self.window.blit(menu.selector, (x - 12, y))
         self._put_logo()
+        self.window.blit(self.credits.sur, ((_WINDOW_WIDTH - self.credits.sur.get_width()) // 2, 750))
                 
     def _blit_menu_pause(self, menu: MenuPause) -> None:
         """Muestra las opciones de pausa sobre la escena congelada."""
