@@ -296,14 +296,18 @@ class GraphicEngine():
         ) -> None:
         """
         """
-        size = 2 if isinstance(pacgum, SuperPacGum) else 5
-        pg_size = self.tile_size // size
-        offset = (self.tile_size - pg_size) // 2
-        for i in range(pg_size):
-            for t in range(pg_size):
-                self._put_pixel(
-                    pacgum.sur, (i + offset, t + offset), pacgum.color
-                )
+        size = 3 if isinstance(pacgum, SuperPacGum) else 8
+        radius = max(1, self.tile_size // size // 2)
+        center = self.tile_size // 2
+
+        for y in range(-radius, radius + 1):
+            for x in range(-radius, radius + 1):
+                if x * x + y * y <= radius * radius:
+                    self._put_pixel(
+                        pacgum.sur,
+                        (center + x, center + y),
+                        pacgum.color
+                    )
 
     def _init_entities(self) -> None:
         """
@@ -711,6 +715,5 @@ class GraphicEngine():
         if text != self._time_text:
             self._time_text = text
             self.time_title = Title(text, size=14)
-
 
 
