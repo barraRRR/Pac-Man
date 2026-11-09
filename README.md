@@ -138,16 +138,19 @@
 │   ├── maze
 │   │   └── bitmap.py
 │   ├── score
-│   │   ├── highscore.py
-│   │   └── score.py
+│   │   └── highscore.py
 │   ├── utils
 │   │   ├── class_config.py
 │   │   ├── class_maze.py
 │   │   ├── error.py
+│   │   ├── logger.py
+│   │   ├── title.py
 │   │   └── utils.py
 │   └── ux_ui
 │       ├── instructions.py
 │       └── menu.py
+├── temp
+│   └── log.txt
 ├── tests
 │   └── test_highscore.py
 ├── uv.lock
@@ -158,7 +161,7 @@
     │   └── mazegenerator-2.1.0.dist-info
     └── mazegenerator-2.1.0-py3-none-any.whl
 
-47 directories, 104 files
+48 directories, 106 files
 ```
 tree -I '.venv|.git'
 
