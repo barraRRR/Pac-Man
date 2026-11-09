@@ -277,9 +277,10 @@ class App:
         if self._death_timer_ms < PLAYER_DEATH_DURATION_MS:
             return
 
-        for ghost in self.ghosts.values():
-            ghost._set_position(ghost.spawn_pos)
-            ghost._reset()
+        if self.player.lives > 0:
+            for ghost in self.ghosts.values():
+                ghost._set_position(ghost.spawn_pos)
+                ghost._reset()
         self.player.finish_death()
         self._death_timer_ms = 0
         self._death_in_progress = False
