@@ -16,6 +16,7 @@ import pygame
 import random
 from src.score.highscore import HighScore, Score, PlayerName
 from src.ux_ui.instructions import Instructions
+from src.utils.logger import logger
 from enum import Enum
 
 
@@ -94,7 +95,7 @@ class App:
         HighScore.security = False   # TEMPORAL: probar salida en claro
         HighScore.load()
         self._engine._set_highscore(HighScore.top())
-        print(f"  highscores loaded: {len(HighScore.scores)}")
+        logger.info("Highscores loaded: %s", len(HighScore.scores))
 
     @property
     def blinky(self) -> Blinky:
@@ -141,7 +142,7 @@ class App:
                 for number, level in enumerate(self.config.level, start=1):
                     # try:
                     # Momento 1: preparar el nivel (mapa)
-                    self._start_level(number, level, True)
+                    self._start_level(number, level)
                     self._spawn_entities()  # Momento 2: colocar Pac-Man y fantasmas (aún no existe)
                     if number != 1:
                         self._level_intro(number)
@@ -181,7 +182,7 @@ class App:
         self._end_game()       # Momento 4: guardar puntuación, despedida
         return 0
 
-    def _start_level(self, number: int, level: Level, debug: bool = False) -> None:
+    def _start_level(self, number: int, level: Level) -> None:
         """Prepara el nivel actual: genera el mapa y deja el estado listo."""
         # Genero el mapa de este nivel con el tamaño que dice la config.
         self.maze.generate_level(
@@ -191,7 +192,6 @@ class App:
         )
         Ghost.path_map.clear()   # mapa nuevo: caduca la cache de caminos BFS
         Coord._set_frontier(self.maze.frontier)
-        print(f"\nLevel {number}:")
 
         self.current_level = number
         self.list_key.clear()   # nivel nuevo: sin giros pendientes del anterior
@@ -213,16 +213,19 @@ class App:
         for cell in self.pacgum_spawns:
             value = self.maze.grid[cell[1]][cell[0]]
             counts[value] = counts.get(value, 0) + 1
-        print(f"  Pacgum cell values: {dict(sorted(counts.items()))}")
 
-        if debug:
-            print(f"  Pac-Man: {self.pacman_start}")
-            print(f"  Ghosts: {self.ghost_spawns}")
-            print(f"  Super-pacgums: {self.super_pacgum_spawns}")
-            # print(f"  Pacgums: {self.pacgum_spawns}")
-            print(f"  Pacgums: {len(self.pacgum_spawns)} placed")
-            print(f"  Pacgums: {self.pacgum_spawns}")
-            print()
+        level_label: str = f"Level {number:02d}"
+        logger.info("[%s] Generating level", level_label)
+        logger.info("[%s] Pacgum cell values: %s",
+                    level_label, dict(sorted(counts.items())))
+        logger.info("[%s] Pac-Man: %s", level_label, self.pacman_start)
+        logger.info("[%s] Ghosts: %s", level_label, self.ghost_spawns)
+        logger.info("[%s] Super-pacgums: %s",
+                    level_label, self.super_pacgum_spawns)
+        logger.info("[%s] Pacgums: %s placed",
+                    level_label, len(self.pacgum_spawns))
+        logger.info("[%s] Pacgum positions: %s",
+                    level_label, self.pacgum_spawns)
 
     def _spawn_entities(self) -> None:
         """
@@ -256,7 +259,9 @@ class App:
             entity._update_entity_map(True)
 
     def _start_player_death(self) -> None:
-        """Oculta los fantasmas mientras Pac-Man reproduce su muerte."""
+        """
+        Oculta los fantasmas mientras Pac-Man reproduce su muerte
+        """
         self._death_in_progress = True
         self._death_timer_ms = 0
         for ghost in self.ghosts.values():
@@ -277,7 +282,9 @@ class App:
         self._death_in_progress = False
 
     def _push_direction(self, dir: Dir) -> None:
-        """Apunta la direccion pulsada: si hay hueco se apila, si esta llena se sustituye la pendiente."""
+        """
+        Apunta la direccion pulsada: si hay hueco se apila, si esta llena se sustituye la pendiente
+        """
         if dir in self.list_key:
             return
         if len(self.list_key) < 2:
@@ -287,17 +294,19 @@ class App:
             self.list_key[1] = dir
 
     def _confirm_menu_pause(self) -> None:
-        """Ejecuta la opcion marcada del menu de pausa."""
+        """
+        Ejecuta la opcion marcada del menu de pausa
+        """
         option = self._engine.menu_pause._active_item._item_type
         if option == ItemType.RESUME:
             self._pause = False
             self.state = AppState.RUN
-            print("Game resumed")
+            logger.info("Game resumed")
         elif option == ItemType.MAIN_MENU:
             self._pause = False  # aquí u a donde vamos, apreniciar todo
             self.state = AppState.INIT
             self._return_to_menu = True
-            print("Return to main menu")
+            logger.info("Return to main menu")
 
     def _toggle_pause(self) -> None:
         """Pausa la partida o confirma la opción seleccionada."""
@@ -306,14 +315,14 @@ class App:
         else:
             self._pause = True
             self.state = AppState.PAUSE
-            print("Game pause")
+            logger.info("Game pause")
 
     # ==== MODO TRUCO ====
     def _toggle_invincible(self) -> None:
         """Activa o desactiva la invencibilidad del jugador (issue #124)."""
         self.player.invincible = not self.player.invincible
         state = "ON" if self.player.invincible else "OFF"
-        print(f"Cheat mode - invincible: {state}")
+        logger.info(f"Cheat mode - invincible: {state}")
         
     def _handle_events(
         self,
@@ -500,7 +509,7 @@ class App:
                 time_limit_ms = self.config.level_max_time * 1000
 
                 if self._level_timer_ms >= time_limit_ms:
-                    print("Time limit reached - game over")
+                    logger.info("Time limit reached - game over")
                     self.state = AppState.PLAYER_NAME
                     running = False
             self._engine._set_time(self.remaining_seconds)
@@ -510,7 +519,7 @@ class App:
             if self._death_in_progress:
                 self._update_player_death(dt)
                 if not self._death_in_progress and self.player.lives <= 0:
-                    print("Game over")
+                    logger.info("GAME OVER")
                     self.state = AppState.PLAYER_NAME
                     running = False
             elif not self._pause:

@@ -3,6 +3,7 @@ from src.utils.utils import Coord, Color, Dir
 from src.core.entity import Entity, State, ANI_SPEED
 from src.utils.error import UnreachableTileError
 import pygame
+from src.utils.logger import logger
 from pygame import Surface
 from src.maze.bitmap import BitMap
 from typing import List, Tuple, Set, Dict
@@ -72,11 +73,18 @@ class Ghost(Entity):
             return
 
         frames: List[Surface] = []
-        for png in sorted(Path(SCARED_GHOST).glob("*.png")):
-            frames.append(pygame.image.load(str(png)).convert_alpha())
+        try:
+            for png in sorted(Path(SCARED_GHOST).glob("*.png")):
+                frames.append(pygame.image.load(str(png)).convert_alpha())
+        except (OSError, pygame.error) as error:
+            logger.exception("Could not load scared ghost frames from %s: %s",
+                             SCARED_GHOST, error)
+            raise RuntimeError(
+                f"Could not load scared ghost frames from {SCARED_GHOST}"
+            ) from error
 
         if not frames:
-            print(f"[WARN] No scared frames found in {SCARED_GHOST}")
+            logger.warning("No scared frames found in %s", SCARED_GHOST)
             return
 
         cls._frames_scared = frames[0::2]    # azules: frames 00 y 02

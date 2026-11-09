@@ -2,6 +2,9 @@
 *generator.py
 *gui_engine.py
 
+# continue
+.continue/
+
 # cache
 __pycache__/
 .pytest_cache

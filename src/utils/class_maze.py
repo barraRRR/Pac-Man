@@ -3,8 +3,8 @@ from src.maze.bitmap import BitMap
 from collections import deque
 from typing import Tuple
 import random
-import sys
 from pygame import Surface
+from src.utils.logger import logger
 
 
 class Maze:
@@ -281,11 +281,7 @@ class Maze:
         placed = random.sample(candidates, min(requested, len(candidates)))
 
         if len(placed) < requested:
-            print(
-                f"Error: requested {requested} pacgums, "
-                f"only {len(placed)} free cells, "
-                f"using {len(placed)}.",
-                file=sys.stderr,
-            )
+            logger.error("Error: requested %s pacgums, only %s free cells, "
+                         "using %s.", requested, len(placed), len(placed))
 
         return placed
