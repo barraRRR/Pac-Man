@@ -1,3 +1,5 @@
+"""Carga la configuración y arranca la aplicación."""
+
 from src.utils.class_config import Config
 from src.core.app import App
 from src.utils.logger import logger

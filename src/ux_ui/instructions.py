@@ -1,5 +1,8 @@
+"""Renderiza la pantalla de ayuda y los controles disponibles."""
+
 from pygame import Surface
 import pygame
+
 
 class Instructions:
     """Guarda el contenido de la pantalla de instrucciones.
@@ -45,7 +48,7 @@ class Instructions:
         if not pygame.font.get_init():
             pygame.font.init()
         font = pygame.font.Font(self._FONT_PATH, size)
-        return font.render(text, True, color)   #cierto, render devuelve el Surface, jaitowerr
+        return font.render(text, True, color)
 
     def _render_keycap(self, label: str) -> Surface:
         """Dibuja una tecla como placa con su nombre centrado.
@@ -64,4 +67,3 @@ class Instructions:
         cap.blit(text, ((w - text.get_width()) // 2,
                         (h - text.get_height()) // 2))
         return cap
-

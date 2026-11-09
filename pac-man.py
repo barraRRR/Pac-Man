@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+"""Punto de entrada para iniciar el juego desde el repositorio."""
 
 
 import sys

@@ -1,3 +1,5 @@
+"""Adapta el generador externo y selecciona casillas del laberinto."""
+
 from mazegenerator import MazeGenerator
 from src.maze.bitmap import BitMap
 from collections import deque
@@ -20,11 +22,10 @@ class Maze:
         Args:
             seed: semilla de la configuración, usada solo para el nivel 1.
         """
-        self._seed = seed                             # Semilla base (solo nivel 1).
-        self._bitmap: BitMap = BitMap()              # Grid [fila][columna] del nivel actual ([] = sin nivel).
+        self._seed = seed
+        self._bitmap: BitMap = BitMap()
         self.sur: Surface | None = None
 
-        # ***** SIZE *****
         self._col: int = 0
         self._row: int = 0
         self._size: Tuple[int, int] = 0
@@ -37,21 +38,22 @@ class Maze:
 
     @property
     def size(self) -> Tuple[int, int]:
-        """
-        Devuelve el tamaño (col, row) del laberinto
-        """
+        """Devuelve las dimensiones actuales del laberinto."""
         return (len(self.grid), len(self.grid[0]))
 
     @property
     def col(self) -> int:
+        """Devuelve la cantidad de columnas del laberinto."""
         return self._col
 
     @property
     def row(self) -> int:
+        """Devuelve la cantidad de filas del laberinto."""
         return self._row
 
     @property
     def frontier(self) -> Tuple[int, int]:
+        """Devuelve las coordenadas del límite del laberinto."""
         return (self._col - 1, self._row - 1)
 
     def generate_level(self, number:int, width: int, height:int) -> None:
@@ -64,18 +66,13 @@ class Maze:
         """
         semilla = self._seed if number == 1 else 0
 
-        # Crear el generador ES generar el mapa (su __init__ ya llama a generate()).
         generator_map = MazeGenerator(size=(width, height), perfect=False, seed=semilla)
 
         self._bitmap.grid.clear()
-        self._bitmap.grid.extend(generator_map.maze)        #Lee el mapa ya creado contiene Una lista de listas de enteros (list[list[int]]
+        self._bitmap.grid.extend(generator_map.maze)
         self._row = len(self._bitmap.grid)
         self._col = len(self._bitmap.grid[0])
         self._size = (self._col, self._row)
-        # print(self._grid)
-        # print('\n')
-        # for row in self._grid:
-        #     print(row)
 
     def center_comecocos(self) -> tuple[int, int]:
         """
@@ -94,7 +91,7 @@ class Maze:
 
         for y in range(height_map):
             for x in range(width):
-                if self.grid[y][x] == 15: #El 15 SOn los bloques del 42
+                if self.grid[y][x] == 15:
                     continue
                 dist = (x - center_x) ** 2 + (y - center_y) ** 2
                 if best_dist is None or dist < best_dist:
@@ -102,7 +99,6 @@ class Maze:
                     best_dist = dist
         if best is None:
             raise ValueError("Maze has no walkable cells.")
-        # print(best)
         return best
 
     def select_ghost_spawns(
@@ -276,7 +272,7 @@ class Maze:
         if requested <= 0:
             return []
 
-        occupied = {pacman_start, *ghost_spawns, *super_pacgum_spawns}      #El *desempaqueta la lista, ahorra el bucle for, pacman_start solo tiene una posición.
+        occupied = {pacman_start, *ghost_spawns, *super_pacgum_spawns}
         candidates = sorted(reachable - occupied)
         placed = random.sample(candidates, min(requested, len(candidates)))
 

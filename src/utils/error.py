@@ -1,10 +1,13 @@
+"""Excepciones de movimiento propias del laberinto."""
+
+
 class MovementError(Exception):
-    pass
+    """Error base para movimientos no válidos."""
 
 
 class HitWallError(MovementError):
-    pass
+    """Señala que una entidad intentó avanzar contra una pared."""
 
 
 class UnreachableTileError(MovementError):
-    pass
+    """Señala que no se puede alcanzar una casilla vecina."""

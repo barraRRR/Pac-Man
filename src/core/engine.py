@@ -1,12 +1,14 @@
+"""Prepara la ventana y dibuja los elementos de la interfaz del juego."""
+
 import pygame
 from pygame import Surface
 from typing import Tuple, List, Dict
 from src.maze.bitmap import BitMap
 from src.core.entity import Entity
 from src.core.player import Player
-from src.core.ghost import Ghost, Blinky, Pinky, Inky, Clyde
+from src.core.ghost import Ghost
 from src.core.pacgum import PacGum, SuperPacGum
-from src.score.highscore import Score, PlayerName
+from src.score.highscore import Score
 from src.utils.title import Title
 from src.utils.utils import Coord, Color, Logo, Dir
 from src.utils.class_maze import Maze
@@ -15,7 +17,7 @@ from src.ux_ui.instructions import Instructions
 
 """
 
-Estas son las funciones que podemos utilizar con el equivalente de MLX
+funciones con el equivalente de MLX
 
 Función MinilibX (MLX)	    Equivalente estricto en Pygame	    Propósito en el motor gráfico
 |--------------------------|-----------------------------------|----------------------------------------------------|
@@ -33,14 +35,11 @@ mlx_destroy_window()	    pygame.display.quit()	            Destruye el contexto 
 
 _WINDOW_WIDTH = 600
 _WINDOW_HEIGHT = 800
-_WINDOW_CENTER = ((_WINDOW_WIDTH // 2), (_WINDOW_HEIGHT // 2))
-
 _PADDING = 30
 _LINE = 2
 _SAFE_LINE = 1
 
 _LOGO_AREA = (510, 130)
-_SCORE_AREA = (600, 100)
 _FOOTER_AREA = 60
 
 _ITEM_LINE_SPACING = 60
@@ -51,21 +50,10 @@ _MAX_TILE_SIZE = 45
 
 _BACKGROUND_COLOR = (3, 18, 15, 255)
 _WALL_COLOR = (5, 4, 170, 255)
-_TEST_COLOR = (0, 0, 0, 255)
-
-_LOGO_POS = (45, 20)
-_1UP_POS = (100, 172)
-_HIGHSCORE = (210, 172)
-_1UP_SCORE_POS = (140, 192)
-_HIGHSCORE_SCORE_POS = (280, 192)
-_FOOTER_POS = (40, 740)
-
 _HEADER_AREA = 220
 _HUD_TITLE_GAP = 48     # el título del marcador queda 48 px sobre el mapa
 _HUD_SCORE_GAP = 28     # la puntuación queda 28 px sobre el mapa
 
-# ==== INTRO DE NIVEL ====
-_INTRO_FONT_PATH = "assets/font/font_emulogic.ttf"
 _INTRO_TEXT_COLOR = (255, 255, 255, 255)
 _INTRO_TITLE_SIZE = 24   # Tamaño del título "LEVEL X"
 _INTRO_SUB_SIZE = 10     # Tamaño del "Push SPACE to play"
@@ -78,7 +66,6 @@ _INSTR_ROW_SPACING = 70                # hueco entre filas
 _INSTR_PAIR_GAP = 30                   # hueco entre placa y texto
 _INSTR_HINT_Y = 700                    # pista de salida, zona del pie
 
-_TITLE_SIZE = 24
 _PAGE_TITLE_GAP = 70
 
 _TARGET_TILE_SIZE = 25      # Tamaño de casilla deseado para el mapa más grande
@@ -86,16 +73,16 @@ _WINDOW_MARGIN = 1.10       # Margen extra sobre el tamaño calculado (10 %)
 _MAX_WINDOW = (1600, 950)   # Tope de seguridad (ancho, alto)
 _SCREEN_MARGIN = 0.90       # Parte de la pantalla que puede ocupar la ventana
 
-class GraphicEngine():
-    """
-    """
+class GraphicEngine:
+    """Calcula dimensiones y renderiza los elementos visuales del juego."""
+
     def __init__(
             self,
             player: Player,
             ghosts: Dict[str, Ghost],
             pacgum: List[PacGum],
             score: Score) -> None:
-
+        """Guarda las entidades y prepara el estado gráfico inicial."""
         # ***** ENTITIES *****
         self.player: Player = player
         self.ghosts: Dict[Ghost] = ghosts
@@ -133,30 +120,15 @@ class GraphicEngine():
         self.score: Score = score
 
 
-    """
-    ╔═════════════════════════════════════════════════════════════════════════╗
-    ║                         DYNAMIC CALTULATIONS                            ║
-    ╚═════════════════════════════════════════════════════════════════════════╝
-    """
-
     def _update_maze(self, new_maze: Maze) -> None:
-        """
-        Fija el tamaño del mapa
-        """
+        """Actualiza el laberinto y recalcula sus dimensiones en pantalla."""
         self.maze = new_maze
         self._calculate_dynamic_tile_size()
         self._calculate_line_px()
         self._calculate_maze_size_px()
-        # self._calculate_window_size_px()
 
     def _calculate_dynamic_tile_size(self) -> int:
-        """Calculate optimal tile size based on window and maze dimensions.
-
-        Returns:
-            Tile size in pixels (10-45 range).
-        """
-        # Esto son operaciones para que el tamaño de las celdas se ajuste
-        # al tamaño de la pantalla
+        """Calcula el tamaño de casilla que mejor se ajusta a la ventana."""
         safe_w: int = self.win_px[0] - (_PADDING * 2)
         safe_h: int = self.win_px[1] - _HEADER_AREA - _FOOTER_AREA - _PADDING
 
@@ -169,18 +141,11 @@ class GraphicEngine():
         )
 
     def _calculate_line_px(self) -> int:
-        """
-        Establecemos el grosor de la línea según el tamaño de la celda
-        """
+        """Ajusta el grosor de los muros al tamaño de las casillas."""
         self.line = _LINE if self.tile_size >= _STD_TILE_SIZE else _SAFE_LINE
 
     def _calculate_maze_size_px(self) -> Tuple[int, int]:
-        """
-        calculamos el tamaño que va a tener cada celda (tile)
-        según los tamaños máximos y mínimos de pantalla que configuremos
-        calculamos en una tupla el tamaño que debe tener el maze
-        (suma de todas las celdas) | ancho x alto
-        """
+        """Calcula el ancho y alto en píxeles del laberinto."""
         self.maze_px = (
             (self.maze.col * self.tile_size),
             (self.maze.row * self.tile_size)
@@ -235,19 +200,6 @@ class GraphicEngine():
             min(max(_WINDOW_HEIGHT, height), limit_h),
         )
 
-    """
-    @staticmethod
-    def _calculate_window_size_px(maze_px: Coord) -> Tuple[int, int]:
-        
-        calculamos el tamaño que debe tener la ventana del programa,
-        de primeras será lo que ocupe el maze + margen (padding) | ancho x alto
-        
-        return(
-            max(_MIN_SCREEN_W,
-                (maze_px.x + (_PADDING * 2)))),(maze_px.y + (_PADDING * 2)
-        )
-    """
-
     @staticmethod
     def _px_with_padding(
         win_px: Coord,
@@ -272,17 +224,13 @@ class GraphicEngine():
     ║                              PIXEl RENDER                               ║
     ╚═════════════════════════════════════════════════════════════════════════╝
     """
-
     @staticmethod
     def _put_pixel(
             surface: Surface,
             coord: Coord | Tuple[int, int],
             color: Color | Tuple[int, int, int, int]
         ) -> None:
-        """
-        coloca el pixel en la superficie. buscar excepcion si la coord
-        cae fuera de la ventana.
-        """
+        """Pinta un píxel usando coordenadas y color en formato compatible."""
         xy = coord.get() if isinstance(coord, Coord) else coord
         rgba = color.get() if isinstance(color, Color) else color
 
@@ -295,18 +243,7 @@ class GraphicEngine():
             value: int,
             color: Color
         ) -> None:
-        """
-        Draw a tile at the specified grid coordinates.
-
-        Renders a square tile of size tile_size×tile_size pixels at the given
-        grid position. Each pixel in the tile is set to the specified color.
-        Colors are automatically extended with alpha channel if needed.
-
-        Args:
-            coord: X coordinates in the grid
-            value: Tile Value in the maze grid
-            color: Color value in hexadecimal format (RGB or ARGB)
-        """
+        """Dibuja los muros de una casilla del laberinto."""
         x = coord.x * self.tile_size
         y = coord.y * self.tile_size
 
@@ -317,7 +254,6 @@ class GraphicEngine():
             Dir.LEFT: lambda i, t: (x + t, y + i),
         }
 
-        # CLOSED
         if value == 15:
             for i in range(self.tile_size):
                 for t in range(self.tile_size):
@@ -329,29 +265,19 @@ class GraphicEngine():
                         for t in range(self.line):
                             self._put_pixel(surface, get_coords(i, t), color)
 
+
     """
     ╔═════════════════════════════════════════════════════════════════════════╗
     ║                                 ENTITIES                                ║
     ╚═════════════════════════════════════════════════════════════════════════╝
     """
 
-    def _render_entity_block(
-            self,
-            entity: Entity,
-            px: int = 0
-        ) -> None:
-        """
-        """
-        for i in range(self.tile_size - px):
-            for t in range(self.tile_size - px):
-                self._put_pixel(entity.sur, (i + px, t + px), entity.color)
 
     def _render_pacgum(
             self,
             pacgum: PacGum,
         ) -> None:
-        """
-        """
+        """Dibuja la pacgum como un círculo centrado en su casilla."""
         size = 3 if isinstance(pacgum, SuperPacGum) else 8
         radius = max(1, self.tile_size // size // 2)
         center = self.tile_size // 2
@@ -366,32 +292,18 @@ class GraphicEngine():
                     )
 
     def _init_entities(self) -> None:
-        """
-        Inicializa las entities en las posiciones iniciales del mapa
-        """
+        """Carga los fotogramas y prepara las superficies de las entidades."""
         self.player._load_frames(self.player.ani_path, self.tile_size)
         for ghost in self.ghosts.values():
             ghost._load_frames(ghost.ani_path, self.tile_size)
         for pacgum in self.pacgum:
-            pacgum._init_surface(pacgum.pos, self.tile_size)
+            pacgum._init_surface(self.tile_size)
 
     def _put_entities(self) -> None:
-        """
-        Dibuja las entities en el mapa
-        """
+        """Prepara y dibuja las pacgums del nivel."""
         self._init_entities()
-        """
-        self._render_entity_block(self.player)
-        
-        for ghost in self.ghosts.values():
-            self._render_entity_block(ghost)
-        """
         for pacgum in self.pacgum:
             self._render_pacgum(pacgum)
-        
-        # map(self._render_entity_block, self.ghosts.values())
-        # map(self._render_pacgum, self.pacgum)
-
 
     """
     ╔═════════════════════════════════════════════════════════════════════════╗
@@ -400,43 +312,33 @@ class GraphicEngine():
     """
 
     def _init_window(self) -> None:
-        """
-        Imprime la ventana entera en pantalla
-        """
+        """Crea la ventana y la superficie de fondo."""
         self.window = pygame.display.set_mode(self.win_px)
-        # Título de la barra del sistema; sin esto SDL pone "pygame window".
         pygame.display.set_caption("Pac-Man")
         self.background = Surface(self.win_px)
 
     def _put_background(self) -> None:
-        """
-        pone el fondo de pantalla sobre la pantalla
-        """
+        """Rellena la superficie de fondo con el color de la interfaz."""
         self.background.fill(_BACKGROUND_COLOR)
 
     def _put_logo(self) -> None:
-        """
-        """
+        """Carga y dibuja el logotipo centrado en la parte superior."""
         self.logo._load_logo()
         scaled_logo: Surface = pygame.transform.smoothscale(self.logo.img, _LOGO_AREA)
         logo_pos: Tuple[int, int] = (
             (self.win_px[0] - _LOGO_AREA[0]) // 2,
-            # _WINDOW_WIDTH - _LOGO_AREA[0]) // 2,
             _PADDING
         ) 
         self.window.blit(scaled_logo, logo_pos)
-    
-    
+
+        
     """
     ╔═════════════════════════════════════════════════════════════════════════╗
     ║                                 MENU                                    ║
     ╚═════════════════════════════════════════════════════════════════════════╝
     """
-
     def _init_menu_init(self) -> None:
-        """
-        Crea el menu de inicio
-        """
+        """Prepara las superficies de texto del menú principal."""
         self.menu_init._render_item_list()
 
     def _window_center(self) -> Tuple[int, int]:
@@ -444,14 +346,11 @@ class GraphicEngine():
         return (self.win_px[0] // 2, self.win_px[1] // 2)
 
     def _blit_menu_init(self, menu: Menu) -> None:
-        """
-        Muestra el menú de inicio en pantalla
-        """
+        """Dibuja el menú principal y el logotipo en la ventana."""
         if self.credits is None:
             self.credits = Title("Created by aitorres and jbarreir © 2026", 8)
         self.window.blit(self.background, (0, 0))
         for i, item in enumerate(menu._items):
-            # x, y = _WINDOW_CENTER
             x, y = (self.win_px[0] // 2, 330)
             y += (i * _ITEM_LINE_SPACING)
             x -= item.sur.get_width() // 2
@@ -473,7 +372,6 @@ class GraphicEngine():
             y += i * _ITEM_LINE_SPACING
             x -= item.sur.get_width() // 2
             item.xy = (x, y)
-        #tirita (los ajsutes pro al ia 100%)
         pad : int = 20
         text_w: int = max(item.sur.get_width() for item in menu._items)
         text_h: int = menu._items[0].sur.get_height()
@@ -486,22 +384,19 @@ class GraphicEngine():
         panel_x: int = (self.win_px[0] - panel_size[0]) // 2
         panel_y: int = menu._items[0].xy[1] - pad
         self.window.blit(panel, (panel_x, panel_y))
-        # self.window.blit(item.sur, (x, y))
-        # if item == menu._active_item:
-        #     self.window.blit(menu.selector, (x - 10, y))
-
-        # las opciones encima de la tira
         for item in menu._items:
             self.window.blit(item.sur, item.xy)
             if item == menu._active_item:
                 self.window.blit(menu.selector, (item.xy[0] - 10, item.xy[1]))
 
     def _get_band_size(self, total_h: int) -> Tuple[int, int]:
+        """Calcula la altura y la posición vertical de una banda informativa."""
         band_h: int = (_INTRO_PAD + total_h + _INTRO_GAP + _INTRO_PAD)
         band_y: int = (self.win_px[1] - band_h) // 2
         return (band_h, band_y)
 
     def _get_title_x(self, title: Title) -> int:
+        """Devuelve la coordenada horizontal para centrar un título."""
         return (self.win_px[0] - title.sur.get_width()) // 2
 
     def _blit_panel(
@@ -509,6 +404,7 @@ class GraphicEngine():
             band_h: int,
             band_y: int
             ) -> None:
+        """Dibuja una banda opaca centrada verticalmente."""
         if self.band is None or self.band.get_size() != (self.win_px[0], band_h):
             self.band = Surface((self.win_px[0], band_h))
         self.band.fill(_BACKGROUND_COLOR)
@@ -522,30 +418,19 @@ class GraphicEngine():
             title_size: int = _INTRO_TITLE_SIZE,
             sub_size: int = _INTRO_SUB_SIZE,
             hint_size: int = _INTRO_SUB_SIZE,
-            dt: int = None,
-            prompt : bool = False
             ) -> None:
-        """Dibuja la banda de inicio de nivel a todo el ancho de la ventana.
-
-        Muestra "LEVEL <n>" en grande y "Push SPACE to play" en letra
-        pequeña, sobre una banda opaca que ocupa el ancho completo,
-        igual que la tira del menú de pausa pero extendida.
-
-        HE JUNTADO VARIAS FUNCIONES EN UNA - REFACTOR
-        """
+        """Dibuja el título, subtítulo y pista opcional en una banda."""
         title: Title = Title(text=title_str, size=title_size, color=_INTRO_TEXT_COLOR)
         sub: Title = Title(text=sub_str, size=sub_size, color=_INTRO_TEXT_COLOR)
         if hint_str:
             hint: Title = Title(text=hint_str, size=hint_size, color=_INTRO_TEXT_COLOR)
         hint_h = hint.sur.get_height() + _INTRO_GAP if hint_str else 0
 
-        # banda a todo el ancho, alto = margen + titulo + hueco + subtitulo + margen
         band_h, band_y = self._get_band_size(title.sur.get_height() + sub.sur.get_height() + hint_h)
         self._blit_panel(
             band_h=band_h,
             band_y=band_y
         )
-        # textos centrados, como en los menus: se resta media superficie
         self.window.blit(title.sur, (self._get_title_x(title), band_y + _INTRO_PAD))
         self.window.blit(sub.sur, (self._get_title_x(sub), band_y + _INTRO_PAD + title.sur.get_height() + _INTRO_GAP))
         if hint_str:
@@ -825,5 +710,4 @@ class GraphicEngine():
         if text != self._time_text:
             self._time_text = text
             self.time_title = Title(text, size=14)
-
 

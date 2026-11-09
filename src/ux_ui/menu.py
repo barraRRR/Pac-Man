@@ -1,3 +1,5 @@
+"""Implementa los elementos y las opciones de los menús del juego."""
+
 from src.utils.utils import Color
 from typing import Tuple, List
 from enum import Enum
@@ -14,8 +16,8 @@ SELECTOR_SIZE = 20
 
 
 class ItemType(str, Enum):
-    """
-    """
+    """Opciones disponibles en los menús."""
+
     START = "START GAME"
     HIGHSCORES = "VIEW HIGHSCORES"
     INSTRUCTIONS = "INSTRUCTIONS"
@@ -26,15 +28,16 @@ class ItemType(str, Enum):
 
 
 class Item:
-    """
-    Items del menu
-    """
+    """Representa una opción seleccionable del menú."""
+
     def __init__(self, item_type: ItemType) -> None:
+        """Crea un elemento asociado a una opción."""
         self._item_type: ItemType = item_type
         self.sur: Surface | None = None
         self.xy: Tuple[int, int] = None
 
     def __hash__(self):
+        """Devuelve el hash de la opción del elemento."""
         return hash(self._item_type)
 
     def _render_item(
@@ -42,8 +45,7 @@ class Item:
             font_path: str | None = None,
             size_font: int | None = None,
             ) -> None:
-        """
-        """
+        """Renderiza el texto del elemento con la fuente seleccionada."""
         if not pygame.font.get_init():
             pygame.font.init()
 
@@ -56,14 +58,15 @@ class Item:
 
 
 class Menu:
-    """
-    """
+    """Mantiene las opciones y la selección activa de un menú."""
+
     selector: Surface = None
 
     def __init__(
             self,
             bg_color: Color = _MENU_BACKGROUND
         ) -> None:
+        """Inicializa el menú y crea el selector si aún no existe."""
         self._bg_color: Color = bg_color
         self._items: List[Item] = []
         self._active_item: Item | None = None
@@ -72,8 +75,7 @@ class Menu:
 
     @classmethod
     def _render_selector(cls) -> None:
-        """
-        """
+        """Renderiza el indicador de la opción activa."""
         if not pygame.font.get_init():
             pygame.font.init()
         font = pygame.font.SysFont(_FONT, SELECTOR_SIZE)
@@ -84,16 +86,12 @@ class Menu:
         font_path: str | None = None,
         size_font: int | None = None
         ) -> None:
-        """
-        Crea las superficies de los items del menú y las almacena
-        """
+        """Renderiza y guarda las superficies de sus elementos."""
         for item in self._items:
             item._render_item(font_path, size_font)
 
     def _select_item(self, next_item: bool) -> None:
-        """
-        controla el item seleccionado. proteger con try-except
-        """
+        """Selecciona la opción siguiente o anterior de forma circular."""
         if self._active_item is None:
             self._active_item = self._items[0]
         else:
@@ -103,9 +101,10 @@ class Menu:
 
 
 class MenuInit(Menu):
-    """
-    """
+    """Menú principal con inicio, récords, instrucciones y salida."""
+
     def __init__(self) -> None:
+        """Crea y renderiza las opciones del menú principal."""
         super().__init__()
         self._items.extend([
             Item(ItemType.START),
@@ -118,9 +117,10 @@ class MenuInit(Menu):
 
 
 class MenuPause(Menu):
-    """
-    """
+    """Menú disponible mientras la partida está pausada."""
+
     def __init__(self) -> None:
+        """Crea y renderiza las opciones para reanudar o salir."""
         super().__init__()
         self._items.extend([
             Item(ItemType.RESUME),

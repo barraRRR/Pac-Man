@@ -1,14 +1,12 @@
-from enum import Enum
-from src.utils.utils import Coord, Color, Dir
+"""Implementa el movimiento, las colisiones y las vidas de Pac-Man."""
+
+from src.utils.utils import Dir
 from src.core.entity import Entity, State, ANI_SPEED
 from src.core.ghost import Ghost
-from src.core.pacgum import PacGum, SuperPacGum
+from src.core.pacgum import SuperPacGum
 from src.score.highscore import Score
-from src.utils.utils import Coord
 import pygame
 from pygame import Surface
-from pathlib import Path
-from enum import Enum
 from pathlib import Path
 
 
@@ -19,9 +17,10 @@ PLAYER_MOVEMENT_INTERVAL = 220
 
 
 class Player(Entity):
-    """
-    """
+    """Representa al jugador y gestiona su puntuación y estado de muerte."""
+
     def __init__(self, lives: int, score: Score) -> None:
+        """Crea Pac-Man con las vidas y el marcador de la partida."""
         super().__init__()
         self.color.set(PLAYER_COLOR)
         self.images: dict[str, list[Surface]] = self._load_images()
@@ -51,9 +50,7 @@ class Player(Entity):
         return images
 
     def _die(self) -> None:
-        """
-        El jugador alcanza o es aclanzado por un Ghost not edible
-        """
+        """Inicia la muerte del jugador, salvo que sea invencible."""
         if self.invincible:
             return
         if self._dying:
@@ -84,9 +81,7 @@ class Player(Entity):
         return self._dying
 
     def _eat(self, target: Entity) -> None:
-        """
-        Come pacgum, Fantasmas, superPacgum, de todo.
-        """
+        """Resuelve qué ocurre cuando Pac-Man toca otra entidad."""
         if isinstance(target, Ghost):
             if not target.alive:
                 return
@@ -104,9 +99,7 @@ class Player(Entity):
                 Ghost.edible = True
 
     def resolve_tile(self) -> None:
-        """
-        Interactua con el resto de Entity de la casilla
-        """
+        """Resuelve las colisiones con las entidades de la casilla."""
         for ent in list(Entity.entity_map.get(self.pos.get(), [])):
             if ent == self:
                 continue

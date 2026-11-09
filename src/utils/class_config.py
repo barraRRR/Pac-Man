@@ -1,5 +1,7 @@
+"""Modelos y validación de la configuración del juego."""
+
 from typing import Any, Dict, List, Optional, Tuple, ClassVar
-from pydantic import BaseModel, Field, ValidationError, ValidationInfo, field_validator, model_validator
+from pydantic import BaseModel, Field, ValidationInfo, field_validator, model_validator
 import json
 import re
 from src.utils.logger import logger
@@ -7,7 +9,6 @@ from src.utils.logger import logger
 
 class Level(BaseModel):
     """Un nivel del juego: dimensiones del laberinto en celdas."""
-
 
     width: int = 15
     height: int = 15
@@ -35,7 +36,7 @@ class Level(BaseModel):
 class Config(BaseModel):
     """Parámetros de configuración con valores por defecto y rangos válidos."""
 
-    # Rangos de cada campo numérico: (mínimo, máximo, valor por defecto). None = sin límite.
+    # Cada rango contiene el mínimo, el máximo y el valor por defecto.
     LIMITES: ClassVar[Dict[str, Tuple[Optional[int], Optional[int], int]]] = {
         "lives": (1, 9, 3),
         "pacgum": (0, None, 42),
@@ -127,6 +128,7 @@ class Config(BaseModel):
 
         # Creamos una función que recibe un objeto Match y comprobamos si hay coincidencia con el primer grupo de paréntesis
         def replacer(match: re.Match):
+            """Conserva cadenas JSON y elimina los fragmentos de comentario."""
             if match.group(1):
                 return match.group(1)
             return ""
