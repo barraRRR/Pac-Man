@@ -3,8 +3,8 @@ from src.utils.utils import Coord, Color
 from src.core.entity import Entity
 
 
-PACGUM_COLOR = (255, 255, 255, 255)
-SUPER_COLOR = (255, 255, 255, 255)
+PACGUM_COLOR = (255, 240, 200, 255)
+SUPER_COLOR = (255, 240, 200, 255)
 
 
 class PacGum(Entity):
