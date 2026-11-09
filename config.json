@@ -12,7 +12,7 @@
         { "width": 12.7, "height": null },     // float y null
         { "width": "30", "height": true }      // número como string y booleano
     ],
-    "lives": 3,
+    "lives": 1,
     "pacgum": 1,
     "points_per_pacgum": 10,
     "points_per_super_pacgum": 50,

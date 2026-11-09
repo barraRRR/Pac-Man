@@ -32,7 +32,7 @@ class Instructions:
                 self._render_text(description, self._TEXT_SIZE, self._TEXT_COLOR),
             ))
         self.hint: Surface = self._render_text(
-            "Push SPACE to go back", self._HINT_SIZE, self._TEXT_COLOR
+            "PRESS SPACE TO GO TO MAIN MENU", self._HINT_SIZE, self._TEXT_COLOR
         )
 
     def _render_text(

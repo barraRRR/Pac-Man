@@ -1,0 +1,341 @@
+2026-11-09 09:16:23,033 [ERROR] pac_man: Error: only 6 levels found, filling up to 10.
+2026-11-09 09:16:23,033 [ERROR] pac_man: Error: width 9 out of range, using 10.
+2026-11-09 09:16:23,033 [ERROR] pac_man: Error: height 7 out of range, using 10.
+2026-11-09 09:16:23,033 [ERROR] pac_man: Error: width 5 out of range, using 10.
+2026-11-09 09:16:23,033 [ERROR] pac_man: Error: height 5 out of range, using 10.
+2026-11-09 09:16:23,411 [INFO] pac_man: Highscores loaded: 10
+2026-11-09 09:25:19,324 [ERROR] pac_man: Error: only 6 levels found, filling up to 10.
+2026-11-09 09:25:19,325 [ERROR] pac_man: Error: width 9 out of range, using 10.
+2026-11-09 09:25:19,325 [ERROR] pac_man: Error: height 7 out of range, using 10.
+2026-11-09 09:25:19,325 [ERROR] pac_man: Error: width 5 out of range, using 10.
+2026-11-09 09:25:19,325 [ERROR] pac_man: Error: height 5 out of range, using 10.
+2026-11-09 09:25:19,610 [INFO] pac_man: Highscores loaded: 10
+2026-11-09 09:25:21,218 [INFO] pac_man: 	Pacgum cell values: {10: 1}
+2026-11-09 09:31:24,347 [ERROR] pac_man: Error: only 6 levels found, filling up to 10.
+2026-11-09 09:31:24,347 [ERROR] pac_man: Error: width 9 out of range, using 10.
+2026-11-09 09:31:24,347 [ERROR] pac_man: Error: height 7 out of range, using 10.
+2026-11-09 09:31:24,347 [ERROR] pac_man: Error: width 5 out of range, using 10.
+2026-11-09 09:31:24,347 [ERROR] pac_man: Error: height 5 out of range, using 10.
+2026-11-09 09:31:24,598 [INFO] pac_man: Highscores loaded: 10
+2026-11-09 09:31:26,954 [INFO] pac_man: Level 1:
+2026-11-09 09:31:26,955 [INFO] pac_man: 	Pacgum cell values: {10: 1}
+2026-11-09 09:31:26,955 [INFO] pac_man: 	Pac-Man: (10, 7)
+2026-11-09 09:31:26,955 [INFO] pac_man: 	Ghosts: [(0, 1), (20, 0), (2, 12), (17, 14)]
+2026-11-09 09:31:26,955 [INFO] pac_man: 	Super-pacgums: [(2, 2), (18, 2), (3, 13), (18, 12)]
+2026-11-09 09:31:26,955 [INFO] pac_man: 	Pacgums: 1 placed
+2026-11-09 09:31:26,955 [INFO] pac_man: 	Pacgums: [(10, 9)]
+2026-11-09 09:31:29,648 [INFO] pac_man: Game pause
+2026-11-09 09:31:30,565 [INFO] pac_man: Return to main menu
+2026-11-09 09:33:47,213 [ERROR] pac_man: Error: only 6 levels found, filling up to 10.
+2026-11-09 09:33:47,214 [ERROR] pac_man: Error: width 9 out of range, using 10.
+2026-11-09 09:33:47,214 [ERROR] pac_man: Error: height 7 out of range, using 10.
+2026-11-09 09:33:47,214 [ERROR] pac_man: Error: width 5 out of range, using 10.
+2026-11-09 09:33:47,214 [ERROR] pac_man: Error: height 5 out of range, using 10.
+2026-11-09 09:33:47,443 [INFO] pac_man: Highscores loaded: 10
+2026-11-09 09:33:49,372 [INFO] pac_man: Generating Level  1
+2026-11-09 09:33:49,374 [INFO] pac_man: Pacgum cell values: {10: 1}
+2026-11-09 09:33:49,374 [INFO] pac_man: Pac-Man: (10, 7)
+2026-11-09 09:33:49,374 [INFO] pac_man: Ghosts: [(0, 1), (20, 0), (2, 12), (17, 14)]
+2026-11-09 09:33:49,374 [INFO] pac_man: Super-pacgums: [(2, 2), (18, 2), (3, 13), (18, 12)]
+2026-11-09 09:33:49,374 [INFO] pac_man: Pacgums: 1 placed
+2026-11-09 09:33:49,374 [INFO] pac_man: Pacgums: [(10, 9)]
+2026-11-09 09:33:52,642 [INFO] pac_man: Game pause
+2026-11-09 09:33:53,915 [INFO] pac_man: Return to main menu
+2026-11-09 09:34:11,620 [ERROR] pac_man: Error: only 6 levels found, filling up to 10.
+2026-11-09 09:34:11,621 [ERROR] pac_man: Error: width 9 out of range, using 10.
+2026-11-09 09:34:11,621 [ERROR] pac_man: Error: height 7 out of range, using 10.
+2026-11-09 09:34:11,621 [ERROR] pac_man: Error: width 5 out of range, using 10.
+2026-11-09 09:34:11,621 [ERROR] pac_man: Error: height 5 out of range, using 10.
+2026-11-09 09:34:11,839 [INFO] pac_man: Highscores loaded: 10
+2026-11-09 09:34:13,437 [INFO] pac_man: Generating Level 01
+2026-11-09 09:34:13,438 [INFO] pac_man: Pacgum cell values: {10: 1}
+2026-11-09 09:34:13,438 [INFO] pac_man: Pac-Man: (10, 7)
+2026-11-09 09:34:13,438 [INFO] pac_man: Ghosts: [(0, 1), (20, 0), (2, 12), (17, 14)]
+2026-11-09 09:34:13,438 [INFO] pac_man: Super-pacgums: [(2, 2), (18, 2), (3, 13), (18, 12)]
+2026-11-09 09:34:13,438 [INFO] pac_man: Pacgums: 1 placed
+2026-11-09 09:34:13,438 [INFO] pac_man: Pacgums: [(10, 9)]
+2026-11-09 09:34:14,681 [INFO] pac_man: Game pause
+2026-11-09 09:34:15,196 [INFO] pac_man: Game resumed
+2026-11-09 09:34:15,494 [INFO] pac_man: Game pause
+2026-11-09 09:34:15,971 [INFO] pac_man: Return to main menu
+2026-11-09 09:36:43,222 [ERROR] pac_man: Error: only 6 levels found, filling up to 10.
+2026-11-09 09:36:43,222 [ERROR] pac_man: Error: width 9 out of range, using 10.
+2026-11-09 09:36:43,222 [ERROR] pac_man: Error: height 7 out of range, using 10.
+2026-11-09 09:36:43,222 [ERROR] pac_man: Error: width 5 out of range, using 10.
+2026-11-09 09:36:43,222 [ERROR] pac_man: Error: height 5 out of range, using 10.
+2026-11-09 09:36:43,446 [INFO] pac_man: Highscores loaded: 10
+2026-11-09 09:36:45,463 [INFO] pac_man: Generating Level 01
+2026-11-09 09:36:45,465 [INFO] pac_man: 01 - Pacgum cell values: {10: 1}
+2026-11-09 09:36:45,465 [INFO] pac_man: 01 - Pac-Man: (10, 7)
+2026-11-09 09:36:45,465 [INFO] pac_man: 01 - Ghosts: [(0, 1), (20, 0), (2, 12), (17, 14)]
+2026-11-09 09:36:45,465 [INFO] pac_man: 01 - Super-pacgums: [(2, 2), (18, 2), (3, 13), (18, 12)]
+2026-11-09 09:36:45,465 [INFO] pac_man: 01 - Pacgums: 1 placed
+2026-11-09 09:36:45,465 [INFO] pac_man: 01 - Pacgum positions: [(10, 9)]
+2026-11-09 09:36:47,034 [INFO] pac_man: Game pause
+2026-11-09 09:36:47,912 [INFO] pac_man: Return to main menu
+2026-11-09 09:38:27,718 [ERROR] pac_man: Error: only 6 levels found, filling up to 10.
+2026-11-09 09:38:27,718 [ERROR] pac_man: Error: width 9 out of range, using 10.
+2026-11-09 09:38:27,718 [ERROR] pac_man: Error: height 7 out of range, using 10.
+2026-11-09 09:38:27,718 [ERROR] pac_man: Error: width 5 out of range, using 10.
+2026-11-09 09:38:27,718 [ERROR] pac_man: Error: height 5 out of range, using 10.
+2026-11-09 09:38:27,933 [INFO] pac_man: Highscores loaded: 10
+2026-11-09 09:38:29,254 [INFO] pac_man: Generating Level 01
+2026-11-09 09:38:29,254 [INFO] pac_man: [Level 01] Pacgum cell values: {10: 1}
+2026-11-09 09:38:29,254 [INFO] pac_man: [Level 01] Pac-Man: (10, 7)
+2026-11-09 09:38:29,254 [INFO] pac_man: [Level 01] Ghosts: [(0, 1), (20, 0), (2, 12), (17, 14)]
+2026-11-09 09:38:29,254 [INFO] pac_man: [Level 01] Super-pacgums: [(2, 2), (18, 2), (3, 13), (18, 12)]
+2026-11-09 09:38:29,254 [INFO] pac_man: [Level 01] Pacgums: 1 placed
+2026-11-09 09:38:29,254 [INFO] pac_man: [Level 01] Pacgum positions: [(10, 9)]
+2026-11-09 09:38:31,046 [INFO] pac_man: Game pause
+2026-11-09 09:38:33,578 [INFO] pac_man: Return to main menu
+2026-11-09 09:45:57,648 [ERROR] pac_man: Error: only 6 levels found, filling up to 10.
+2026-11-09 09:45:57,648 [ERROR] pac_man: Error: width 9 out of range, using 10.
+2026-11-09 09:45:57,648 [ERROR] pac_man: Error: height 7 out of range, using 10.
+2026-11-09 09:45:57,648 [ERROR] pac_man: Error: width 5 out of range, using 10.
+2026-11-09 09:45:57,648 [ERROR] pac_man: Error: height 5 out of range, using 10.
+2026-11-09 09:45:57,832 [INFO] pac_man: Highscores loaded: 10
+2026-11-09 09:46:00,578 [INFO] pac_man: [Level 01] Generating level
+2026-11-09 09:46:00,578 [INFO] pac_man: [Level 01] Pacgum cell values: {10: 1}
+2026-11-09 09:46:00,578 [INFO] pac_man: [Level 01] Pac-Man: (10, 7)
+2026-11-09 09:46:00,578 [INFO] pac_man: [Level 01] Ghosts: [(0, 1), (20, 0), (2, 12), (17, 14)]
+2026-11-09 09:46:00,579 [INFO] pac_man: [Level 01] Super-pacgums: [(2, 2), (18, 2), (3, 13), (18, 12)]
+2026-11-09 09:46:00,579 [INFO] pac_man: [Level 01] Pacgums: 1 placed
+2026-11-09 09:46:00,579 [INFO] pac_man: [Level 01] Pacgum positions: [(10, 9)]
+2026-11-09 09:46:01,732 [INFO] pac_man: Game pause
+2026-11-09 09:46:02,389 [INFO] pac_man: Return to main menu
+2026-11-09 10:01:10,430 [ERROR] pac_man: Error: only 6 levels found, filling up to 10.
+2026-11-09 10:01:10,431 [ERROR] pac_man: Error: width 9 out of range, using 10.
+2026-11-09 10:01:10,431 [ERROR] pac_man: Error: height 7 out of range, using 10.
+2026-11-09 10:01:10,431 [ERROR] pac_man: Error: width 5 out of range, using 10.
+2026-11-09 10:01:10,431 [ERROR] pac_man: Error: height 5 out of range, using 10.
+2026-11-09 10:01:10,630 [INFO] pac_man: Highscores loaded: 10
+2026-11-09 10:01:11,908 [INFO] pac_man: [Level 01] Generating level
+2026-11-09 10:01:11,908 [INFO] pac_man: [Level 01] Pacgum cell values: {10: 1}
+2026-11-09 10:01:11,908 [INFO] pac_man: [Level 01] Pac-Man: (10, 7)
+2026-11-09 10:01:11,908 [INFO] pac_man: [Level 01] Ghosts: [(0, 1), (20, 0), (2, 12), (17, 14)]
+2026-11-09 10:01:11,908 [INFO] pac_man: [Level 01] Super-pacgums: [(2, 2), (18, 2), (3, 13), (18, 12)]
+2026-11-09 10:01:11,908 [INFO] pac_man: [Level 01] Pacgums: 1 placed
+2026-11-09 10:01:11,908 [INFO] pac_man: [Level 01] Pacgum positions: [(10, 9)]
+2026-11-09 10:01:16,823 [INFO] pac_man: Game pause
+2026-11-09 10:01:17,720 [INFO] pac_man: Game resumed
+2026-11-09 10:01:18,535 [INFO] pac_man: Cheat mode - invincible: ON
+2026-11-09 10:01:34,985 [INFO] pac_man: Cheat mode - invincible: OFF
+2026-11-09 10:01:51,961 [INFO] pac_man: GAME OVER
+2026-11-09 10:03:37,783 [INFO] pac_man: Quiting game. See you soon!
+2026-11-09 10:05:18,155 [ERROR] pac_man: Error: only 6 levels found, filling up to 10.
+2026-11-09 10:05:18,156 [ERROR] pac_man: Error: width 9 out of range, using 10.
+2026-11-09 10:05:18,156 [ERROR] pac_man: Error: height 7 out of range, using 10.
+2026-11-09 10:05:18,156 [ERROR] pac_man: Error: width 5 out of range, using 10.
+2026-11-09 10:05:18,156 [ERROR] pac_man: Error: height 5 out of range, using 10.
+2026-11-09 10:05:18,362 [INFO] pac_man: Highscores loaded: 10
+2026-11-09 10:05:20,035 [INFO] pac_man: [Level 01] Generating level
+2026-11-09 10:05:20,036 [INFO] pac_man: [Level 01] Pacgum cell values: {10: 1}
+2026-11-09 10:05:20,036 [INFO] pac_man: [Level 01] Pac-Man: (10, 7)
+2026-11-09 10:05:20,036 [INFO] pac_man: [Level 01] Ghosts: [(0, 1), (20, 0), (2, 12), (17, 14)]
+2026-11-09 10:05:20,036 [INFO] pac_man: [Level 01] Super-pacgums: [(2, 2), (18, 2), (3, 13), (18, 12)]
+2026-11-09 10:05:20,036 [INFO] pac_man: [Level 01] Pacgums: 1 placed
+2026-11-09 10:05:20,036 [INFO] pac_man: [Level 01] Pacgum positions: [(10, 9)]
+2026-11-09 10:05:21,920 [INFO] pac_man: Cheat mode - invincible: ON
+2026-11-09 10:05:47,814 [INFO] pac_man: [Level 02] Generating level
+2026-11-09 10:05:47,814 [INFO] pac_man: [Level 02] Pacgum cell values: {3: 1}
+2026-11-09 10:05:47,814 [INFO] pac_man: [Level 02] Pac-Man: (5, 5)
+2026-11-09 10:05:47,814 [INFO] pac_man: [Level 02] Ghosts: [(0, 0), (9, 0), (0, 8), (8, 8)]
+2026-11-09 10:05:47,814 [INFO] pac_man: [Level 02] Super-pacgums: [(1, 0), (8, 1), (1, 8), (9, 9)]
+2026-11-09 10:05:47,814 [INFO] pac_man: [Level 02] Pacgums: 1 placed
+2026-11-09 10:05:47,814 [INFO] pac_man: [Level 02] Pacgum positions: [(2, 8)]
+2026-11-09 10:06:05,704 [INFO] pac_man: [Level 03] Generating level
+2026-11-09 10:06:05,704 [INFO] pac_man: [Level 03] Pacgum cell values: {3: 1}
+2026-11-09 10:06:05,704 [INFO] pac_man: [Level 03] Pac-Man: (7, 7)
+2026-11-09 10:06:05,704 [INFO] pac_man: [Level 03] Ghosts: [(0, 2), (13, 1), (2, 12), (13, 12)]
+2026-11-09 10:06:05,704 [INFO] pac_man: [Level 03] Super-pacgums: [(1, 1), (12, 2), (1, 12), (12, 14)]
+2026-11-09 10:06:05,704 [INFO] pac_man: [Level 03] Pacgums: 1 placed
+2026-11-09 10:06:05,704 [INFO] pac_man: [Level 03] Pacgum positions: [(11, 11)]
+2026-11-09 10:06:32,851 [INFO] pac_man: [Level 04] Generating level
+2026-11-09 10:06:32,851 [INFO] pac_man: [Level 04] Pacgum cell values: {1: 1}
+2026-11-09 10:06:32,851 [INFO] pac_man: [Level 04] Pac-Man: (5, 5)
+2026-11-09 10:06:32,851 [INFO] pac_man: [Level 04] Ghosts: [(1, 1), (8, 1), (0, 8), (8, 9)]
+2026-11-09 10:06:32,851 [INFO] pac_man: [Level 04] Super-pacgums: [(0, 1), (9, 0), (1, 9), (9, 9)]
+2026-11-09 10:06:32,851 [INFO] pac_man: [Level 04] Pacgums: 1 placed
+2026-11-09 10:06:32,851 [INFO] pac_man: [Level 04] Pacgum positions: [(2, 8)]
+2026-11-09 10:06:46,439 [INFO] pac_man: [Level 05] Generating level
+2026-11-09 10:06:46,440 [INFO] pac_man: [Level 05] Pacgum cell values: {8: 1}
+2026-11-09 10:06:46,440 [INFO] pac_man: [Level 05] Pac-Man: (12, 10)
+2026-11-09 10:06:46,440 [INFO] pac_man: [Level 05] Ghosts: [(0, 2), (21, 2), (3, 20), (24, 20)]
+2026-11-09 10:06:46,440 [INFO] pac_man: [Level 05] Super-pacgums: [(3, 0), (23, 2), (1, 20), (23, 19)]
+2026-11-09 10:06:46,440 [INFO] pac_man: [Level 05] Pacgums: 1 placed
+2026-11-09 10:06:46,440 [INFO] pac_man: [Level 05] Pacgum positions: [(2, 9)]
+2026-11-09 10:06:52,103 [INFO] pac_man: Game pause
+2026-11-09 10:08:10,136 [INFO] pac_man: Game resumed
+2026-11-09 10:08:10,991 [INFO] pac_man: [Level 06] Generating level
+2026-11-09 10:08:10,991 [INFO] pac_man: [Level 06] Pacgum cell values: {10: 1}
+2026-11-09 10:08:10,991 [INFO] pac_man: [Level 06] Pac-Man: (5, 6)
+2026-11-09 10:08:10,991 [INFO] pac_man: [Level 06] Ghosts: [(0, 1), (10, 1), (1, 12), (9, 11)]
+2026-11-09 10:08:10,991 [INFO] pac_man: [Level 06] Super-pacgums: [(0, 0), (10, 0), (1, 11), (10, 11)]
+2026-11-09 10:08:10,991 [INFO] pac_man: [Level 06] Pacgums: 1 placed
+2026-11-09 10:08:10,991 [INFO] pac_man: [Level 06] Pacgum positions: [(5, 1)]
+2026-11-09 10:08:11,865 [INFO] pac_man: [Level 07] Generating level
+2026-11-09 10:08:11,865 [INFO] pac_man: [Level 07] Pacgum cell values: {9: 1}
+2026-11-09 10:08:11,865 [INFO] pac_man: [Level 07] Pac-Man: (7, 7)
+2026-11-09 10:08:11,866 [INFO] pac_man: [Level 07] Ghosts: [(2, 2), (14, 2), (1, 12), (14, 14)]
+2026-11-09 10:08:11,866 [INFO] pac_man: [Level 07] Super-pacgums: [(0, 0), (12, 0), (2, 13), (13, 13)]
+2026-11-09 10:08:11,866 [INFO] pac_man: [Level 07] Pacgums: 1 placed
+2026-11-09 10:08:11,866 [INFO] pac_man: [Level 07] Pacgum positions: [(0, 13)]
+2026-11-09 10:08:12,544 [INFO] pac_man: [Level 08] Generating level
+2026-11-09 10:08:12,545 [INFO] pac_man: [Level 08] Pacgum cell values: {6: 1}
+2026-11-09 10:08:12,545 [INFO] pac_man: [Level 08] Pac-Man: (7, 7)
+2026-11-09 10:08:12,545 [INFO] pac_man: [Level 08] Ghosts: [(0, 1), (13, 2), (2, 14), (12, 12)]
+2026-11-09 10:08:12,545 [INFO] pac_man: [Level 08] Super-pacgums: [(1, 1), (12, 1), (2, 13), (13, 14)]
+2026-11-09 10:08:12,545 [INFO] pac_man: [Level 08] Pacgums: 1 placed
+2026-11-09 10:08:12,545 [INFO] pac_man: [Level 08] Pacgum positions: [(13, 11)]
+2026-11-09 10:08:13,318 [INFO] pac_man: [Level 09] Generating level
+2026-11-09 10:08:13,319 [INFO] pac_man: [Level 09] Pacgum cell values: {3: 1}
+2026-11-09 10:08:13,319 [INFO] pac_man: [Level 09] Pac-Man: (7, 7)
+2026-11-09 10:08:13,319 [INFO] pac_man: [Level 09] Ghosts: [(0, 0), (12, 0), (0, 13), (14, 12)]
+2026-11-09 10:08:13,319 [INFO] pac_man: [Level 09] Super-pacgums: [(1, 2), (12, 2), (2, 13), (12, 14)]
+2026-11-09 10:08:13,319 [INFO] pac_man: [Level 09] Pacgums: 1 placed
+2026-11-09 10:08:13,319 [INFO] pac_man: [Level 09] Pacgum positions: [(10, 3)]
+2026-11-09 10:08:15,325 [INFO] pac_man: [Level 10] Generating level
+2026-11-09 10:08:15,325 [INFO] pac_man: [Level 10] Pacgum cell values: {6: 1}
+2026-11-09 10:08:15,325 [INFO] pac_man: [Level 10] Pac-Man: (7, 7)
+2026-11-09 10:08:15,325 [INFO] pac_man: [Level 10] Ghosts: [(0, 2), (13, 1), (1, 14), (14, 12)]
+2026-11-09 10:08:15,325 [INFO] pac_man: [Level 10] Super-pacgums: [(2, 0), (14, 0), (2, 12), (13, 13)]
+2026-11-09 10:08:15,326 [INFO] pac_man: [Level 10] Pacgums: 1 placed
+2026-11-09 10:08:15,326 [INFO] pac_man: [Level 10] Pacgum positions: [(12, 9)]
+2026-11-09 10:10:11,611 [INFO] pac_man: Quiting game. See you soon!
+2026-11-09 10:21:28,022 [ERROR] pac_man: Error: only 6 levels found, filling up to 10.
+2026-11-09 10:21:28,022 [ERROR] pac_man: Error: width 9 out of range, using 10.
+2026-11-09 10:21:28,022 [ERROR] pac_man: Error: height 7 out of range, using 10.
+2026-11-09 10:21:28,022 [ERROR] pac_man: Error: width 5 out of range, using 10.
+2026-11-09 10:21:28,022 [ERROR] pac_man: Error: height 5 out of range, using 10.
+2026-11-09 10:21:28,207 [INFO] pac_man: Highscores loaded: 10
+2026-11-09 10:21:29,941 [INFO] pac_man: [Level 01] Generating level
+2026-11-09 10:21:29,941 [INFO] pac_man: [Level 01] Pacgum cell values: {10: 1}
+2026-11-09 10:21:29,941 [INFO] pac_man: [Level 01] Pac-Man: (10, 7)
+2026-11-09 10:21:29,941 [INFO] pac_man: [Level 01] Ghosts: [(0, 1), (20, 0), (2, 12), (17, 14)]
+2026-11-09 10:21:29,941 [INFO] pac_man: [Level 01] Super-pacgums: [(2, 2), (18, 2), (3, 13), (18, 12)]
+2026-11-09 10:21:29,941 [INFO] pac_man: [Level 01] Pacgums: 1 placed
+2026-11-09 10:21:29,941 [INFO] pac_man: [Level 01] Pacgum positions: [(10, 9)]
+2026-11-09 10:21:42,869 [INFO] pac_man: GAME OVER
+2026-11-09 10:23:41,975 [INFO] pac_man: Quiting game. See you soon!
+2026-11-09 10:24:51,690 [ERROR] pac_man: Error: only 6 levels found, filling up to 10.
+2026-11-09 10:24:51,690 [ERROR] pac_man: Error: width 9 out of range, using 10.
+2026-11-09 10:24:51,690 [ERROR] pac_man: Error: height 7 out of range, using 10.
+2026-11-09 10:24:51,690 [ERROR] pac_man: Error: width 5 out of range, using 10.
+2026-11-09 10:24:51,690 [ERROR] pac_man: Error: height 5 out of range, using 10.
+2026-11-09 10:24:51,879 [INFO] pac_man: Highscores loaded: 10
+2026-11-09 10:24:54,707 [ERROR] pac_man: Forced exit
+Traceback (most recent call last):
+  File "/Users/barreiro/coding/42/pac_man/repo/src/main.py", line 20, in main
+    return app.run()
+  File "/Users/barreiro/coding/42/pac_man/repo/src/core/app.py", line 123, in run
+    option: ItemType = self._menu_loop(
+  File "/Users/barreiro/coding/42/pac_man/repo/src/core/app.py", line 359, in _menu_loop
+    dt: int = self.clock.tick(_FPS)
+KeyboardInterrupt
+2026-11-09 10:24:54,709 [INFO] pac_man: Quiting game. See you soon!
+2026-11-09 10:26:20,781 [ERROR] pac_man: Error: only 6 levels found, filling up to 10.
+2026-11-09 10:26:20,781 [ERROR] pac_man: Error: width 9 out of range, using 10.
+2026-11-09 10:26:20,781 [ERROR] pac_man: Error: height 7 out of range, using 10.
+2026-11-09 10:26:20,781 [ERROR] pac_man: Error: width 5 out of range, using 10.
+2026-11-09 10:26:20,781 [ERROR] pac_man: Error: height 5 out of range, using 10.
+2026-11-09 10:26:20,987 [INFO] pac_man: Highscores loaded: 10
+2026-11-09 10:26:24,964 [ERROR] pac_man: Forced exit
+2026-11-09 10:26:24,964 [INFO] pac_man: Quiting game. See you soon!
+2026-11-09 10:28:47,943 [ERROR] pac_man: Error: only 6 levels found, filling up to 10.
+2026-11-09 10:28:47,943 [ERROR] pac_man: Error: width 9 out of range, using 10.
+2026-11-09 10:28:47,943 [ERROR] pac_man: Error: height 7 out of range, using 10.
+2026-11-09 10:28:47,943 [ERROR] pac_man: Error: width 5 out of range, using 10.
+2026-11-09 10:28:47,943 [ERROR] pac_man: Error: height 5 out of range, using 10.
+2026-11-09 10:28:48,130 [INFO] pac_man: Highscores loaded: 10
+2026-11-09 10:28:49,862 [INFO] pac_man: [Level 01] Generating level
+2026-11-09 10:28:49,863 [INFO] pac_man: [Level 01] Pacgum cell values: {10: 1}
+2026-11-09 10:28:49,863 [INFO] pac_man: [Level 01] Pac-Man: (10, 7)
+2026-11-09 10:28:49,863 [INFO] pac_man: [Level 01] Ghosts: [(0, 1), (20, 0), (2, 12), (17, 14)]
+2026-11-09 10:28:49,863 [INFO] pac_man: [Level 01] Super-pacgums: [(2, 2), (18, 2), (3, 13), (18, 12)]
+2026-11-09 10:28:49,863 [INFO] pac_man: [Level 01] Pacgums: 1 placed
+2026-11-09 10:28:49,863 [INFO] pac_man: [Level 01] Pacgum positions: [(10, 9)]
+2026-11-09 10:28:54,343 [INFO] pac_man: GAME OVER
+2026-11-09 10:29:07,325 [INFO] pac_man: [Level 01] Generating level
+2026-11-09 10:29:07,325 [INFO] pac_man: [Level 01] Pacgum cell values: {10: 1}
+2026-11-09 10:29:07,325 [INFO] pac_man: [Level 01] Pac-Man: (10, 7)
+2026-11-09 10:29:07,325 [INFO] pac_man: [Level 01] Ghosts: [(0, 1), (20, 0), (2, 12), (17, 14)]
+2026-11-09 10:29:07,325 [INFO] pac_man: [Level 01] Super-pacgums: [(2, 2), (18, 2), (3, 13), (18, 12)]
+2026-11-09 10:29:07,325 [INFO] pac_man: [Level 01] Pacgums: 1 placed
+2026-11-09 10:29:07,325 [INFO] pac_man: [Level 01] Pacgum positions: [(10, 9)]
+2026-11-09 10:29:11,783 [INFO] pac_man: GAME OVER
+2026-11-09 10:30:44,709 [INFO] pac_man: Quiting game. See you soon!
+2026-11-09 10:32:58,391 [ERROR] pac_man: Error: only 6 levels found, filling up to 10.
+2026-11-09 10:32:58,391 [ERROR] pac_man: Error: width 9 out of range, using 10.
+2026-11-09 10:32:58,391 [ERROR] pac_man: Error: height 7 out of range, using 10.
+2026-11-09 10:32:58,391 [ERROR] pac_man: Error: width 5 out of range, using 10.
+2026-11-09 10:32:58,391 [ERROR] pac_man: Error: height 5 out of range, using 10.
+2026-11-09 10:32:58,583 [INFO] pac_man: Highscores loaded: 10
+2026-11-09 10:32:59,929 [INFO] pac_man: [Level 01] Generating level
+2026-11-09 10:32:59,930 [INFO] pac_man: [Level 01] Pacgum cell values: {10: 1}
+2026-11-09 10:32:59,930 [INFO] pac_man: [Level 01] Pac-Man: (10, 7)
+2026-11-09 10:32:59,930 [INFO] pac_man: [Level 01] Ghosts: [(0, 1), (20, 0), (2, 12), (17, 14)]
+2026-11-09 10:32:59,930 [INFO] pac_man: [Level 01] Super-pacgums: [(2, 2), (18, 2), (3, 13), (18, 12)]
+2026-11-09 10:32:59,930 [INFO] pac_man: [Level 01] Pacgums: 1 placed
+2026-11-09 10:32:59,930 [INFO] pac_man: [Level 01] Pacgum positions: [(10, 9)]
+2026-11-09 10:33:04,177 [INFO] pac_man: GAME OVER
+2026-11-09 10:33:23,736 [INFO] pac_man: Quiting game. See you soon!
+2026-11-09 10:37:38,896 [ERROR] pac_man: Error: only 6 levels found, filling up to 10.
+2026-11-09 10:37:38,896 [ERROR] pac_man: Error: width 9 out of range, using 10.
+2026-11-09 10:37:38,896 [ERROR] pac_man: Error: height 7 out of range, using 10.
+2026-11-09 10:37:38,896 [ERROR] pac_man: Error: width 5 out of range, using 10.
+2026-11-09 10:37:38,896 [ERROR] pac_man: Error: height 5 out of range, using 10.
+2026-11-09 10:37:39,079 [INFO] pac_man: Highscores loaded: 10
+2026-11-09 10:37:42,056 [INFO] pac_man: [Level 01] Generating level
+2026-11-09 10:37:42,057 [INFO] pac_man: [Level 01] Pacgum cell values: {10: 1}
+2026-11-09 10:37:42,057 [INFO] pac_man: [Level 01] Pac-Man: (10, 7)
+2026-11-09 10:37:42,057 [INFO] pac_man: [Level 01] Ghosts: [(0, 1), (20, 0), (2, 12), (17, 14)]
+2026-11-09 10:37:42,057 [INFO] pac_man: [Level 01] Super-pacgums: [(2, 2), (18, 2), (3, 13), (18, 12)]
+2026-11-09 10:37:42,057 [INFO] pac_man: [Level 01] Pacgums: 1 placed
+2026-11-09 10:37:42,057 [INFO] pac_man: [Level 01] Pacgum positions: [(10, 9)]
+2026-11-09 10:37:46,748 [INFO] pac_man: GAME OVER
+2026-11-09 10:38:42,008 [INFO] pac_man: Quiting game. See you soon!
+2026-11-09 10:38:46,906 [ERROR] pac_man: Error: only 6 levels found, filling up to 10.
+2026-11-09 10:38:46,906 [ERROR] pac_man: Error: width 9 out of range, using 10.
+2026-11-09 10:38:46,906 [ERROR] pac_man: Error: height 7 out of range, using 10.
+2026-11-09 10:38:46,906 [ERROR] pac_man: Error: width 5 out of range, using 10.
+2026-11-09 10:38:46,906 [ERROR] pac_man: Error: height 5 out of range, using 10.
+2026-11-09 10:38:47,098 [INFO] pac_man: Highscores loaded: 10
+2026-11-09 10:38:48,473 [INFO] pac_man: [Level 01] Generating level
+2026-11-09 10:38:48,474 [INFO] pac_man: [Level 01] Pacgum cell values: {10: 1}
+2026-11-09 10:38:48,474 [INFO] pac_man: [Level 01] Pac-Man: (10, 7)
+2026-11-09 10:38:48,474 [INFO] pac_man: [Level 01] Ghosts: [(0, 1), (20, 0), (2, 12), (17, 14)]
+2026-11-09 10:38:48,474 [INFO] pac_man: [Level 01] Super-pacgums: [(2, 2), (18, 2), (3, 13), (18, 12)]
+2026-11-09 10:38:48,474 [INFO] pac_man: [Level 01] Pacgums: 1 placed
+2026-11-09 10:38:48,474 [INFO] pac_man: [Level 01] Pacgum positions: [(10, 9)]
+2026-11-09 10:38:52,924 [INFO] pac_man: GAME OVER
+2026-11-09 10:39:18,297 [INFO] pac_man: Quiting game. See you soon!
+2026-11-09 10:39:47,814 [ERROR] pac_man: Error: only 6 levels found, filling up to 10.
+2026-11-09 10:39:47,814 [ERROR] pac_man: Error: width 9 out of range, using 10.
+2026-11-09 10:39:47,814 [ERROR] pac_man: Error: height 7 out of range, using 10.
+2026-11-09 10:39:47,814 [ERROR] pac_man: Error: width 5 out of range, using 10.
+2026-11-09 10:39:47,814 [ERROR] pac_man: Error: height 5 out of range, using 10.
+2026-11-09 10:39:48,009 [INFO] pac_man: Highscores loaded: 10
+2026-11-09 10:39:49,367 [INFO] pac_man: [Level 01] Generating level
+2026-11-09 10:39:49,368 [INFO] pac_man: [Level 01] Pacgum cell values: {10: 1}
+2026-11-09 10:39:49,368 [INFO] pac_man: [Level 01] Pac-Man: (10, 7)
+2026-11-09 10:39:49,368 [INFO] pac_man: [Level 01] Ghosts: [(0, 1), (20, 0), (2, 12), (17, 14)]
+2026-11-09 10:39:49,368 [INFO] pac_man: [Level 01] Super-pacgums: [(2, 2), (18, 2), (3, 13), (18, 12)]
+2026-11-09 10:39:49,368 [INFO] pac_man: [Level 01] Pacgums: 1 placed
+2026-11-09 10:39:49,368 [INFO] pac_man: [Level 01] Pacgum positions: [(10, 9)]
+2026-11-09 10:39:53,597 [INFO] pac_man: GAME OVER
+2026-11-09 10:40:01,774 [INFO] pac_man: Quiting game. See you soon!
+2026-11-09 11:07:44,731 [ERROR] pac_man: Error: only 6 levels found, filling up to 10.
+2026-11-09 11:07:44,732 [ERROR] pac_man: Error: width 9 out of range, using 10.
+2026-11-09 11:07:44,732 [ERROR] pac_man: Error: height 7 out of range, using 10.
+2026-11-09 11:07:44,732 [ERROR] pac_man: Error: width 5 out of range, using 10.
+2026-11-09 11:07:44,732 [ERROR] pac_man: Error: height 5 out of range, using 10.
+2026-11-09 11:07:44,946 [INFO] pac_man: Highscores loaded: 10
+2026-11-09 11:07:46,312 [INFO] pac_man: [Level 01] Generating level
+2026-11-09 11:07:46,312 [INFO] pac_man: [Level 01] Pacgum cell values: {10: 1}
+2026-11-09 11:07:46,312 [INFO] pac_man: [Level 01] Pac-Man: (10, 7)
+2026-11-09 11:07:46,312 [INFO] pac_man: [Level 01] Ghosts: [(0, 1), (20, 0), (2, 12), (17, 14)]
+2026-11-09 11:07:46,312 [INFO] pac_man: [Level 01] Super-pacgums: [(2, 2), (18, 2), (3, 13), (18, 12)]
+2026-11-09 11:07:46,312 [INFO] pac_man: [Level 01] Pacgums: 1 placed
+2026-11-09 11:07:46,312 [INFO] pac_man: [Level 01] Pacgum positions: [(10, 9)]
+2026-11-09 11:07:50,765 [INFO] pac_man: GAME OVER
+2026-11-09 11:07:58,444 [INFO] pac_man: Quiting game. See you soon!

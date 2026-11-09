@@ -3,6 +3,7 @@ from src.utils.utils import Coord, Color, Dir
 from src.core.entity import Entity, State, ANI_SPEED
 from src.utils.error import UnreachableTileError
 import pygame
+from src.utils.logger import logger
 from pygame import Surface
 from src.maze.bitmap import BitMap
 from typing import List, Tuple, Set, Dict
@@ -72,11 +73,18 @@ class Ghost(Entity):
             return
 
         frames: List[Surface] = []
-        for png in sorted(Path(SCARED_GHOST).glob("*.png")):
-            frames.append(pygame.image.load(str(png)).convert_alpha())
+        try:
+            for png in sorted(Path(SCARED_GHOST).glob("*.png")):
+                frames.append(pygame.image.load(str(png)).convert_alpha())
+        except (OSError, pygame.error) as error:
+            logger.exception("Could not load scared ghost frames from %s: %s",
+                             SCARED_GHOST, error)
+            raise RuntimeError(
+                f"Could not load scared ghost frames from {SCARED_GHOST}"
+            ) from error
 
         if not frames:
-            print(f"[WARN] No scared frames found in {SCARED_GHOST}")
+            logger.warning("No scared frames found in %s", SCARED_GHOST)
             return
 
         cls._frames_scared = frames[0::2]    # azules: frames 00 y 02
@@ -352,42 +360,42 @@ class Ghost(Entity):
             return
 
         # Mismo latido que la caza: un paso cada `speed` ms.
-        self._timer_ms += dt
-        if self._timer_ms < self.speed:
-            return
-        self._timer_ms -= self.speed
-
-        # Ancla de la huida: salida del cuarto opuesto a Pac-Man.
-        # Si Pac-Man cambia de cuarto, se cambia de esquina.
-        flee_spawn: Coord | None = self._get_opposite_spawn(
-            target, bitmap, self._ghost_spawns)
-        
-        if flee_spawn is None:
-            return
-        
-        if self._flee_spawn is None or self._flee_spawn != flee_spawn:
-            self._flee_spawn = flee_spawn
-            self._flee_target = Coord(flee_spawn.get())
-
-        path: List[Coord] = self._find_path(
-            start=self.pos,
-            target=self._flee_target,
-            bitmap=bitmap
-        )
-        if len(path) >= 2:
-            self.delta = self.pos._get_delta(path[1])
-            self._set_position(path[1])
+        ticks = self.movement_ticks(dt)
+        if not ticks:
             return
 
-        # Llegada al destino: alternar salida <-> casilla cercana.
-        if self._flee_target == self._flee_spawn:
-            nearby: Coord | None = self._get_nearby_cell(
-                self._flee_spawn, bitmap
+        for _ in range(ticks):
+            # Ancla de la huida: salida del cuarto opuesto a Pac-Man.
+            # Si Pac-Man cambia de cuarto, se cambia de esquina.
+            flee_spawn: Coord | None = self._get_opposite_spawn(
+                target, bitmap, self._ghost_spawns)
+
+            if flee_spawn is None:
+                return
+
+            if self._flee_spawn is None or self._flee_spawn != flee_spawn:
+                self._flee_spawn = flee_spawn
+                self._flee_target = Coord(flee_spawn.get())
+
+            path: List[Coord] = self._find_path(
+                start=self.pos,
+                target=self._flee_target,
+                bitmap=bitmap
             )
-            if nearby is not None:
-                self._flee_target = nearby
-        else:
-            self._flee_target = Coord(self._flee_spawn.get())
+            if len(path) >= 2:
+                self.delta = self.pos._get_delta(path[1])
+                self._set_position(path[1])
+                continue
+
+            # Llegada al destino: alternar salida <-> casilla cercana.
+            if self._flee_target == self._flee_spawn:
+                nearby: Coord | None = self._get_nearby_cell(
+                    self._flee_spawn, bitmap
+                )
+                if nearby is not None:
+                    self._flee_target = nearby
+            else:
+                self._flee_target = Coord(self._flee_spawn.get())
 
 
 
@@ -403,6 +411,7 @@ class Blinky(Ghost):
         super().__init__(name="Blinky", points=points)
         self.color.set(BLINKY_COLOR)
         self.speed: int = BLINKY_SPEED
+        self.set_movement_interval(self.speed)
 
         # ***** LOAD_ANIMATION *****
         self.ani_path: str = BLINKY_ANI_PATH
@@ -427,9 +436,7 @@ class Blinky(Ghost):
         if self.edible:
             self._move_superpacgum(target, dt, tile_size, bitmap)
             return
-        self._timer_ms += dt
-        if self._timer_ms >= self.speed:
-            self._timer_ms -= self.speed
+        for _ in range(self.movement_ticks(dt)):
             curr_target: Coord = (
                 target if self.edible == False else self.spawn_pos
             )
@@ -458,7 +465,7 @@ class Pinky(Ghost):
         self.color.set(PINKY_COLOR)
         self.speed: int = PINKY_SPEED
         self.ani_path: str = PINKY_ANI_PATH
-
+        self.set_movement_interval(self.speed)
 
     def _move(
         self,
@@ -481,9 +488,7 @@ class Pinky(Ghost):
             return
 
         # un paso de BFS cada `speed` ms hacia la casilla predicha.
-        self._timer_ms += dt
-        if self._timer_ms >= self.speed:
-            self._timer_ms -= self.speed
+        for _ in range(self.movement_ticks(dt)):
             curr_target: Coord = self._predict_pinky_target(
                 target, directions, bitmap
             )
@@ -544,6 +549,7 @@ class Inky(Ghost):
         self.color.set(INKY_COLOR)
         self.speed: int = INKY_SPEED
         self.ani_path: str = INKY_ANI_PATH
+        self.set_movement_interval(self.speed)
 
     def _move(
         self,
@@ -566,9 +572,7 @@ class Inky(Ghost):
             return
 
         # un paso de BFS cada `speed` ms hacia el punto de emboscada.
-        self._timer_ms += dt
-        if self._timer_ms >= self.speed:
-            self._timer_ms -= self.speed
+        for _ in range(self.movement_ticks(dt)):
             curr_target: Coord = self._get_inky_target(target, directions, bitmap)
             path: List[Coord] = self._find_path(
                 start=self.pos,
@@ -650,6 +654,7 @@ class Clyde(Ghost):
         self.color.set(CLYDE_COLOR)
         self.speed: int = CLYDE_SPEED
         self.ani_path: str = CLYDE_ANI_PATH
+        self.set_movement_interval(self.speed)
 
     def _move(
             self,
@@ -671,9 +676,7 @@ class Clyde(Ghost):
             self._move_superpacgum(target, dt, tile_size, bitmap)
             return
         
-        self._timer_ms += dt
-        if self._timer_ms >= self.speed:
-            self._timer_ms -= self.speed
+        for _ in range(self.movement_ticks(dt)):
 
             path_to_target: List[Coord] = self._find_path(
                 start=self.pos,

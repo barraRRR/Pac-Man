@@ -9,6 +9,8 @@ _MENU_BACKGROUND = (3, 18, 15, 255)
 _FONT = 'Arial'
 _FONT_COLOR = (255, 255, 255, 255)
 _FONT_BODY_SIZE = 10
+FONT_MENU_INIT_SIZE = 20
+SELECTOR_SIZE = 20
 
 
 class ItemType(str, Enum):
@@ -74,7 +76,7 @@ class Menu:
         """
         if not pygame.font.get_init():
             pygame.font.init()
-        font = pygame.font.SysFont(_FONT, _FONT_BODY_SIZE)
+        font = pygame.font.SysFont(_FONT, SELECTOR_SIZE)
         cls.selector = font.render(">", True, _FONT_COLOR)
 
     def _render_item_list(
@@ -111,7 +113,7 @@ class MenuInit(Menu):
             Item(ItemType.INSTRUCTIONS),
             Item(ItemType.QUIT)
         ])
-        self._render_item_list("assets/font/font_emulogic.ttf", 16)
+        self._render_item_list("assets/font/font_emulogic.ttf", FONT_MENU_INIT_SIZE)
         self._active_item = self._items[0]
 
 
@@ -126,9 +128,3 @@ class MenuPause(Menu):
         ])
         self._render_item_list("assets/font/font_emulogic.ttf", 16)
         self._active_item = self._items[0]
-
-
-
-
-
-

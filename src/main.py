@@ -1,32 +1,36 @@
 from src.utils.class_config import Config
 from src.core.app import App
+from src.utils.logger import logger
 import json
+import pygame
 import sys
 
 
 def main() -> int:
     """Aquí comprobamos que nos hayan pasado el archivo de configuración."""
     if len(sys.argv) != 2:
-        print(
+        logger.error(
             "Error: Expected exactly one config file.\n"
-            "Usage: python3 pac-man.py <config.json>",
-            file=sys.stderr,
+            "Usage: python3 pac-man.py <config.json>"
         )
         return 1
 
-    # Aquí hay try-excepts que pusiste Aitor, pero el flujo lo manejamos dentro de la clase? ya que el programa se sigue ejecutando aunque el file de config esté mal. Si el path es incorrecto podemos promptear para que el usuario decida si prefiere poner otra ruta o cargar valores por defecto.
     try:
         app = App(Config.json_parser(sys.argv[1]))
-    except (OSError, FileNotFoundError, json.JSONDecodeError) as e:
-        print(f"Error loading config: {e}", file=sys.stderr)
+        return app.run()
+    except (OSError, FileNotFoundError, json.JSONDecodeError) as error:
+        logger.exception("Error loading or initializing application: %s",
+                         error)
         return 1
-
-    
-
-    # ——— test suite ———
-    # print(parser._config_clean) #Documento
-    # print(app._config.model_dump_json(indent=4)) #Objeto Config creado
-    return app.run()
+    except Exception:
+        logger.exception("Unhandled application error")
+        return 1
+    except KeyboardInterrupt:
+        logger.error("Forced exit")
+        return 1
+    finally:
+        logger.info("Quiting game. See you soon!")
+        pygame.quit()
 
 
 if __name__ == "__main__":

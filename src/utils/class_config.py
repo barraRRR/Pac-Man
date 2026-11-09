@@ -2,7 +2,7 @@ from typing import Any, Dict, List, Optional, Tuple, ClassVar
 from pydantic import BaseModel, Field, ValidationError, ValidationInfo, field_validator, model_validator
 import json
 import re
-import sys
+from src.utils.logger import logger
 
 
 class Level(BaseModel):
@@ -22,13 +22,13 @@ class Level(BaseModel):
         try:
             numero = int(valor)
         except (TypeError, ValueError):
-            print(f"Error: invalid {info.field_name} '{valor}', using 15.",
-                  file=sys.stderr)
+            logger.error("Error: invalid %s '%s', using 15.",
+                         info.field_name, valor)
             return 15
         acotado = max(cls.MIN_SIZE, min(cls.MAX_SIZE, numero))
         if acotado != numero:
-            print(f"Error: {info.field_name} {numero} out of range, "
-                  f"using {acotado}.", file=sys.stderr)
+            logger.error("Error: %s %s out of range, using %s.",
+                         info.field_name, numero, acotado)
         return acotado
     
 
@@ -62,8 +62,8 @@ class Config(BaseModel):
         try:
             numero = int(valor)
         except (TypeError, ValueError, OverflowError):
-            print(f"Error: invalid '{nombre}' ({valor!r}), using {defecto}.",
-                  file=sys.stderr)
+            logger.error("Error: invalid '%s' (%r), using %s.",
+                         nombre, valor, defecto)
             return defecto
         acotado = numero
         if minimo is not None:
@@ -71,8 +71,8 @@ class Config(BaseModel):
         if maximo is not None:
             acotado = min(maximo, acotado)
         if acotado != numero:
-            print(f"Error: '{nombre}' {numero} out of range, using {acotado}.",
-                  file=sys.stderr)
+            logger.error("Error: '%s' %s out of range, using %s.",
+                         nombre, numero, acotado)
         return acotado
 
     @model_validator(mode="before")
@@ -98,25 +98,28 @@ class Config(BaseModel):
                       and len(nombre_archivo) > 4
                       and not nombre_archivo[:-4].isdigit())
             if not valido:
-                print(f"Error: invalid highscore_filename "
-                      f"({nombre_archivo!r}), using highscore.csv.",
-                      file=sys.stderr)
+                logger.error("Error: invalid highscore_filename (%r), "
+                             "using highscore.csv.", nombre_archivo)
                 datos["highscore_filename"] = "highscore.csv"
 
         # El subject pide mínimo 10 niveles: los que falten se rellenan con 15x15
         niveles = datos.get("level")
         if isinstance(niveles, list) and len(niveles) < 10:
-            print(f"Error: only {len(niveles)} levels found, "
-                  f"filling up to 10.", file=sys.stderr)
+            logger.error("Error: only %s levels found, filling up to 10.",
+                         len(niveles))
             datos["level"] = niveles + [{} for _ in range(10 - len(niveles))]
         return datos
 
     @classmethod
     def json_parser(cls, config_file_path: str) -> "Config":
         """Lee un archivo JSON (con comentarios) y construye la Config."""
-        with open(config_file_path, "r", encoding="utf-8") as file:
-            config_raw: str = file.read()
-        # Proteger read() con try-except (o hacerlo desde la llamada??
+        try:
+            with open(config_file_path, "r", encoding="utf-8") as file:
+                config_raw: str = file.read()
+        except OSError:
+            logger.exception("No se pudo leer la configuración: %s",
+                             config_file_path)
+            raise
             
         # TEAM NOTE: antes de procesar y parsear el json, le quitamos los comentarios para evitar un JSONError al cargarlo.
         # Este patrón lo vemos juntos mejor. Básicamente crea 4 grupos. El primero recoje todo lo válido y los otros son grupos que incluyen los comentarios
@@ -130,7 +133,11 @@ class Config(BaseModel):
 
         # Aquí re.sub() actúa como función de orden superior para ejectura replacer
         config_clean: str = re.sub(pattern, replacer, config_raw)
-        config_dict: Dict[str, Any] = json.loads(config_clean)
-        # Proteger json.loads() con try-except
+        try:
+            config_dict: Dict[str, Any] = json.loads(config_clean)
+        except json.JSONDecodeError:
+            logger.exception("La configuración no contiene JSON válido: %s",
+                             config_file_path)
+            raise
 
         return cls(**config_dict)

@@ -73,7 +73,7 @@ _INTRO_PAD = 20          # Margen interior de la banda
 _INTRO_GAP = 30          # Hueco entre título y subtítulo
 
 # ==== INSTRUCCIONES ====
-_INSTR_FIRST_ROW_Y = 290               # primera fila, debajo del logo
+_INSTR_FIRST_ROW_Y = 350               # primera fila, debajo del logo
 _INSTR_ROW_SPACING = 70                # hueco entre filas
 _INSTR_PAIR_GAP = 30                   # hueco entre placa y texto
 _INSTR_HINT_Y = 700                    # pista de salida, zona del pie
@@ -118,10 +118,11 @@ class GraphicEngine():
         self.menu_pause: MenuPause = MenuPause()
         self.instructions: Instructions = Instructions()
         self.band: Surface = None
+        self.credits: Title = None
 
         # ***** TÍTULOS *****
-        self.instructions_title: Title = Title("INSTRUCTIONS", _TITLE_SIZE)
-        self.page_highscores_title: Title = Title("HIGH SCORES", _TITLE_SIZE)
+        self.instructions_title: Title = Title("INSTRUCTIONS")
+        self.page_highscores_title: Title = None
         self.time_title: Title = Title("00:00", size=14)
         self._time_text: str = "00:00"
 
@@ -130,6 +131,7 @@ class GraphicEngine():
         self.highscore_title: Title = Title("HIGH SCORE")
         self.highscore_int: Title = Title("0000")
         self.score: Score = score
+
 
     """
     ╔═════════════════════════════════════════════════════════════════════════╗
@@ -350,14 +352,18 @@ class GraphicEngine():
         ) -> None:
         """
         """
-        size = 2 if isinstance(pacgum, SuperPacGum) else 5
-        pg_size = self.tile_size // size
-        offset = (self.tile_size - pg_size) // 2
-        for i in range(pg_size):
-            for t in range(pg_size):
-                self._put_pixel(
-                    pacgum.sur, (i + offset, t + offset), pacgum.color
-                )
+        size = 3 if isinstance(pacgum, SuperPacGum) else 8
+        radius = max(1, self.tile_size // size // 2)
+        center = self.tile_size // 2
+
+        for y in range(-radius, radius + 1):
+            for x in range(-radius, radius + 1):
+                if x * x + y * y <= radius * radius:
+                    self._put_pixel(
+                        pacgum.sur,
+                        (center + x, center + y),
+                        pacgum.color
+                    )
 
     def _init_entities(self) -> None:
         """
@@ -441,17 +447,25 @@ class GraphicEngine():
         """
         Muestra el menú de inicio en pantalla
         """
+        if self.credits is None:
+            self.credits = Title("Created by aitorres and jbarreir © 2026", 8)
         self.window.blit(self.background, (0, 0))
         for i, item in enumerate(menu._items):
-            x, y = self._window_center()
+            # x, y = _WINDOW_CENTER
+            x, y = (self.win_px[0] // 2, 330)
             y += (i * _ITEM_LINE_SPACING)
             x -= item.sur.get_width() // 2
             item.xy = (x, y)
             self.window.blit(item.sur, (x, y))
             if item == menu._active_item:
-                self.window.blit(menu.selector, (x - 10, y))
+                self.window.blit(menu.selector, (x - 12, y))
         self._put_logo()
-
+        self.window.blit(
+            self.credits.sur,
+            ((self.win_px[0] - self.credits.sur.get_width()) // 2,
+             self.win_px[1] - _PADDING - self.credits.sur.get_height())
+        )
+                
     def _blit_menu_pause(self, menu: MenuPause) -> None:
         """Muestra las opciones de pausa sobre la escena congelada."""
         for i, item in enumerate(menu._items):
@@ -490,17 +504,27 @@ class GraphicEngine():
     def _get_title_x(self, title: Title) -> int:
         return (self.win_px[0] - title.sur.get_width()) // 2
 
-    def _blit_cropped_bg(
+    def _blit_panel(
             self,
             band_h: int,
             band_y: int
             ) -> None:
-        if self.band is None:
-            self.band: Surface = Surface((self.win_px[0], band_h))
+        if self.band is None or self.band.get_size() != (self.win_px[0], band_h):
+            self.band = Surface((self.win_px[0], band_h))
         self.band.fill(_BACKGROUND_COLOR)
         self.window.blit(self.band, (0, band_y))
     
-    def _blit_level_info(self, title_str: str, sub_str: str) -> None:
+    def _blit_level_info(
+            self,
+            title_str: str,
+            sub_str: str,
+            hint_str: str = None,
+            title_size: int = _INTRO_TITLE_SIZE,
+            sub_size: int = _INTRO_SUB_SIZE,
+            hint_size: int = _INTRO_SUB_SIZE,
+            dt: int = None,
+            prompt : bool = False
+            ) -> None:
         """Dibuja la banda de inicio de nivel a todo el ancho de la ventana.
 
         Muestra "LEVEL <n>" en grande y "Push SPACE to play" en letra
@@ -509,18 +533,31 @@ class GraphicEngine():
 
         HE JUNTADO VARIAS FUNCIONES EN UNA - REFACTOR
         """
-        title: Title = Title(text=title_str, size=_INTRO_TITLE_SIZE, color=_INTRO_TEXT_COLOR)
-        sub: Title = Title(text=sub_str, size=_INTRO_SUB_SIZE, color=_INTRO_TEXT_COLOR)
+        title: Title = Title(text=title_str, size=title_size, color=_INTRO_TEXT_COLOR)
+        sub: Title = Title(text=sub_str, size=sub_size, color=_INTRO_TEXT_COLOR)
+        if hint_str:
+            hint: Title = Title(text=hint_str, size=hint_size, color=_INTRO_TEXT_COLOR)
+        hint_h = hint.sur.get_height() + _INTRO_GAP if hint_str else 0
 
         # banda a todo el ancho, alto = margen + titulo + hueco + subtitulo + margen
-        band_h, band_y = self._get_band_size(title.sur.get_height() + sub.sur.get_height())
-        self._blit_cropped_bg(
+        band_h, band_y = self._get_band_size(title.sur.get_height() + sub.sur.get_height() + hint_h)
+        self._blit_panel(
             band_h=band_h,
             band_y=band_y
         )
         # textos centrados, como en los menus: se resta media superficie
         self.window.blit(title.sur, (self._get_title_x(title), band_y + _INTRO_PAD))
         self.window.blit(sub.sur, (self._get_title_x(sub), band_y + _INTRO_PAD + title.sur.get_height() + _INTRO_GAP))
+        if hint_str:
+            hint_y = (
+                band_y
+                + _INTRO_PAD
+                + title.sur.get_height()
+                + _INTRO_GAP
+                + sub.sur.get_height()
+                + _INTRO_GAP
+            )
+            self.window.blit(hint.sur, (self._get_title_x(hint), hint_y))
 
     def _blit_instructions(self) -> None:
         """Pega la pantalla de instrucciones renderizada por su objeto."""
@@ -554,10 +591,11 @@ class GraphicEngine():
         """Dibuja el logo y el título de la pantalla de puntuaciones."""
         self._put_logo()
 
-       # Igual que en instrucciones: el centro es el de la ventana actual.
+        # Igual que en instrucciones: el centro es el de la ventana actual.
         title_x: int = (self.win_px[0] - self.page_highscores_title.sur.get_width()) // 2
         title_y: int = _PADDING + _LOGO_AREA[1] + _PAGE_TITLE_GAP
-        self.window.blit(self.page_highscores_title.sur, (title_x, title_y))
+        self.page_highscores_title.blit_title(self.window, (title_x, title_y))
+
 
     def _blit_highscores_rows(
         self,
@@ -783,8 +821,5 @@ class GraphicEngine():
         if text != self._time_text:
             self._time_text = text
             self.time_title = Title(text, size=14)
-
-
-
 
 

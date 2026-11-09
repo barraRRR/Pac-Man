@@ -16,12 +16,11 @@ import pygame
 import random
 from src.score.highscore import HighScore, Score, PlayerName
 from src.ux_ui.instructions import Instructions
+from src.utils.logger import logger
 from enum import Enum
 
 
 _FPS = 60
-_MOVEMENT_INTERVAL = 220
-
 # Duracion del efecto de la super-pacgum (10 s de prueba)
 _SUPER_PACGUM_DURATION_MS = 10000
 
@@ -96,7 +95,7 @@ class App:
         HighScore.security = False   # TEMPORAL: probar salida en claro
         HighScore.load()
         self._engine._set_highscore(HighScore.top())
-        print(f"  highscores loaded: {len(HighScore.scores)}")
+        logger.info("Highscores loaded: %s", len(HighScore.scores))
 
     @property
     def blinky(self) -> Blinky:
@@ -148,10 +147,12 @@ class App:
                 for number, level in enumerate(self.config.level, start=1):
                     # try:
                     # Momento 1: preparar el nivel (mapa)
-                    self._start_level(number, level, True)
+                    self._start_level(number, level)
                     self._spawn_entities()  # Momento 2: colocar Pac-Man y fantasmas (aún no existe)
+                    """
                     if number != 1:
                         self._level_intro(number)
+                    """
                     self._game_loop()      # Momento 3: mover, comer, morir (aún no existe)
 
                     # Último nivel superado (ganado o saltado con ESC): toca guardar el nombre.
@@ -160,12 +161,11 @@ class App:
                         and not self._return_to_menu
                     ):
                         if self._level_completed():
-                            self._congratulations()
+                            self._congratulations("YOU ARE THE WINNER!", "PRESS SPACE")
                         self.state = AppState.PLAYER_NAME
 
-
-
                     if self.state == AppState.PLAYER_NAME:
+                        self._congratulations("GAME OVER", "PRESS SPACE")
                         self._enter_player_name()
                         if self.state == AppState.HIGHSCORE:
                             self._highscores_loop()
@@ -190,7 +190,7 @@ class App:
         self._end_game()       # Momento 4: guardar puntuación, despedida
         return 0
 
-    def _start_level(self, number: int, level: Level, debug: bool = False) -> None:
+    def _start_level(self, number: int, level: Level) -> None:
         """Prepara el nivel actual: genera el mapa y deja el estado listo."""
         # Genero el mapa de este nivel con el tamaño que dice la config.
         self.maze.generate_level(
@@ -200,7 +200,6 @@ class App:
         )
         Ghost.path_map.clear()   # mapa nuevo: caduca la cache de caminos BFS
         Coord._set_frontier(self.maze.frontier)
-        print(f"\nLevel {number}:")
 
         self.current_level = number
         self.list_key.clear()   # nivel nuevo: sin giros pendientes del anterior
@@ -222,16 +221,19 @@ class App:
         for cell in self.pacgum_spawns:
             value = self.maze.grid[cell[1]][cell[0]]
             counts[value] = counts.get(value, 0) + 1
-        print(f"  Pacgum cell values: {dict(sorted(counts.items()))}")
 
-        if debug:
-            print(f"  Pac-Man: {self.pacman_start}")
-            print(f"  Ghosts: {self.ghost_spawns}")
-            print(f"  Super-pacgums: {self.super_pacgum_spawns}")
-            # print(f"  Pacgums: {self.pacgum_spawns}")
-            print(f"  Pacgums: {len(self.pacgum_spawns)} placed")
-            print(f"  Pacgums: {self.pacgum_spawns}")
-            print()
+        level_label: str = f"Level {number:02d}"
+        logger.info("[%s] Generating level", level_label)
+        logger.info("[%s] Pacgum cell values: %s",
+                    level_label, dict(sorted(counts.items())))
+        logger.info("[%s] Pac-Man: %s", level_label, self.pacman_start)
+        logger.info("[%s] Ghosts: %s", level_label, self.ghost_spawns)
+        logger.info("[%s] Super-pacgums: %s",
+                    level_label, self.super_pacgum_spawns)
+        logger.info("[%s] Pacgums: %s placed",
+                    level_label, len(self.pacgum_spawns))
+        logger.info("[%s] Pacgum positions: %s",
+                    level_label, self.pacgum_spawns)
 
     def _spawn_entities(self) -> None:
         """
@@ -265,7 +267,9 @@ class App:
             entity._update_entity_map(True)
 
     def _start_player_death(self) -> None:
-        """Oculta los fantasmas mientras Pac-Man reproduce su muerte."""
+        """
+        Oculta los fantasmas mientras Pac-Man reproduce su muerte
+        """
         self._death_in_progress = True
         self._death_timer_ms = 0
         for ghost in self.ghosts.values():
@@ -278,15 +282,18 @@ class App:
         if self._death_timer_ms < PLAYER_DEATH_DURATION_MS:
             return
 
-        for ghost in self.ghosts.values():
-            ghost._set_position(ghost.spawn_pos)
-            ghost._reset()
+        if self.player.lives > 0:
+            for ghost in self.ghosts.values():
+                ghost._set_position(ghost.spawn_pos)
+                ghost._reset()
         self.player.finish_death()
         self._death_timer_ms = 0
         self._death_in_progress = False
 
     def _push_direction(self, dir: Dir) -> None:
-        """Apunta la direccion pulsada: si hay hueco se apila, si esta llena se sustituye la pendiente."""
+        """
+        Apunta la direccion pulsada: si hay hueco se apila, si esta llena se sustituye la pendiente
+        """
         if dir in self.list_key:
             return
         if len(self.list_key) < 2:
@@ -296,17 +303,19 @@ class App:
             self.list_key[1] = dir
 
     def _confirm_menu_pause(self) -> None:
-        """Ejecuta la opcion marcada del menu de pausa."""
+        """
+        Ejecuta la opcion marcada del menu de pausa
+        """
         option = self._engine.menu_pause._active_item._item_type
         if option == ItemType.RESUME:
             self._pause = False
             self.state = AppState.RUN
-            print("Game resumed")
+            logger.info("Game resumed")
         elif option == ItemType.MAIN_MENU:
             self._pause = False  # aquí u a donde vamos, apreniciar todo
             self.state = AppState.INIT
             self._return_to_menu = True
-            print("Return to main menu")
+            logger.info("Return to main menu")
 
     def _toggle_pause(self) -> None:
         """Pausa la partida o confirma la opción seleccionada."""
@@ -315,14 +324,14 @@ class App:
         else:
             self._pause = True
             self.state = AppState.PAUSE
-            print("Game pause")
+            logger.info("Game pause")
 
     # ==== MODO TRUCO ====
     def _toggle_invincible(self) -> None:
         """Activa o desactiva la invencibilidad del jugador (issue #124)."""
         self.player.invincible = not self.player.invincible
         state = "ON" if self.player.invincible else "OFF"
-        print(f"Cheat mode - invincible: {state}")
+        logger.info(f"Cheat mode - invincible: {state}")
         
     def _handle_events(
         self,
@@ -396,7 +405,10 @@ class App:
             pygame.display.flip()
             self._engine.window.fill((0, 0, 0, 0))
 
-    def _congratulations(self) -> None:
+    def _congratulations(
+            self,
+            title_str: str = "LEVEL COMPLETE",
+            sub_str: str = "PRESS SPACE FOR NEXT LEVEL") -> None:
         """Muestra la banda de nivel completado y espera SPACE.
 
         Igual que _level_intro pero sin preparar nada: se repinta la
@@ -406,7 +418,7 @@ class App:
         while waiting:
             dt: int = self.clock.tick(_FPS)
             self._engine._blit_elements(dt, self.current_level)
-            self._engine._blit_level_info(title_str="CONGRATULATIONS!", sub_str="'space'")
+            self._engine._blit_level_info(title_str, sub_str)
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     # la X de la ventana tambien cierra aqui, no solo SPACE
@@ -427,7 +439,9 @@ class App:
             self._engine._blit_elements(dt, self.current_level)
             self._engine._blit_level_info(
                 title_str="ENTER NAME",
-                sub_str=self.player_name.get_name(),
+                sub_str=self.player_name.get_prompt(dt),
+                hint_str="PRESS SPACE TO SAVE YOUR SCORE",
+                hint_size=8
             )
             if not self._handle_events(get_keys(self)):
                 self.state = AppState.INIT
@@ -454,19 +468,21 @@ class App:
         Misma idea que la intro de nivel: se repite el dibujo en cada
         frame y se espera la barra para volver al menú principal.
         """
-        waiting: bool = True
+        waiting = True
         while waiting:
             self.clock.tick(_FPS)
+
+            self._engine.window.blit(self._engine.background, (0, 0))
             self._engine._blit_highscores_title()
             self._engine._blit_highscores_rows(HighScore.scores)
-            
+
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     waiting = False
                 elif event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
                     waiting = False
+
             pygame.display.flip()
-            self._engine.window.fill((0, 0, 0, 0))
         self.state = AppState.INIT
 
     def _instructions_loop(self) -> None:
@@ -478,14 +494,15 @@ class App:
         waiting: bool = True
         while waiting:
             self.clock.tick(_FPS)
+            self._engine.window.blit(self._engine.background, (0, 0))
             self._engine._blit_instructions()
+
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     waiting = False
                 elif event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
                     waiting = False
             pygame.display.flip()
-            self._engine.window.fill((0, 0, 0, 0))
 
     @property
     def remaining_seconds(self) -> int:
@@ -507,8 +524,6 @@ class App:
 
         # mantiene el programa en ejecución hasta que haya un evento de cierre
         running = True
-        move_timer: int = 0
-
         while running and not self._return_to_menu and not self._level_completed():
             dt: int = self.clock.tick(_FPS)
 
@@ -517,7 +532,7 @@ class App:
                 time_limit_ms = self.config.level_max_time * 1000
 
                 if self._level_timer_ms >= time_limit_ms:
-                    print("Time limit reached - game over")
+                    logger.info("Time limit reached - game over")
                     self.state = AppState.PLAYER_NAME
                     running = False
             self._engine._set_time(self.remaining_seconds)
@@ -527,16 +542,13 @@ class App:
             if self._death_in_progress:
                 self._update_player_death(dt)
                 if not self._death_in_progress and self.player.lives <= 0:
-                    print("Game over")
+                    logger.info("GAME OVER")
                     self.state = AppState.PLAYER_NAME
                     running = False
             elif not self._pause:
                 # ========PLAYER============
-                # movimiento del player: un paso cada _MOVEMENT_INTERVAL ms
-                move_timer += dt
-                if move_timer >= _MOVEMENT_INTERVAL:
-                    # resto en vez de cero, igual que la hucha de Blinky
-                    move_timer -= _MOVEMENT_INTERVAL
+                # El reloj de Entity conserva el tiempo sobrante entre frames.
+                for _ in range(self.player.movement_ticks(dt)):
                     if self.list_key:
                         # giro anticipado: si la pendiente ya se puede, se ejecuta al instante
                         moved: bool = False
@@ -689,7 +701,7 @@ def get_keys(app: App) -> Dict[int, Callable[[], None]]:
             for char in "abcdefghijklmnopqrstuvwxyz0123456789"
         }
         keys[pygame.K_BACKSPACE] = app.player_name.delete_last
-        keys[pygame.K_RETURN] = app._finish_player_name
+        keys[pygame.K_SPACE] = app._finish_player_name
         return keys
 
     if app.state in (

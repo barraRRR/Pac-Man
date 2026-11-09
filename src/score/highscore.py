@@ -1,12 +1,16 @@
 import base64
 import csv
 import string
-import sys
 from pathlib import Path
 import time
 from src.utils.title import Title
+from src.utils.utils import make_interval_ticker
+from src.utils.logger import logger
+
 
 PLAYER_MAX_LEN_NAME = 10
+PROMPT_INTERVAL = 300
+
 
 class HighScore:
     """Sistema de puntuaciones del juego.
@@ -62,12 +66,8 @@ class HighScore:
 
         if len(clean_name) > cls.MAX_NAME_LENGTH:
             clean_name = clean_name[:cls.MAX_NAME_LENGTH]
-            print(
-                "Error: name is longer than "
-                f"{cls.MAX_NAME_LENGTH} characters, "
-                f'keeping "{clean_name}".',
-                file=sys.stderr,
-            )
+            logger.error("Error: name is longer than %s characters, "
+                         'keeping "%s".', cls.MAX_NAME_LENGTH, clean_name)
         return clean_name
 
     @classmethod
@@ -173,12 +173,9 @@ class HighScore:
                 if not row:
                     continue
                 rows.append({"name": row[0], "score": int(row[1])})
-        except (ValueError, IndexError, OSError):
-            print(
-                "Error: highscore file is damaged, "
-                "starting with an empty ranking.",
-                file=sys.stderr,
-            )
+        except (ValueError, IndexError, OSError, UnicodeError) as error:
+            logger.error("Highscore file is damaged; starting with an empty "
+                         "ranking: %s", error)
             cls.scores = []
             return cls.scores
         cls.scores = rows
@@ -207,20 +204,15 @@ class HighScore:
             except OSError:
                 if attempt == cls.SAVE_ATTEMPTS:
                     break
-                print(
-                    f"Error: could not save the highscore file "
-                    f"(attempt {attempt} of {cls.SAVE_ATTEMPTS}).",
-                    file=sys.stderr,
-                )
+                logger.exception("Error: could not save the highscore file "
+                                 "(attempt %s of %s).",
+                                 attempt, cls.SAVE_ATTEMPTS)
                 for count in range(cls.SAVE_ATTEMPTS, 0, -1):
-                    print(f"Retrying in {count}...", file=sys.stderr)
+                    logger.info("Retrying in %s...", count)
                     time.sleep(cls.RETRY_SECONDS)
-        print(
-            "Error: total failure saving the highscore. "
-            "The ranking survives in memory: play again and "
-            "we will try again.",
-            file=sys.stderr,
-        )
+        logger.error("Error: total failure saving the highscore. "
+                     "The ranking survives in memory: play again and "
+                     "we will try again.")
         return False
 
     @classmethod
@@ -240,17 +232,11 @@ class HighScore:
         """
         clean_name = cls.clean_name(name)
         if not clean_name:
-            print(
-                "Error: player name cannot be empty.",
-                file=sys.stderr,
-            )
+            logger.error("Error: player name cannot be empty.")
             return False
 
         if not cls.is_valid_score(score):
-            print(
-                "Error: score must be a non-negative integer.",
-                file=sys.stderr,
-            )
+            logger.error("Error: score must be a non-negative integer.")
             return False
 
         if len(cls.scores) >= 10:
@@ -303,7 +289,10 @@ class Score(Title):
 class PlayerName(Title):
     def __init__(self) -> None:
         super().__init__(text="")
-        self._name = "|"
+        self._name = ""
+        self.prompt = "|"
+        self.timer = make_interval_ticker(PROMPT_INTERVAL)
+        self.prompt_visible: bool = True
     
     def set_name(self, new: str) -> bool:
         if len(new) > PLAYER_MAX_LEN_NAME:
@@ -317,16 +306,21 @@ class PlayerName(Title):
     def build_name(self, char: str) -> bool:
         return self.set_name(self._name + char)
     
-    
     def delete_last(self) -> bool:
         return self.set_name(self._name[:-2])
-    
     
     def get_name(self) -> str:
         return self._name
 
-
-
+    def define_visible_prompt(self) -> None:
+        self.prompt = "|" if self.prompt_visible else " "
+    
+    def get_prompt(self, dt: int) -> str:
+        ticks = self.timer(dt)
+        for _ in range(ticks):
+            self.prompt_visible = not self.prompt_visible
+            self.define_visible_prompt()
+        return self._name + self.prompt
 
 
 
