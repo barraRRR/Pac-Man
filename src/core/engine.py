@@ -15,24 +15,6 @@ from src.utils.class_maze import Maze
 from src.ux_ui.menu import Menu, MenuInit, MenuPause
 from src.ux_ui.instructions import Instructions
 
-"""
-
-funciones con el equivalente de MLX
-
-Función MinilibX (MLX)	    Equivalente estricto en Pygame	    Propósito en el motor gráfico
-|--------------------------|-----------------------------------|----------------------------------------------------|
-mlx_init()	                pygame.init()	                    Inicializa los módulos internos del entorno gráfico.
-mlx_new_window()	        pygame.display.set_mode((w, h))	    Crea la ventana principal donde se renderizará el juego.
-mlx_new_image()	            pygame.Surface((w, h))	            Crea un lienzo en memoria para dibujar antes de volcar a pantalla.
-mlx_xpm_file_to_image()	    pygame.image.load(ruta)	            Carga una textura o sprite desde un archivo local a la memoria.
-mlx_pixel_put()	            Surface.set_at((x, y), color)	    Cambia el color de un único píxel específico.
-mlx_put_image_to_window()	Display.blit(image, (x, y))	        Vuelca una imagen o buffer en unas coordenadas concretas de la pantalla.
-mlx_hook() / mlx_key_hook()	pygame.event.get()	                Captura eventos crudos del sistema (teclas, ratón, cierre de ventana).
-mlx_loop()	                while loop: + pygame.display.flip()	Mantiene el programa en ejecución y actualiza los fotogramas.
-mlx_destroy_window()	    pygame.display.quit()	            Destruye el contexto gráfico y cierra la ventana de forma segura.
-
-"""
-
 _WINDOW_WIDTH = 600
 _WINDOW_HEIGHT = 800
 _PADDING = 30
@@ -51,27 +33,26 @@ _MAX_TILE_SIZE = 45
 _BACKGROUND_COLOR = (3, 18, 15, 255)
 _WALL_COLOR = (5, 4, 170, 255)
 _HEADER_AREA = 220
-_HUD_TITLE_GAP = 48     # el título del marcador queda 48 px sobre el mapa
-_HUD_SCORE_GAP = 28     # la puntuación queda 28 px sobre el mapa
+_HUD_TITLE_GAP = 48
+_HUD_SCORE_GAP = 28
 
 _INTRO_TEXT_COLOR = (255, 255, 255, 255)
-_INTRO_TITLE_SIZE = 24   # Tamaño del título "LEVEL X"
-_INTRO_SUB_SIZE = 10     # Tamaño del "Push SPACE to play"
-_INTRO_PAD = 20          # Margen interior de la banda
-_INTRO_GAP = 30          # Hueco entre título y subtítulo
+_INTRO_TITLE_SIZE = 24
+_INTRO_SUB_SIZE = 10
+_INTRO_PAD = 20
+_INTRO_GAP = 30
 
-# ==== INSTRUCCIONES ====
-_INSTR_FIRST_ROW_Y = 350               # primera fila, debajo del logo
-_INSTR_ROW_SPACING = 70                # hueco entre filas
-_INSTR_PAIR_GAP = 30                   # hueco entre placa y texto
-_INSTR_HINT_Y = 700                    # pista de salida, zona del pie
+_INSTR_FIRST_ROW_Y = 350
+_INSTR_ROW_SPACING = 70
+_INSTR_PAIR_GAP = 30
+_INSTR_HINT_Y = 700
 
 _PAGE_TITLE_GAP = 70
 
-_TARGET_TILE_SIZE = 25      # Tamaño de casilla deseado para el mapa más grande
-_WINDOW_MARGIN = 1.10       # Margen extra sobre el tamaño calculado (10 %)
-_MAX_WINDOW = (1600, 950)   # Tope de seguridad (ancho, alto)
-_SCREEN_MARGIN = 0.90       # Parte de la pantalla que puede ocupar la ventana
+_TARGET_TILE_SIZE = 25
+_WINDOW_MARGIN = 1.10
+_MAX_WINDOW = (1600, 950)
+_SCREEN_MARGIN = 0.90
 
 class GraphicEngine:
     """Calcula dimensiones y renderiza los elementos visuales del juego."""
@@ -83,21 +64,17 @@ class GraphicEngine:
             pacgum: List[PacGum],
             score: Score) -> None:
         """Guarda las entidades y prepara el estado gráfico inicial."""
-        # ***** ENTITIES *****
         self.player: Player = player
         self.ghosts: Dict[Ghost] = ghosts
         self.pacgum: List[PacGum] = pacgum
         self.maze: Maze | None = None
 
-        # ***** PARAMETERS *****
-        # size = (col, row) / px = pixeles (x, y) / se invierten
         self.maze_size: Tuple[int, int] = None
         self.tile_size: int = None
         self.line: int = None
         self.maze_px: Tuple[int, int] = None
         self.win_px: Tuple[int, int] = (_WINDOW_WIDTH, _WINDOW_HEIGHT)
 
-        # ***** UX-UI *****
         self.logo: Logo = Logo()
         self.background: Surface = None
         self.window: Surface = None
@@ -107,13 +84,11 @@ class GraphicEngine:
         self.band: Surface = None
         self.credits: Title = None
 
-        # ***** TÍTULOS *****
         self.instructions_title: Title = Title("INSTRUCTIONS")
         self.page_highscores_title: Title = None
         self.time_title: Title = Title("00:00", size=14)
         self._time_text: str = "00:00"
 
-        # ***** SCORE *****
         self.up_title: Title = Title("1UP")
         self.highscore_title: Title = Title("HIGH SCORE")
         self.highscore_int: Title = Title("0000")
@@ -219,11 +194,6 @@ class GraphicEngine:
         extra_x = (win_px.x - maze_px.x) // 2
         return Coord((x_px + extra_x, y_px + _PADDING))
 
-    """
-    ╔═════════════════════════════════════════════════════════════════════════╗
-    ║                              PIXEl RENDER                               ║
-    ╚═════════════════════════════════════════════════════════════════════════╝
-    """
     @staticmethod
     def _put_pixel(
             surface: Surface,
@@ -337,6 +307,7 @@ class GraphicEngine:
     ║                                 MENU                                    ║
     ╚═════════════════════════════════════════════════════════════════════════╝
     """
+
     def _init_menu_init(self) -> None:
         """Prepara las superficies de texto del menú principal."""
         self.menu_init._render_item_list()
@@ -448,14 +419,10 @@ class GraphicEngine:
         """Pega la pantalla de instrucciones renderizada por su objeto."""
         self._put_logo()
 
-        # ===TITULO===
-        # Se centra en el ancho real de la ventana, no en la constante de 600.
         title_x: int = (self.win_px[0] - self.instructions_title.sur.get_width()) // 2
-        # El alto se calcula desde el borde inferior del logo, no con un 200 fijo.
         title_y: int = _PADDING + _LOGO_AREA[1] + _PAGE_TITLE_GAP
         self.window.blit(self.instructions_title.sur, (title_x, title_y))
 
-        # ===CONTENIDO===
         for index, (cap, text) in enumerate(self.instructions.rows):
             pair_w: int = cap.get_width() + _INSTR_PAIR_GAP + text.get_width()
             x: int = (self.win_px[0] - pair_w) // 2
@@ -467,7 +434,6 @@ class GraphicEngine:
                  y + (cap.get_height() - text.get_height()) // 2)
             )
 
-        # pista de salida, como el "Push SPACE to play" de la intro
         hint: Surface = self.instructions.hint
         self.window.blit(hint, ((self.win_px[0] - hint.get_width()) // 2,
                     _INSTR_HINT_Y))
@@ -476,11 +442,9 @@ class GraphicEngine:
         """Dibuja el logo y el título de la pantalla de puntuaciones."""
         self._put_logo()
 
-        # El título se crea la primera vez que se pinta la pantalla.
         if self.page_highscores_title is None:
             self.page_highscores_title = Title("HIGH SCORES")
 
-        # Igual que en instrucciones: el centro es el de la ventana actual.
         title_x: int = (self.win_px[0] - self.page_highscores_title.sur.get_width()) // 2
         title_y: int = _PADDING + _LOGO_AREA[1] + _PAGE_TITLE_GAP
         self.page_highscores_title.blit_title(self.window, (title_x, title_y))
@@ -490,13 +454,9 @@ class GraphicEngine:
         self,
         scores: List[Dict[str, str | int]]
     ) -> None:
-        """
-        """
+        """Dibuja los nombres y puntuaciones del ranking."""
         first_row_y: int = 300
         row_spaccing: int = 35
-        # El bloque se reparte alrededor del centro real: la columna de
-        # nombres a la izquierda y la de puntos a la derecha, a 230 px cada
-        # una. Antes eran 70 y 530, que solo cuadraban con una ventana de 600.
         center_x: int = self.win_px[0] // 2
         left_x: int = center_x - 230
         right_x: int = center_x + 230
@@ -509,20 +469,12 @@ class GraphicEngine:
             self.window.blit(name.sur, (left_x, y))
             score_x: int = right_x - score.sur.get_width()
             self.window.blit(score.sur, (score_x, y))
-            pass
 
-        # ---- exit--
         hint: Surface = self.instructions.hint
         self.window.blit(
             hint,
             ((self.win_px[0] - hint.get_width()) // 2, _INSTR_HINT_Y)
         )
-
-    """
-    ╔═════════════════════════════════════════════════════════════════════════╗
-    ║                                  MAZE                                   ║
-    ╚═════════════════════════════════════════════════════════════════════════╝
-    """
 
     def _render_maze(
             self,
@@ -530,16 +482,7 @@ class GraphicEngine:
             bitmap: BitMap,
             color: Color
         ) -> None:
-        """
-        Render a maze grid to the screen.
-
-        Iterates through the maze 2D array and renders each cell as a tile.
-        Cells with value > 0 are drawn in white, others in background color.
-        Does not automatically flush the image; call flush_image() to display.
-
-        Args:
-            maze: 2D list where each element is an int representing a cell.
-        """
+        """Dibuja cada celda de la cuadrícula en la superficie del laberinto."""
         for y, row in enumerate(bitmap.grid):
             for x, cell_value in enumerate(row):
                 self._render_cell(
@@ -561,76 +504,37 @@ class GraphicEngine:
         return free // 2
 
     def _cal_maze_top(self) -> int:
-        """
-        Altura a la que empieza el mapa dentro de la ventana.
-
-        Se centra en el alto disponible, pero nunca sube por encima de
-        _HEADER_AREA, que es donde acaban el logo y el marcador.
-        """
+        """Calcula el inicio vertical del mapa debajo del encabezado."""
         free: int = self.win_px[1] - self.maze_px[1]
         return max(_HEADER_AREA, free // 2)
 
     def _cal_maze_offset(self) -> Tuple[int, int]:
-        """
-        """
+        """Devuelve el desplazamiento del laberinto dentro de la ventana."""
         return (self._cal_left_padding(self.maze_px[0]), self._cal_maze_top())
     
     def _put_maze(
             self,
             new_maze: Maze,
             color: Color | Tuple[int, int, int, int] = _WALL_COLOR
-        ) -> None:
-        """
-        Imprime la ventana entera en pantalla
-        """
+            ) -> None:
+        """Actualiza el laberinto y prepara su superficie de dibujo."""
         self._update_maze(new_maze)
         self.maze.sur = Surface(self.maze_px, pygame.SRCALPHA)
         self.maze.sur.fill((0, 0, 0, 0)) 
         self._render_maze(self.maze.sur, self.maze._bitmap, color)
 
 
-    """
-    ╔═════════════════════════════════════════════════════════════════════════╗
-    ║                             RENDER_GHOSTS                               ║
-    ╚═════════════════════════════════════════════════════════════════════════╝
-    """
-
-
-
-
-
-    """
-    ╔═════════════════════════════════════════════════════════════════════════╗
-    ║                             RENDER_PLAYER                               ║
-    ╚═════════════════════════════════════════════════════════════════════════╝
-    """
-
-
-
-
-    """
-    ╔═════════════════════════════════════════════════════════════════════════╗
-    ║                           RENDER_FULL_FRAME                             ║
-    ╚═════════════════════════════════════════════════════════════════════════╝
-    """
-
     def _blit_elements(self, dt: int, level: int = 1) -> None:
-        """
-        """
+        """Dibuja el laberinto, las entidades, el HUD y las vidas."""
         self.window.blit(self.background, (0, 0))
         self._put_logo()
         self.window.blit(self.maze.sur, (self._cal_maze_offset()))
         left: int = self._cal_left_padding(self.maze_px[0])
         top: int = self._cal_maze_top()
 
-        # El marcador se reparte en tres columnas sobre el mapa: 1UP y su
-        # puntuación pegados al borde izquierdo, HIGH SCORE centrado en el
-        # mapa y las vidas pegadas al borde derecho.
         right: int = left + self.maze_px[0]
         center_x: int = left + self.maze_px[0] // 2
 
-        # La línea cuelga del borde superior del mapa, no de una y fija:
-        # así queda siempre cerca del laberinto y lejos del logo.
         hud_y: int = top - _HUD_TITLE_GAP
         hud_score_y: int = top - _HUD_SCORE_GAP
 
@@ -655,8 +559,6 @@ class GraphicEngine:
                 self.window.blit(ghost.get_frame(dt), ghost.pos.off_get(self.tile_size, top, left))
         self.window.blit(self.player.get_frame(dt), self.player.pos.off_get(self.tile_size, top, left))
 
-        # --- vidas ---
-        # Vidas restantes como iconos estáticos, alineados a la derecha.
         frames = self.player.images.get("right", [])
         lives = self.player.lives
 
@@ -673,7 +575,6 @@ class GraphicEngine:
                     (start_x + index * (icon_size + gap), hud_score_y)
                 )
 
-        # Reloj
         time_x = (
             left
             + self.maze_px[0]
@@ -682,7 +583,6 @@ class GraphicEngine:
         time_y = top + self.maze_px[1] + 12
         self.window.blit(self.time_title.sur, (time_x, time_y))
 
-        # Nivel
         level_preview: Title = Title(f"LEVEL {level}", size=14)
         self.window.blit(
             level_preview.sur,
@@ -710,4 +610,3 @@ class GraphicEngine:
         if text != self._time_text:
             self._time_text = text
             self.time_title = Title(text, size=14)
-

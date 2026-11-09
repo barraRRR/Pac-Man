@@ -42,7 +42,7 @@ class App:
 
     def __init__(self, config: Config) -> None:
         """Construye la App con la configuración y deja el estado vacío."""
-        self.config: Config = config                                  # Configuración ya validada y acotada.
+        self.config: Config = config
         self.maze: Maze = Maze(config.seed)
         self.pacman_start: tuple[int, int] | None = None
         self.ghost_spawns: list[tuple[int, int]] = []
@@ -56,7 +56,6 @@ class App:
         self.state: AppState = AppState.INIT
 
         pygame.init()
-        # Entity instancies
         self.player: Player = Player(
             lives=self.config.lives,
             score=self.score
@@ -69,7 +68,6 @@ class App:
         }
         self.pacgum: List[PacGum] = []
 
-        # Graphic Engine
         self._engine: GraphicEngine = GraphicEngine(
             player=self.player,
             ghosts=self.ghosts,
@@ -79,7 +77,6 @@ class App:
         self.list_key: Dir = []
         self._pause: bool = False
         self._return_to_menu: bool = False
-        # Tiempo acumulado del efecto de la super-pacgum (ms)
         self._super_timer_ms: int = 0
         self._death_timer_ms: int = 0
         self._death_in_progress: bool = False
@@ -274,7 +271,6 @@ class App:
         if len(self.list_key) < 2:
             self.list_key.append(dir)
         else:
-            # lista llena: la nueva tecla sustituye a la pendiente
             self.list_key[1] = dir
 
     def _confirm_menu_pause(self) -> None:
@@ -486,7 +482,6 @@ class App:
         self._engine._put_entities()
         self.state = AppState.RUN
 
-        # mantiene el programa en ejecución hasta que haya un evento de cierre
         running = True
         while running and not self._return_to_menu and not self._level_completed():
             dt: int = self.clock.tick(_FPS)
@@ -510,11 +505,9 @@ class App:
                     self.state = AppState.PLAYER_NAME
                     running = False
             elif not self._pause:
-                # ========PLAYER============
-                # El reloj de Entity conserva el tiempo sobrante entre frames.
+                # Movimiento de Pac-Man.
                 for _ in range(self.player.movement_ticks(dt)):
                     if self.list_key:
-                        # giro anticipado: si la pendiente ya se puede, se ejecuta al instante
                         moved: bool = False
                         if len(self.list_key) == 2:
                             try:
@@ -524,19 +517,16 @@ class App:
                                 moved = True
                             except HitWallError:
                                 pass
-                            # paso normal con la actual, si no acabamos de girar
                         if not moved:
                             try:
                                 self.player._move(
                                     self.maze._bitmap, self.list_key[0])
                             except HitWallError:
-                                # pared: cae la actual y la pendiente manda en el proximo latido
                                 if len(self.list_key) == 2:
                                     self.list_key.pop(0)
 
                 lives_before: int = self.player.lives
 
-                # Super-pacgums vivas antes de comer (#110)
                 super_pacgums_before: int = sum(
                     isinstance(pacgum, SuperPacGum) and pacgum.alive
                     for pacgum in self.pacgum
@@ -544,24 +534,21 @@ class App:
 
                 self.player.resolve_tile()
 
-                # Super-pacgums vivas despues de comer (#110)
                 super_pacgums_after: int = sum(
                     isinstance(pacgum, SuperPacGum) and pacgum.alive
                     for pacgum in self.pacgum
                 )
 
                 if super_pacgums_after < super_pacgums_before:
-                    # Se acaba de comer una super: el efecto vuelve a empezar
                     self._super_timer_ms = 0
                 
-                #eliminar direciones guardadas si pierdes una vida
                 if self.player.lives < lives_before:
                     self.list_key.clear()
                     self._start_player_death()
 
-                # ========GHOST============
+                # Movimiento y colisiones de los fantasmas.
                 if not self._death_in_progress:
-                    for ghost in self.ghosts.values():      # movement
+                    for ghost in self.ghosts.values():
                         ghost._move(
                             target=self.player.pos,
                             dt=dt,
@@ -577,7 +564,6 @@ class App:
                 if Ghost.edible and not self._death_in_progress:
                     self._super_timer_ms += dt
 
-                    # Durante los últimos 2 segundos, los fantasmas se ven blancos.
                     warning_time_ms: int = 2_000
                     Ghost.show_white = (
                         self._super_timer_ms
@@ -589,13 +575,11 @@ class App:
                         Ghost.show_white = False
                         self._super_timer_ms = 0
                 
-                # Si perdió una vida durante este frame, borra la dirección pendiente.
                 if self.player.lives < lives_before:
                     self.list_key.clear()
                     if not self._death_in_progress:
                         self._start_player_death()
 
-                # Game over: sin vidas, volvemos al menú.
                 if self.player.lives <= 0 and not self._death_in_progress:
                     self.state = AppState.PLAYER_NAME
                     running = False
@@ -606,7 +590,6 @@ class App:
             
             if running:
                 running = self._handle_events(get_keys(self))
-            # actualiza frame
             pygame.display.flip()
             self._engine.window.fill((0, 0, 0, 0))
 
