@@ -591,6 +591,10 @@ class GraphicEngine():
         """Dibuja el logo y el título de la pantalla de puntuaciones."""
         self._put_logo()
 
+        # El título se crea la primera vez que se pinta la pantalla.
+        if self.page_highscores_title is None:
+            self.page_highscores_title = Title("HIGH SCORES")
+
         # Igual que en instrucciones: el centro es el de la ventana actual.
         title_x: int = (self.win_px[0] - self.page_highscores_title.sur.get_width()) // 2
         title_y: int = _PADDING + _LOGO_AREA[1] + _PAGE_TITLE_GAP
