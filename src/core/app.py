@@ -117,6 +117,11 @@ class App:
     def run(self) -> int:
         """Recorre los niveles en orden y ejecuta los momentos del juego."""
         self.clock: pygame.time.Clock = pygame.time.Clock()
+        levels = [
+            (level.width, level.height)
+            for level in self.config.level
+        ]
+        self._engine.win_px = self._engine._calculate_window_size(levels)
         self._engine._init_window()
         Ghost._load_scared_frames()
 
@@ -326,7 +331,8 @@ class App:
         """Ejecuta la acción asociada a cada tecla pulsada."""
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                return False
+                self._end_game()
+                raise SystemExit(0)
             if event.type != pygame.KEYDOWN:
                 continue
             if event.key == pygame.K_ESCAPE:
@@ -381,6 +387,10 @@ class App:
             self._engine._blit_elements(dt, number)          # escena + HUD, como en juego
             self._engine._blit_level_info(title_str=f"LEVEL {number}", sub_str="Push SPACE to play")  # banda encima de la escena
             for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    # la X de la ventana tambien cierra aqui, no solo SPACE
+                    self._end_game()
+                    raise SystemExit(0)
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
                     waiting = False
             pygame.display.flip()
@@ -398,6 +408,10 @@ class App:
             self._engine._blit_elements(dt, self.current_level)
             self._engine._blit_level_info(title_str="CONGRATULATIONS!", sub_str="'space'")
             for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    # la X de la ventana tambien cierra aqui, no solo SPACE
+                    self._end_game()
+                    raise SystemExit(0)
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
                     waiting = False
             pygame.display.flip()

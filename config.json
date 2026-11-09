@@ -2,7 +2,7 @@
     "highscore_filename": "highscore.csv",
     "level": [
         { "width": 40,   "height": 8 },        // tira horizontal válida
-        { "width": 10,   "height": 99 },       // torre en el mínimo de ancho y el máximo de alto
+        { "width": 10,   "heigh       t": 99 },       // torre en el mínimo de ancho y el máximo de alto
         { "width": 99,   "height": 99 },       // mapa gigante en el límite
         { "width": 10,   "height": 10 },       // mínimo exacto
         { "width": 3,    "height": 25 },       // ancho por debajo del mínimo

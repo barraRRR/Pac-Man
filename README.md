@@ -903,7 +903,77 @@ Cada nivel tiene un límite de tiempo configurable mediante `level_max_time`. Co
 
 
 
+## Tamaño de ventana y HUD adaptativo
 
+La ventana ya no mide siempre 600 × 800. `App.run()` pide el tamaño a
+`GraphicEngine._calculate_window_size(levels)` antes de crear la ventana, y
+ese tamaño se guarda en `win_px`. Todo lo que se dibuja después se coloca
+respecto a `win_px`, al mapa o a ambos.
+
+### Cómo se calcula la ventana
+
+Se busca el nivel más ancho y el más alto de la configuración y se reserva
+espacio para una casilla objetivo:
+Pruebe:
+|
+max_cols, max_rows
+Ancho y alto máximos entre todos los niveles.
+need_w
+max_cols * _TARGET_TILE_SIZE + _PADDING * 2.
+need_h
+max_rows * _TARGET_TILE_SIZE + _HEADER_AREA + _FOOTER_AREA + _PADDING.
+_WINDOW_MARGIN
+Margen del 10 % sobre lo calculado.
+_get_screen_limit()
+Resolución del monitor por _SCREEN_MARGIN, acotada por _MAX_WINDOW.
+El resultado se acota entre el tamaño base y el límite de pantalla. Si no se
+puede leer la resolución, se usa solo _MAX_WINDOW.
+
+Consecuencia conocida: la ventana se dimensiona para el nivel más grande, así
+que los niveles pequeños dejan margen negro alrededor del mapa. Queda pendiente
+decidir si se reajusta por nivel.
+
+El HUD va sobre el mapa, no sobre la ventana
+_blit_elements calcula tres referencias y coloca todo desde ellas:
+
+python
+Copiar
+left: int = self._cal_left_padding(self.maze_px[0])
+top: int = self._cal_maze_top()
+right: int = left + self.maze_px[0]
+center_x: int = left + self.maze_px[0] // 2
+Pruebe:
+|
+El marcador se reparte en tres columnas: 1UP y su puntuación alineados al
+borde izquierdo del laberinto, HIGH SCORE centrado en el mapa y los iconos de
+vidas pegados al borde derecho. El reloj y la etiqueta LEVEL <n> van debajo
+del laberinto, en top + self.maze_px[1] + 12. Como todo sale de left y
+top, el HUD acompaña al mapa cuando cambia el tamaño de casilla.
+
+_cal_left_padding recibe el ancho del elemento y una alineación opcional
+(left, center o right); sin alineación centra. _cal_maze_top() centra el
+mapa en el alto disponible pero nunca sube por encima de _HEADER_AREA, que es
+donde acaban el logo y el marcador.
+
+_FOOTER_AREA bajó de 100 a 60 px para dejar más alto útil al mapa: con eso un
+mapa de 35 × 35 llega a casillas de 18 px sin pegarse al HUD.
+
+Pantallas de instrucciones y high scores
+Las dos pantallas se centran en self.win_px[0], no en la constante de 600.
+Eso afecta al título, a cada fila de placa + texto, a la pista de salida y a las
+columnas de nombre y puntos del ranking, que se reparten a ±230 px del centro
+real.
+
+El título de cada pantalla se coloca bajo el logo con
+_PADDING + _LOGO_AREA[1] + _PAGE_TITLE_GAP, en lugar de un y fijo. Así el
+hueco respecto al logo se mantiene aunque cambie _LOGO_AREA, y queda la misma
+separación que se ve en la partida entre el logo y la línea de puntuación.
+
+Cierre de la ventana
+pygame.QUIT se atiende igual en _level_intro, _congratulations y
+_game_loop: se llama a _end_game() y se lanza SystemExit(0). Antes, la X
+se ignoraba en las pantallas intermedias y podía dejar el juego en un estado
+inesperado.
 
 
 

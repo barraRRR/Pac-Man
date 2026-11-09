@@ -7,20 +7,25 @@ import sys
 
 class Level(BaseModel):
     """Un nivel del juego: dimensiones del laberinto en celdas."""
+
+
     width: int = 15
     height: int = 15
 
+    MIN_SIZE: ClassVar[int] = 15
+    MAX_SIZE: ClassVar[int] = 35
+    
     @field_validator("width", "height", mode="before")
     @classmethod
     def acotar(cls, valor: Any, info: ValidationInfo) -> int:
-        """Acota el tamaño entre 5 y 99; si no es un número, usa 15."""
+        """Acota el tamaño entre MIN_SIZE y MAX_SIZE; si no es un número, usa DEFAULT_SIZE."""
         try:
             numero = int(valor)
         except (TypeError, ValueError):
             print(f"Error: invalid {info.field_name} '{valor}', using 15.",
                   file=sys.stderr)
             return 15
-        acotado = max(10, min(99, numero))
+        acotado = max(cls.MIN_SIZE, min(cls.MAX_SIZE, numero))
         if acotado != numero:
             print(f"Error: {info.field_name} {numero} out of range, "
                   f"using {acotado}.", file=sys.stderr)
