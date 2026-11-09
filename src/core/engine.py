@@ -398,6 +398,8 @@ class GraphicEngine():
         Imprime la ventana entera en pantalla
         """
         self.window = pygame.display.set_mode(self.win_px)
+        # Título de la barra del sistema; sin esto SDL pone "pygame window".
+        pygame.display.set_caption("Pac-Man")
         self.background = Surface(self.win_px)
 
     def _put_background(self) -> None:
