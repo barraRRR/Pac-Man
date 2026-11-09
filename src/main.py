@@ -25,6 +25,9 @@ def main() -> int:
     except Exception:
         logger.exception("Unhandled application error")
         return 1
+    except KeyboardInterrupt:
+        logger.error("Forced exit")
+        return 1
     finally:
         logger.info("Quiting game. See you soon!")
         pygame.quit()

@@ -144,8 +144,10 @@ class App:
                     # Momento 1: preparar el nivel (mapa)
                     self._start_level(number, level)
                     self._spawn_entities()  # Momento 2: colocar Pac-Man y fantasmas (aún no existe)
+                    """
                     if number != 1:
                         self._level_intro(number)
+                    """
                     self._game_loop()      # Momento 3: mover, comer, morir (aún no existe)
 
                     # Último nivel superado (ganado o saltado con ESC): toca guardar el nombre.
@@ -154,10 +156,11 @@ class App:
                         and not self._return_to_menu
                     ):
                         if self._level_completed():
-                            self._congratulations()
+                            self._congratulations("YOU ARE THE WINNER!", "PRESS SPACE")
                         self.state = AppState.PLAYER_NAME
 
                     if self.state == AppState.PLAYER_NAME:
+                        self._congratulations("GAME OVER", "PRESS SPACE")
                         self._enter_player_name()
                         if self.state == AppState.HIGHSCORE:
                             self._highscores_loop()
@@ -370,28 +373,10 @@ class App:
             pygame.display.flip()
             self._engine.window.fill((0, 0, 0, 0))
 
-    def _level_intro(self, number: int) -> None:
-        """Muestra la banda de inicio de nivel y espera SPACE para jugar.
-
-        Pinta la escena del nivel nuevo con la banda encima y no deja
-        entrar al game loop hasta que se pulse la barra espaciadora.
-        """
-        # escena del nivel nuevo, lo mismo que pinta _game_loop antes de arrancar
-        self._engine._put_maze(self.maze)
-        self._engine._put_entities()
-
-        waiting: bool = True
-        while waiting:
-            dt: int = self.clock.tick(_FPS)
-            self._engine._blit_elements(dt, number)          # escena + HUD, como en juego
-            self._engine._blit_level_info(title_str=f"LEVEL {number}", sub_str="Push SPACE to play")  # banda encima de la escena
-            for event in pygame.event.get():
-                if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
-                    waiting = False
-            pygame.display.flip()
-            self._engine.window.fill((0, 0, 0, 0))
-
-    def _congratulations(self) -> None:
+    def _congratulations(
+            self,
+            title_str: str = "LEVEL COMPLETE",
+            sub_str: str = "PRESS SPACE FOR NEXT LEVEL") -> None:
         """Muestra la banda de nivel completado y espera SPACE.
 
         Igual que _level_intro pero sin preparar nada: se repinta la
@@ -401,7 +386,7 @@ class App:
         while waiting:
             dt: int = self.clock.tick(_FPS)
             self._engine._blit_elements(dt, self.current_level)
-            self._engine._blit_level_info(title_str="CONGRATULATIONS!", sub_str="'space'")
+            self._engine._blit_level_info(title_str, sub_str)
             for event in pygame.event.get():
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
                     waiting = False
@@ -419,6 +404,8 @@ class App:
             self._engine._blit_level_info(
                 title_str="ENTER NAME",
                 sub_str=self.player_name.get_prompt(dt),
+                hint_str="PRESS SPACE TO SAVE YOUR SCORE",
+                hint_size=8
             )
             if not self._handle_events(get_keys(self)):
                 self.state = AppState.INIT
@@ -678,7 +665,7 @@ def get_keys(app: App) -> Dict[int, Callable[[], None]]:
             for char in "abcdefghijklmnopqrstuvwxyz0123456789"
         }
         keys[pygame.K_BACKSPACE] = app.player_name.delete_last
-        keys[pygame.K_RETURN] = app._finish_player_name
+        keys[pygame.K_SPACE] = app._finish_player_name
         return keys
 
     if app.state in (
