@@ -435,12 +435,12 @@ class GraphicEngine():
     def _get_title_x(title: Title) -> int:
         return (_WINDOW_WIDTH - title.sur.get_width()) // 2
 
-    def _blit_cropped_bg(
+    def _blit_panel(
             self,
             band_h: int,
             band_y: int
             ) -> None:
-        if self.band is None:
+        if self.band is None or self.band.get_size() != (_WINDOW_WIDTH, band_h):
             self.band: Surface = Surface((_WINDOW_WIDTH, band_h))
         self.band.fill(_BACKGROUND_COLOR)
         self.window.blit(self.band, (0, band_y))
@@ -468,11 +468,11 @@ class GraphicEngine():
         sub: Title = Title(text=sub_str, size=sub_size, color=_INTRO_TEXT_COLOR)
         if hint_str:
             hint: Title = Title(text=hint_str, size=hint_size, color=_INTRO_TEXT_COLOR)
-        hint_h = hint.sur.get_height() if hint_str else 0
+        hint_h = hint.sur.get_height() + _INTRO_GAP if hint_str else 0
 
         # banda a todo el ancho, alto = margen + titulo + hueco + subtitulo + margen
         band_h, band_y = self._get_band_size(title.sur.get_height() + sub.sur.get_height() + hint_h)
-        self._blit_cropped_bg(
+        self._blit_panel(
             band_h=band_h,
             band_y=band_y
         )
@@ -480,7 +480,15 @@ class GraphicEngine():
         self.window.blit(title.sur, (self._get_title_x(title), band_y + _INTRO_PAD))
         self.window.blit(sub.sur, (self._get_title_x(sub), band_y + _INTRO_PAD + title.sur.get_height() + _INTRO_GAP))
         if hint_str:
-            self.window.blit(hint.sur, (self._get_title_x(hint), band_y + _INTRO_PAD + title.sur.get_height() + (_INTRO_GAP * 2)))
+            hint_y = (
+                band_y
+                + _INTRO_PAD
+                + title.sur.get_height()
+                + _INTRO_GAP
+                + sub.sur.get_height()
+                + _INTRO_GAP
+            )
+            self.window.blit(hint.sur, (self._get_title_x(hint), hint_y))
 
     def _blit_instructions(self) -> None:
         """Pega la pantalla de instrucciones renderizada por su objeto."""
@@ -703,8 +711,6 @@ class GraphicEngine():
         if text != self._time_text:
             self._time_text = text
             self.time_title = Title(text, size=14)
-
-
 
 
 
