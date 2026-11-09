@@ -7,20 +7,25 @@ from src.utils.logger import logger
 
 class Level(BaseModel):
     """Un nivel del juego: dimensiones del laberinto en celdas."""
+
+
     width: int = 15
     height: int = 15
 
+    MIN_SIZE: ClassVar[int] = 15
+    MAX_SIZE: ClassVar[int] = 35
+    
     @field_validator("width", "height", mode="before")
     @classmethod
     def acotar(cls, valor: Any, info: ValidationInfo) -> int:
-        """Acota el tamaño entre 5 y 99; si no es un número, usa 15."""
+        """Acota el tamaño entre MIN_SIZE y MAX_SIZE; si no es un número, usa DEFAULT_SIZE."""
         try:
             numero = int(valor)
         except (TypeError, ValueError):
             logger.error("Error: invalid %s '%s', using 15.",
                          info.field_name, valor)
             return 15
-        acotado = max(10, min(99, numero))
+        acotado = max(cls.MIN_SIZE, min(cls.MAX_SIZE, numero))
         if acotado != numero:
             logger.error("Error: %s %s out of range, using %s.",
                          info.field_name, numero, acotado)

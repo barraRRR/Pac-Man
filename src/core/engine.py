@@ -41,7 +41,7 @@ _SAFE_LINE = 1
 
 _LOGO_AREA = (510, 130)
 _SCORE_AREA = (600, 100)
-_FOOTER_AREA = 100
+_FOOTER_AREA = 60
 
 _ITEM_LINE_SPACING = 60
 
@@ -54,13 +54,15 @@ _WALL_COLOR = (5, 4, 170, 255)
 _TEST_COLOR = (0, 0, 0, 255)
 
 _LOGO_POS = (45, 20)
-_1UP_POS = (100, 160)
-_HIGHSCORE = (210, 160)
-_1UP_SCORE_POS = (140, 180)
-_HIGHSCORE_SCORE_POS = (280, 180)
+_1UP_POS = (100, 172)
+_HIGHSCORE = (210, 172)
+_1UP_SCORE_POS = (140, 192)
+_HIGHSCORE_SCORE_POS = (280, 192)
 _FOOTER_POS = (40, 740)
 
 _HEADER_AREA = 220
+_HUD_TITLE_GAP = 48     # el título del marcador queda 48 px sobre el mapa
+_HUD_SCORE_GAP = 28     # la puntuación queda 28 px sobre el mapa
 
 # ==== INTRO DE NIVEL ====
 _INTRO_FONT_PATH = "assets/font/font_emulogic.ttf"
@@ -77,7 +79,12 @@ _INSTR_PAIR_GAP = 30                   # hueco entre placa y texto
 _INSTR_HINT_Y = 700                    # pista de salida, zona del pie
 
 _TITLE_SIZE = 24
+_PAGE_TITLE_GAP = 70
 
+_TARGET_TILE_SIZE = 25      # Tamaño de casilla deseado para el mapa más grande
+_WINDOW_MARGIN = 1.10       # Margen extra sobre el tamaño calculado (10 %)
+_MAX_WINDOW = (1600, 950)   # Tope de seguridad (ancho, alto)
+_SCREEN_MARGIN = 0.90       # Parte de la pantalla que puede ocupar la ventana
 
 class GraphicEngine():
     """
@@ -150,8 +157,8 @@ class GraphicEngine():
         """
         # Esto son operaciones para que el tamaño de las celdas se ajuste
         # al tamaño de la pantalla
-        safe_w: int = _WINDOW_WIDTH - (_PADDING * 2)
-        safe_h: int = _WINDOW_HEIGHT - _HEADER_AREA - _FOOTER_AREA - _PADDING
+        safe_w: int = self.win_px[0] - (_PADDING * 2)
+        safe_h: int = self.win_px[1] - _HEADER_AREA - _FOOTER_AREA - _PADDING
 
         ideal_tile_w: int = safe_w // self.maze.col
         ideal_tile_h: int = safe_h // self.maze.row
@@ -177,6 +184,55 @@ class GraphicEngine():
         self.maze_px = (
             (self.maze.col * self.tile_size),
             (self.maze.row * self.tile_size)
+        )
+
+    @staticmethod
+    def _get_screen_limit() -> Tuple[int, int]:
+        """
+        Devuelve el tamaño máximo de ventana que admite la pantalla.
+
+        Lee la resolución del monitor, le aplica _SCREEN_MARGIN y la limita
+        con _MAX_WINDOW. Si no se puede leer, usa solo _MAX_WINDOW.
+        """
+        try:
+            info = pygame.display.Info()
+        except pygame.error:
+            return _MAX_WINDOW
+        if info.current_w <= 0 or info.current_h <= 0:
+            return _MAX_WINDOW
+        return (
+            min(_MAX_WINDOW[0], int(info.current_w * _SCREEN_MARGIN)),
+            min(_MAX_WINDOW[1], int(info.current_h * _SCREEN_MARGIN)),
+        )
+    
+    @staticmethod
+    def _calculate_window_size(
+            levels: List[Tuple[int, int]]
+        ) -> Tuple[int, int]:
+        """
+        Calcula el tamaño de ventana a partir del mapa más grande.
+
+        Busca el ancho y el alto máximos entre todos los niveles, calcula el
+        espacio necesario con un tamaño de casilla objetivo, le suma un margen
+        en porcentaje y lo acota entre el tamaño base y el tope máximo.
+        """
+        max_cols: int = max(cols for cols, _ in levels)
+        max_rows: int = max(rows for _, rows in levels)
+
+        need_w: int = max_cols * _TARGET_TILE_SIZE + _PADDING * 2
+        need_h: int = (
+            max_rows * _TARGET_TILE_SIZE
+            + _HEADER_AREA + _FOOTER_AREA + _PADDING
+        )
+
+        limit_w, limit_h = GraphicEngine._get_screen_limit()
+
+        width: int = int(need_w * _WINDOW_MARGIN)
+        height: int = int(need_h * _WINDOW_MARGIN)
+
+        return (
+            min(max(_WINDOW_WIDTH, width), limit_w),
+            min(max(_WINDOW_HEIGHT, height), limit_h),
         )
 
     """
@@ -348,6 +404,8 @@ class GraphicEngine():
         Imprime la ventana entera en pantalla
         """
         self.window = pygame.display.set_mode(self.win_px)
+        # Título de la barra del sistema; sin esto SDL pone "pygame window".
+        pygame.display.set_caption("Pac-Man")
         self.background = Surface(self.win_px)
 
     def _put_background(self) -> None:
@@ -362,9 +420,10 @@ class GraphicEngine():
         self.logo._load_logo()
         scaled_logo: Surface = pygame.transform.smoothscale(self.logo.img, _LOGO_AREA)
         logo_pos: Tuple[int, int] = (
-            (_WINDOW_WIDTH - _LOGO_AREA[0]) // 2,
+            (self.win_px[0] - _LOGO_AREA[0]) // 2,
+            # _WINDOW_WIDTH - _LOGO_AREA[0]) // 2,
             _PADDING
-        )
+        ) 
         self.window.blit(scaled_logo, logo_pos)
     
     
@@ -380,6 +439,10 @@ class GraphicEngine():
         """
         self.menu_init._render_item_list()
 
+    def _window_center(self) -> Tuple[int, int]:
+        """Centro de la ventana actual, no el de la constante de 600x800."""
+        return (self.win_px[0] // 2, self.win_px[1] // 2)
+
     def _blit_menu_init(self, menu: Menu) -> None:
         """
         Muestra el menú de inicio en pantalla
@@ -389,7 +452,7 @@ class GraphicEngine():
         self.window.blit(self.background, (0, 0))
         for i, item in enumerate(menu._items):
             # x, y = _WINDOW_CENTER
-            x, y = (_WINDOW_CENTER[0], 330)
+            x, y = (self.win_px[0] // 2, 330)
             y += (i * _ITEM_LINE_SPACING)
             x -= item.sur.get_width() // 2
             item.xy = (x, y)
@@ -397,12 +460,16 @@ class GraphicEngine():
             if item == menu._active_item:
                 self.window.blit(menu.selector, (x - 12, y))
         self._put_logo()
-        self.window.blit(self.credits.sur, ((_WINDOW_WIDTH - self.credits.sur.get_width()) // 2, 750))
+        self.window.blit(
+            self.credits.sur,
+            ((self.win_px[0] - self.credits.sur.get_width()) // 2,
+             self.win_px[1] - _PADDING - self.credits.sur.get_height())
+        )
                 
     def _blit_menu_pause(self, menu: MenuPause) -> None:
         """Muestra las opciones de pausa sobre la escena congelada."""
         for i, item in enumerate(menu._items):
-            x, y = _WINDOW_CENTER
+            x, y = self._window_center()
             y += i * _ITEM_LINE_SPACING
             x -= item.sur.get_width() // 2
             item.xy = (x, y)
@@ -416,7 +483,7 @@ class GraphicEngine():
         )
         panel: Surface = Surface(panel_size)
         panel.fill(_BACKGROUND_COLOR)
-        panel_x: int = (_WINDOW_WIDTH - panel_size[0]) // 2
+        panel_x: int = (self.win_px[0] - panel_size[0]) // 2
         panel_y: int = menu._items[0].xy[1] - pad
         self.window.blit(panel, (panel_x, panel_y))
         # self.window.blit(item.sur, (x, y))
@@ -429,23 +496,21 @@ class GraphicEngine():
             if item == menu._active_item:
                 self.window.blit(menu.selector, (item.xy[0] - 10, item.xy[1]))
 
-    @staticmethod
-    def _get_band_size(total_h: int) -> Tuple[int, int]:
+    def _get_band_size(self, total_h: int) -> Tuple[int, int]:
         band_h: int = (_INTRO_PAD + total_h + _INTRO_GAP + _INTRO_PAD)
-        band_y: int = (_WINDOW_HEIGHT - band_h) // 2
+        band_y: int = (self.win_px[1] - band_h) // 2
         return (band_h, band_y)
 
-    @staticmethod
-    def _get_title_x(title: Title) -> int:
-        return (_WINDOW_WIDTH - title.sur.get_width()) // 2
+    def _get_title_x(self, title: Title) -> int:
+        return (self.win_px[0] - title.sur.get_width()) // 2
 
     def _blit_panel(
             self,
             band_h: int,
             band_y: int
             ) -> None:
-        if self.band is None or self.band.get_size() != (_WINDOW_WIDTH, band_h):
-            self.band: Surface = Surface((_WINDOW_WIDTH, band_h))
+        if self.band is None or self.band.get_size() != (self.win_px[0], band_h):
+            self.band = Surface((self.win_px[0], band_h))
         self.band.fill(_BACKGROUND_COLOR)
         self.window.blit(self.band, (0, band_y))
     
@@ -499,13 +564,16 @@ class GraphicEngine():
         self._put_logo()
 
         # ===TITULO===
-        title_x: int = (_WINDOW_WIDTH - self.instructions_title.sur.get_width()) // 2
-        self.window.blit(self.instructions_title.sur, (title_x, 200))
+        # Se centra en el ancho real de la ventana, no en la constante de 600.
+        title_x: int = (self.win_px[0] - self.instructions_title.sur.get_width()) // 2
+        # El alto se calcula desde el borde inferior del logo, no con un 200 fijo.
+        title_y: int = _PADDING + _LOGO_AREA[1] + _PAGE_TITLE_GAP
+        self.window.blit(self.instructions_title.sur, (title_x, title_y))
 
         # ===CONTENIDO===
         for index, (cap, text) in enumerate(self.instructions.rows):
             pair_w: int = cap.get_width() + _INSTR_PAIR_GAP + text.get_width()
-            x: int = (_WINDOW_WIDTH - pair_w) // 2
+            x: int = (self.win_px[0] - pair_w) // 2
             y: int = _INSTR_FIRST_ROW_Y + index * _INSTR_ROW_SPACING
             self.window.blit(cap, (x, y))
             self.window.blit(
@@ -516,18 +584,22 @@ class GraphicEngine():
 
         # pista de salida, como el "Push SPACE to play" de la intro
         hint: Surface = self.instructions.hint
-        self.window.blit(hint, ((_WINDOW_WIDTH - hint.get_width()) // 2,
-                                _INSTR_HINT_Y))
-
+        self.window.blit(hint, ((self.win_px[0] - hint.get_width()) // 2,
+                    _INSTR_HINT_Y))
+        
     def _blit_highscores_title(self) -> None:
         """Dibuja el logo y el título de la pantalla de puntuaciones."""
         self._put_logo()
 
+        # El título se crea la primera vez que se pinta la pantalla.
         if self.page_highscores_title is None:
-            self.page_highscores_title = Title("HIGH SCORE")
-        title_x: int = (_WINDOW_WIDTH - self.page_highscores_title.sur.get_width()) // 2
-        title_y: int = 200
+            self.page_highscores_title = Title("HIGH SCORES")
+
+        # Igual que en instrucciones: el centro es el de la ventana actual.
+        title_x: int = (self.win_px[0] - self.page_highscores_title.sur.get_width()) // 2
+        title_y: int = _PADDING + _LOGO_AREA[1] + _PAGE_TITLE_GAP
         self.page_highscores_title.blit_title(self.window, (title_x, title_y))
+
 
     def _blit_highscores_rows(
         self,
@@ -537,8 +609,12 @@ class GraphicEngine():
         """
         first_row_y: int = 300
         row_spaccing: int = 35
-        left_x:int = 70
-        right_x: int = 530
+        # El bloque se reparte alrededor del centro real: la columna de
+        # nombres a la izquierda y la de puntos a la derecha, a 230 px cada
+        # una. Antes eran 70 y 530, que solo cuadraban con una ventana de 600.
+        center_x: int = self.win_px[0] // 2
+        left_x: int = center_x - 230
+        right_x: int = center_x + 230
 
         for index, record in enumerate(scores, start = 1):
             name: Title = Title(f"{index}. {record['name']}")
@@ -554,9 +630,8 @@ class GraphicEngine():
         hint: Surface = self.instructions.hint
         self.window.blit(
             hint,
-            ((_WINDOW_WIDTH - hint.get_width()) // 2, _INSTR_HINT_Y)
+            ((self.win_px[0] - hint.get_width()) // 2, _INSTR_HINT_Y)
         )
-
 
     """
     ╔═════════════════════════════════════════════════════════════════════════╗
@@ -586,18 +661,34 @@ class GraphicEngine():
                     maze_surface, Coord((x, y)), cell_value, color
                 )
 
-    def _cal_left_padding(self) -> int:
-        """
-        """
-        return (_WINDOW_WIDTH - self.maze_px[0]) // 2
+    def _cal_left_padding(
+        self,
+        element_width: int,
+        align: str = "center",
+    ) -> int:
+        """Calcula la posición horizontal de un elemento según su alineación."""
+        free: int = self.win_px[0] - element_width
 
-    def _cal_maze_offset(
-            self,
-            h: int = _HEADER_AREA
-        ) -> Tuple[int, int]:
+        if align == "left":
+            return _PADDING
+        elif align == "right":
+            return free - _PADDING
+        return free // 2
+
+    def _cal_maze_top(self) -> int:
+        """
+        Altura a la que empieza el mapa dentro de la ventana.
+
+        Se centra en el alto disponible, pero nunca sube por encima de
+        _HEADER_AREA, que es donde acaban el logo y el marcador.
+        """
+        free: int = self.win_px[1] - self.maze_px[1]
+        return max(_HEADER_AREA, free // 2)
+
+    def _cal_maze_offset(self) -> Tuple[int, int]:
         """
         """
-        return (self._cal_left_padding(), h)
+        return (self._cal_left_padding(self.maze_px[0]), self._cal_maze_top())
     
     def _put_maze(
             self,
@@ -638,29 +729,48 @@ class GraphicEngine():
     ╚═════════════════════════════════════════════════════════════════════════╝
     """
 
-
-
     def _blit_elements(self, dt: int, level: int = 1) -> None:
         """
         """
         self.window.blit(self.background, (0, 0))
         self._put_logo()
         self.window.blit(self.maze.sur, (self._cal_maze_offset()))
-        self.window.blit(self.score.sur, _1UP_SCORE_POS)
-        self.window.blit(self.up_title.sur, _1UP_POS)
-        self.window.blit(self.highscore_title.sur, _HIGHSCORE)
-        self.window.blit(self.highscore_int.sur, _HIGHSCORE_SCORE_POS)
+        left: int = self._cal_left_padding(self.maze_px[0])
+        top: int = self._cal_maze_top()
+
+        # El marcador se reparte en tres columnas sobre el mapa: 1UP y su
+        # puntuación pegados al borde izquierdo, HIGH SCORE centrado en el
+        # mapa y las vidas pegadas al borde derecho.
+        right: int = left + self.maze_px[0]
+        center_x: int = left + self.maze_px[0] // 2
+
+        # La línea cuelga del borde superior del mapa, no de una y fija:
+        # así queda siempre cerca del laberinto y lejos del logo.
+        hud_y: int = top - _HUD_TITLE_GAP
+        hud_score_y: int = top - _HUD_SCORE_GAP
+
+        self.window.blit(self.up_title.sur, (left, hud_y))
+        self.window.blit(self.score.sur, (left, hud_score_y))
+        self.window.blit(
+            self.highscore_title.sur,
+            (center_x - self.highscore_title.sur.get_width() // 2, hud_y)
+        )
+        self.window.blit(
+            self.highscore_int.sur,
+            (center_x - self.highscore_int.sur.get_width() // 2, hud_score_y)
+        )
+
         for pacgum in self.pacgum:
             if pacgum.alive:
                 self.window.blit(
                     pacgum.sur,
-                    pacgum.pos.off_get(self.tile_size, _HEADER_AREA, self._cal_left_padding()))
+                    pacgum.pos.off_get(self.tile_size, top, left))
         for ghost in self.ghosts.values():
             if ghost.alive:
-                self.window.blit(ghost.get_frame(dt), ghost.pos.off_get(self.tile_size, _HEADER_AREA, self._cal_left_padding()))
-        self.window.blit(self.player.get_frame(dt), self.player.pos.off_get(self.tile_size, _HEADER_AREA, self._cal_left_padding()))
+                self.window.blit(ghost.get_frame(dt), ghost.pos.off_get(self.tile_size, top, left))
+        self.window.blit(self.player.get_frame(dt), self.player.pos.off_get(self.tile_size, top, left))
 
-                # --- vidas ---
+        # --- vidas ---
         # Vidas restantes como iconos estáticos, alineados a la derecha.
         frames = self.player.images.get("right", [])
         lives = self.player.lives
@@ -669,29 +779,29 @@ class GraphicEngine():
             icon_size = 16
             gap = 4
             total_width = lives * icon_size + (lives - 1) * gap
-            start_x = _WINDOW_WIDTH - _PADDING - total_width
+            start_x = right - _PADDING - total_width
             icon = pygame.transform.scale(frames[0], (icon_size, icon_size))
 
             for index in range(lives):
                 self.window.blit(
                     icon,
-                    (start_x + index * (icon_size + gap), _1UP_SCORE_POS[1])
+                    (start_x + index * (icon_size + gap), hud_score_y)
                 )
 
         # Reloj
         time_x = (
-            self._cal_left_padding()
+            left
             + self.maze_px[0]
             - self.time_title.sur.get_width()
         )
-        time_y = _HEADER_AREA + self.maze_px[1] + 12
+        time_y = top + self.maze_px[1] + 12
         self.window.blit(self.time_title.sur, (time_x, time_y))
 
         # Nivel
         level_preview: Title = Title(f"LEVEL {level}", size=14)
         self.window.blit(
             level_preview.sur,
-            (self._cal_left_padding(), time_y)
+            (left, time_y)
         )
 
     def _set_highscore(self, points: int) -> None:

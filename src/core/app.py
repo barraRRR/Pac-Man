@@ -116,6 +116,11 @@ class App:
     def run(self) -> int:
         """Recorre los niveles en orden y ejecuta los momentos del juego."""
         self.clock: pygame.time.Clock = pygame.time.Clock()
+        levels = [
+            (level.width, level.height)
+            for level in self.config.level
+        ]
+        self._engine.win_px = self._engine._calculate_window_size(levels)
         self._engine._init_window()
         Ghost._load_scared_frames()
 
@@ -335,7 +340,8 @@ class App:
         """Ejecuta la acción asociada a cada tecla pulsada."""
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                return False
+                self._end_game()
+                raise SystemExit(0)
             if event.type != pygame.KEYDOWN:
                 continue
             if event.key == pygame.K_ESCAPE:
@@ -374,6 +380,31 @@ class App:
             pygame.display.flip()
             self._engine.window.fill((0, 0, 0, 0))
 
+    def _level_intro(self, number: int) -> None:
+        """Muestra la banda de inicio de nivel y espera SPACE para jugar.
+
+        Pinta la escena del nivel nuevo con la banda encima y no deja
+        entrar al game loop hasta que se pulse la barra espaciadora.
+        """
+        # escena del nivel nuevo, lo mismo que pinta _game_loop antes de arrancar
+        self._engine._put_maze(self.maze)
+        self._engine._put_entities()
+
+        waiting: bool = True
+        while waiting:
+            dt: int = self.clock.tick(_FPS)
+            self._engine._blit_elements(dt, number)          # escena + HUD, como en juego
+            self._engine._blit_level_info(title_str=f"LEVEL {number}", sub_str="Push SPACE to play")  # banda encima de la escena
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    # la X de la ventana tambien cierra aqui, no solo SPACE
+                    self._end_game()
+                    raise SystemExit(0)
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+                    waiting = False
+            pygame.display.flip()
+            self._engine.window.fill((0, 0, 0, 0))
+
     def _congratulations(
             self,
             title_str: str = "LEVEL COMPLETE",
@@ -389,6 +420,10 @@ class App:
             self._engine._blit_elements(dt, self.current_level)
             self._engine._blit_level_info(title_str, sub_str)
             for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    # la X de la ventana tambien cierra aqui, no solo SPACE
+                    self._end_game()
+                    raise SystemExit(0)
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
                     waiting = False
             pygame.display.flip()

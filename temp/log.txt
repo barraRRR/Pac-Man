@@ -339,3 +339,240 @@ KeyboardInterrupt
 2026-11-09 11:07:46,312 [INFO] pac_man: [Level 01] Pacgum positions: [(10, 9)]
 2026-11-09 11:07:50,765 [INFO] pac_man: GAME OVER
 2026-11-09 11:07:58,444 [INFO] pac_man: Quiting game. See you soon!
+2026-11-09 16:37:08,689 [ERROR] pac_man: Error: width 40 out of range, using 35.
+2026-11-09 16:37:08,689 [ERROR] pac_man: Error: height 8 out of range, using 15.
+2026-11-09 16:37:08,689 [ERROR] pac_man: Error: width 10 out of range, using 15.
+2026-11-09 16:37:08,689 [ERROR] pac_man: Error: width 99 out of range, using 35.
+2026-11-09 16:37:08,689 [ERROR] pac_man: Error: height 99 out of range, using 35.
+2026-11-09 16:37:08,689 [ERROR] pac_man: Error: width 10 out of range, using 15.
+2026-11-09 16:37:08,689 [ERROR] pac_man: Error: height 10 out of range, using 15.
+2026-11-09 16:37:08,689 [ERROR] pac_man: Error: width 3 out of range, using 15.
+2026-11-09 16:37:08,689 [ERROR] pac_man: Error: width 150 out of range, using 35.
+2026-11-09 16:37:08,689 [ERROR] pac_man: Error: height 5 out of range, using 15.
+2026-11-09 16:37:08,689 [ERROR] pac_man: Error: width -20 out of range, using 15.
+2026-11-09 16:37:08,689 [ERROR] pac_man: Error: height 1000 out of range, using 35.
+2026-11-09 16:37:08,689 [ERROR] pac_man: Error: invalid width 'abc', using 15.
+2026-11-09 16:37:08,689 [ERROR] pac_man: Error: width 12 out of range, using 15.
+2026-11-09 16:37:08,689 [ERROR] pac_man: Error: invalid height 'None', using 15.
+2026-11-09 16:37:08,689 [ERROR] pac_man: Error: height 1 out of range, using 15.
+2026-11-09 16:37:08,740 [INFO] pac_man: Highscores loaded: 10
+2026-11-09 16:37:17,560 [INFO] pac_man: [Level 01] Generating level
+2026-11-09 16:37:17,560 [INFO] pac_man: [Level 01] Pacgum cell values: {5: 1}
+2026-11-09 16:37:17,560 [INFO] pac_man: [Level 01] Pac-Man: (17, 7)
+2026-11-09 16:37:17,560 [INFO] pac_man: [Level 01] Ghosts: [(4, 1), (32, 1), (0, 14), (33, 14)]
+2026-11-09 16:37:17,560 [INFO] pac_man: [Level 01] Super-pacgums: [(5, 0), (30, 1), (6, 14), (32, 14)]
+2026-11-09 16:37:17,560 [INFO] pac_man: [Level 01] Pacgums: 1 placed
+2026-11-09 16:37:17,560 [INFO] pac_man: [Level 01] Pacgum positions: [(2, 14)]
+2026-11-09 16:37:19,331 [INFO] pac_man: Game pause
+2026-11-09 16:37:20,044 [INFO] pac_man: Game resumed
+2026-11-09 16:37:20,920 [INFO] pac_man: Cheat mode - invincible: ON
+2026-11-09 16:37:22,007 [INFO] pac_man: [Level 02] Generating level
+2026-11-09 16:37:22,007 [INFO] pac_man: [Level 02] Pacgum cell values: {4: 1}
+2026-11-09 16:37:22,007 [INFO] pac_man: [Level 02] Pac-Man: (7, 7)
+2026-11-09 16:37:22,007 [INFO] pac_man: [Level 02] Ghosts: [(2, 1), (13, 1), (1, 14), (13, 14)]
+2026-11-09 16:37:22,007 [INFO] pac_man: [Level 02] Super-pacgums: [(0, 0), (14, 0), (0, 13), (12, 12)]
+2026-11-09 16:37:22,007 [INFO] pac_man: [Level 02] Pacgums: 1 placed
+2026-11-09 16:37:22,007 [INFO] pac_man: [Level 02] Pacgum positions: [(4, 11)]
+2026-11-09 16:37:26,218 [INFO] pac_man: Game pause
+2026-11-09 16:37:26,874 [INFO] pac_man: Game resumed
+2026-11-09 16:37:27,304 [INFO] pac_man: Cheat mode - invincible: OFF
+2026-11-09 16:37:28,336 [INFO] pac_man: Cheat mode - invincible: ON
+2026-11-09 16:37:28,813 [INFO] pac_man: GAME OVER
+2026-11-09 16:37:33,278 [ERROR] pac_man: Unhandled application error
+Traceback (most recent call last):
+  File "/home/jaitowerr/42madrid/milestone_4/Pac-Man/src/main.py", line 20, in main
+    return app.run()
+  File "/home/jaitowerr/42madrid/milestone_4/Pac-Man/src/core/app.py", line 171, in run
+    self._highscores_loop()
+  File "/home/jaitowerr/42madrid/milestone_4/Pac-Man/src/core/app.py", line 476, in _highscores_loop
+    self._engine._blit_highscores_title()
+  File "/home/jaitowerr/42madrid/milestone_4/Pac-Man/src/core/engine.py", line 595, in _blit_highscores_title
+    title_x: int = (self.win_px[0] - self.page_highscores_title.sur.get_width()) // 2
+AttributeError: 'NoneType' object has no attribute 'sur'
+2026-11-09 16:37:33,278 [INFO] pac_man: Quiting game. See you soon!
+2026-11-09 16:37:36,983 [ERROR] pac_man: Error: width 40 out of range, using 35.
+2026-11-09 16:37:36,983 [ERROR] pac_man: Error: height 8 out of range, using 15.
+2026-11-09 16:37:36,983 [ERROR] pac_man: Error: width 10 out of range, using 15.
+2026-11-09 16:37:36,983 [ERROR] pac_man: Error: width 99 out of range, using 35.
+2026-11-09 16:37:36,983 [ERROR] pac_man: Error: height 99 out of range, using 35.
+2026-11-09 16:37:36,983 [ERROR] pac_man: Error: width 10 out of range, using 15.
+2026-11-09 16:37:36,983 [ERROR] pac_man: Error: height 10 out of range, using 15.
+2026-11-09 16:37:36,983 [ERROR] pac_man: Error: width 3 out of range, using 15.
+2026-11-09 16:37:36,983 [ERROR] pac_man: Error: width 150 out of range, using 35.
+2026-11-09 16:37:36,983 [ERROR] pac_man: Error: height 5 out of range, using 15.
+2026-11-09 16:37:36,983 [ERROR] pac_man: Error: width -20 out of range, using 15.
+2026-11-09 16:37:36,983 [ERROR] pac_man: Error: height 1000 out of range, using 35.
+2026-11-09 16:37:36,983 [ERROR] pac_man: Error: invalid width 'abc', using 15.
+2026-11-09 16:37:36,983 [ERROR] pac_man: Error: width 12 out of range, using 15.
+2026-11-09 16:37:36,983 [ERROR] pac_man: Error: invalid height 'None', using 15.
+2026-11-09 16:37:36,983 [ERROR] pac_man: Error: height 1 out of range, using 15.
+2026-11-09 16:37:37,007 [INFO] pac_man: Highscores loaded: 10
+2026-11-09 16:37:37,954 [INFO] pac_man: [Level 01] Generating level
+2026-11-09 16:37:37,954 [INFO] pac_man: [Level 01] Pacgum cell values: {5: 1}
+2026-11-09 16:37:37,954 [INFO] pac_man: [Level 01] Pac-Man: (17, 7)
+2026-11-09 16:37:37,954 [INFO] pac_man: [Level 01] Ghosts: [(4, 1), (32, 1), (0, 14), (33, 14)]
+2026-11-09 16:37:37,954 [INFO] pac_man: [Level 01] Super-pacgums: [(5, 0), (30, 1), (6, 14), (32, 14)]
+2026-11-09 16:37:37,954 [INFO] pac_man: [Level 01] Pacgums: 1 placed
+2026-11-09 16:37:37,954 [INFO] pac_man: [Level 01] Pacgum positions: [(2, 14)]
+2026-11-09 16:37:41,559 [INFO] pac_man: Cheat mode - invincible: ON
+2026-11-09 16:37:42,833 [INFO] pac_man: [Level 02] Generating level
+2026-11-09 16:37:42,833 [INFO] pac_man: [Level 02] Pacgum cell values: {0: 1}
+2026-11-09 16:37:42,833 [INFO] pac_man: [Level 02] Pac-Man: (7, 7)
+2026-11-09 16:37:42,833 [INFO] pac_man: [Level 02] Ghosts: [(0, 1), (12, 2), (1, 14), (14, 12)]
+2026-11-09 16:37:42,833 [INFO] pac_man: [Level 02] Super-pacgums: [(0, 2), (13, 2), (2, 12), (13, 14)]
+2026-11-09 16:37:42,833 [INFO] pac_man: [Level 02] Pacgums: 1 placed
+2026-11-09 16:37:42,833 [INFO] pac_man: [Level 02] Pacgum positions: [(11, 8)]
+2026-11-09 16:37:43,985 [INFO] pac_man: [Level 03] Generating level
+2026-11-09 16:37:43,985 [INFO] pac_man: [Level 03] Pacgum cell values: {2: 1}
+2026-11-09 16:37:43,985 [INFO] pac_man: [Level 03] Pac-Man: (17, 17)
+2026-11-09 16:37:43,985 [INFO] pac_man: [Level 03] Ghosts: [(0, 2), (34, 0), (1, 30), (32, 28)]
+2026-11-09 16:37:43,985 [INFO] pac_man: [Level 03] Super-pacgums: [(1, 5), (34, 2), (0, 28), (29, 28)]
+2026-11-09 16:37:43,985 [INFO] pac_man: [Level 03] Pacgums: 1 placed
+2026-11-09 16:37:43,985 [INFO] pac_man: [Level 03] Pacgum positions: [(25, 19)]
+2026-11-09 16:37:44,462 [INFO] pac_man: [Level 04] Generating level
+2026-11-09 16:37:44,462 [INFO] pac_man: [Level 04] Pacgum cell values: {8: 1}
+2026-11-09 16:37:44,462 [INFO] pac_man: [Level 04] Pac-Man: (7, 7)
+2026-11-09 16:37:44,462 [INFO] pac_man: [Level 04] Ghosts: [(1, 2), (12, 1), (2, 14), (14, 13)]
+2026-11-09 16:37:44,462 [INFO] pac_man: [Level 04] Super-pacgums: [(1, 0), (14, 2), (0, 12), (12, 12)]
+2026-11-09 16:37:44,462 [INFO] pac_man: [Level 04] Pacgums: 1 placed
+2026-11-09 16:37:44,462 [INFO] pac_man: [Level 04] Pacgum positions: [(0, 5)]
+2026-11-09 16:37:44,798 [INFO] pac_man: [Level 05] Generating level
+2026-11-09 16:37:44,798 [INFO] pac_man: [Level 05] Pacgum cell values: {12: 1}
+2026-11-09 16:37:44,798 [INFO] pac_man: [Level 05] Pac-Man: (7, 12)
+2026-11-09 16:37:44,798 [INFO] pac_man: [Level 05] Ghosts: [(2, 4), (12, 1), (2, 20), (14, 21)]
+2026-11-09 16:37:44,798 [INFO] pac_man: [Level 05] Super-pacgums: [(1, 2), (12, 0), (0, 24), (14, 23)]
+2026-11-09 16:37:44,798 [INFO] pac_man: [Level 05] Pacgums: 1 placed
+2026-11-09 16:37:44,798 [INFO] pac_man: [Level 05] Pacgum positions: [(9, 20)]
+2026-11-09 16:37:45,083 [INFO] pac_man: [Level 06] Generating level
+2026-11-09 16:37:45,083 [INFO] pac_man: [Level 06] Pacgum cell values: {6: 1}
+2026-11-09 16:37:45,083 [INFO] pac_man: [Level 06] Pac-Man: (17, 7)
+2026-11-09 16:37:45,083 [INFO] pac_man: [Level 06] Ghosts: [(3, 1), (33, 0), (6, 13), (31, 13)]
+2026-11-09 16:37:45,083 [INFO] pac_man: [Level 06] Super-pacgums: [(3, 0), (32, 2), (5, 12), (29, 12)]
+2026-11-09 16:37:45,083 [INFO] pac_man: [Level 06] Pacgums: 1 placed
+2026-11-09 16:37:45,083 [INFO] pac_man: [Level 06] Pacgum positions: [(34, 6)]
+2026-11-09 16:37:45,356 [INFO] pac_man: [Level 07] Generating level
+2026-11-09 16:37:45,356 [INFO] pac_man: [Level 07] Pacgum cell values: {6: 1}
+2026-11-09 16:37:45,356 [INFO] pac_man: [Level 07] Pac-Man: (7, 17)
+2026-11-09 16:37:45,356 [INFO] pac_man: [Level 07] Ghosts: [(2, 2), (12, 1), (0, 31), (13, 31)]
+2026-11-09 16:37:45,356 [INFO] pac_man: [Level 07] Super-pacgums: [(2, 0), (12, 4), (2, 28), (12, 29)]
+2026-11-09 16:37:45,356 [INFO] pac_man: [Level 07] Pacgums: 1 placed
+2026-11-09 16:37:45,356 [INFO] pac_man: [Level 07] Pacgum positions: [(13, 7)]
+2026-11-09 16:37:48,158 [INFO] pac_man: [Level 08] Generating level
+2026-11-09 16:37:48,159 [INFO] pac_man: [Level 08] Pacgum cell values: {9: 1}
+2026-11-09 16:37:48,159 [INFO] pac_man: [Level 08] Pac-Man: (7, 10)
+2026-11-09 16:37:48,159 [INFO] pac_man: [Level 08] Ghosts: [(2, 2), (12, 0), (0, 19), (13, 17)]
+2026-11-09 16:37:48,159 [INFO] pac_man: [Level 08] Super-pacgums: [(2, 1), (14, 0), (2, 19), (13, 19)]
+2026-11-09 16:37:48,159 [INFO] pac_man: [Level 08] Pacgums: 1 placed
+2026-11-09 16:37:48,159 [INFO] pac_man: [Level 08] Pacgum positions: [(2, 7)]
+2026-11-09 16:37:48,682 [INFO] pac_man: [Level 09] Generating level
+2026-11-09 16:37:48,682 [INFO] pac_man: [Level 09] Pacgum cell values: {1: 1}
+2026-11-09 16:37:48,682 [INFO] pac_man: [Level 09] Pac-Man: (7, 7)
+2026-11-09 16:37:48,682 [INFO] pac_man: [Level 09] Ghosts: [(1, 1), (12, 1), (1, 12), (13, 12)]
+2026-11-09 16:37:48,682 [INFO] pac_man: [Level 09] Super-pacgums: [(0, 0), (14, 1), (0, 14), (14, 13)]
+2026-11-09 16:37:48,682 [INFO] pac_man: [Level 09] Pacgums: 1 placed
+2026-11-09 16:37:48,682 [INFO] pac_man: [Level 09] Pacgum positions: [(6, 10)]
+2026-11-09 16:37:49,014 [INFO] pac_man: Game pause
+2026-11-09 16:37:49,665 [INFO] pac_man: Game resumed
+2026-11-09 16:37:50,078 [INFO] pac_man: Game pause
+2026-11-09 16:37:50,939 [INFO] pac_man: Return to main menu
+2026-11-09 16:37:52,936 [INFO] pac_man: Quiting game. See you soon!
+2026-11-09 16:38:09,688 [ERROR] pac_man: Error: width 40 out of range, using 35.
+2026-11-09 16:38:09,688 [ERROR] pac_man: Error: height 8 out of range, using 15.
+2026-11-09 16:38:09,688 [ERROR] pac_man: Error: width 10 out of range, using 15.
+2026-11-09 16:38:09,688 [ERROR] pac_man: Error: width 99 out of range, using 35.
+2026-11-09 16:38:09,688 [ERROR] pac_man: Error: height 99 out of range, using 35.
+2026-11-09 16:38:09,688 [ERROR] pac_man: Error: width 10 out of range, using 15.
+2026-11-09 16:38:09,688 [ERROR] pac_man: Error: height 10 out of range, using 15.
+2026-11-09 16:38:09,688 [ERROR] pac_man: Error: width 3 out of range, using 15.
+2026-11-09 16:38:09,688 [ERROR] pac_man: Error: width 150 out of range, using 35.
+2026-11-09 16:38:09,688 [ERROR] pac_man: Error: height 5 out of range, using 15.
+2026-11-09 16:38:09,688 [ERROR] pac_man: Error: width -20 out of range, using 15.
+2026-11-09 16:38:09,688 [ERROR] pac_man: Error: height 1000 out of range, using 35.
+2026-11-09 16:38:09,688 [ERROR] pac_man: Error: invalid width 'abc', using 15.
+2026-11-09 16:38:09,688 [ERROR] pac_man: Error: width 12 out of range, using 15.
+2026-11-09 16:38:09,688 [ERROR] pac_man: Error: invalid height 'None', using 15.
+2026-11-09 16:38:09,688 [ERROR] pac_man: Error: height 1 out of range, using 15.
+2026-11-09 16:38:09,710 [INFO] pac_man: Highscores loaded: 10
+2026-11-09 16:38:12,551 [INFO] pac_man: [Level 01] Generating level
+2026-11-09 16:38:12,551 [INFO] pac_man: [Level 01] Pacgum cell values: {5: 1}
+2026-11-09 16:38:12,551 [INFO] pac_man: [Level 01] Pac-Man: (17, 7)
+2026-11-09 16:38:12,551 [INFO] pac_man: [Level 01] Ghosts: [(4, 1), (32, 1), (0, 14), (33, 14)]
+2026-11-09 16:38:12,551 [INFO] pac_man: [Level 01] Super-pacgums: [(5, 0), (30, 1), (6, 14), (32, 14)]
+2026-11-09 16:38:12,551 [INFO] pac_man: [Level 01] Pacgums: 1 placed
+2026-11-09 16:38:12,551 [INFO] pac_man: [Level 01] Pacgum positions: [(2, 14)]
+2026-11-09 16:38:23,995 [INFO] pac_man: GAME OVER
+2026-11-09 16:38:32,347 [ERROR] pac_man: Unhandled application error
+Traceback (most recent call last):
+  File "/home/jaitowerr/42madrid/milestone_4/Pac-Man/src/main.py", line 20, in main
+    return app.run()
+  File "/home/jaitowerr/42madrid/milestone_4/Pac-Man/src/core/app.py", line 171, in run
+    self._highscores_loop()
+  File "/home/jaitowerr/42madrid/milestone_4/Pac-Man/src/core/app.py", line 476, in _highscores_loop
+    self._engine._blit_highscores_title()
+  File "/home/jaitowerr/42madrid/milestone_4/Pac-Man/src/core/engine.py", line 595, in _blit_highscores_title
+    title_x: int = (self.win_px[0] - self.page_highscores_title.sur.get_width()) // 2
+AttributeError: 'NoneType' object has no attribute 'sur'
+2026-11-09 16:38:32,347 [INFO] pac_man: Quiting game. See you soon!
+2026-11-09 16:43:51,760 [ERROR] pac_man: Error: width 40 out of range, using 35.
+2026-11-09 16:43:51,760 [ERROR] pac_man: Error: height 8 out of range, using 15.
+2026-11-09 16:43:51,760 [ERROR] pac_man: Error: width 10 out of range, using 15.
+2026-11-09 16:43:51,761 [ERROR] pac_man: Error: width 99 out of range, using 35.
+2026-11-09 16:43:51,761 [ERROR] pac_man: Error: height 99 out of range, using 35.
+2026-11-09 16:43:51,761 [ERROR] pac_man: Error: width 10 out of range, using 15.
+2026-11-09 16:43:51,761 [ERROR] pac_man: Error: height 10 out of range, using 15.
+2026-11-09 16:43:51,761 [ERROR] pac_man: Error: width 3 out of range, using 15.
+2026-11-09 16:43:51,761 [ERROR] pac_man: Error: width 150 out of range, using 35.
+2026-11-09 16:43:51,761 [ERROR] pac_man: Error: height 5 out of range, using 15.
+2026-11-09 16:43:51,761 [ERROR] pac_man: Error: width -20 out of range, using 15.
+2026-11-09 16:43:51,761 [ERROR] pac_man: Error: height 1000 out of range, using 35.
+2026-11-09 16:43:51,761 [ERROR] pac_man: Error: invalid width 'abc', using 15.
+2026-11-09 16:43:51,761 [ERROR] pac_man: Error: width 12 out of range, using 15.
+2026-11-09 16:43:51,761 [ERROR] pac_man: Error: invalid height 'None', using 15.
+2026-11-09 16:43:51,761 [ERROR] pac_man: Error: height 1 out of range, using 15.
+2026-11-09 16:43:51,814 [INFO] pac_man: Highscores loaded: 10
+2026-11-09 16:43:52,660 [INFO] pac_man: [Level 01] Generating level
+2026-11-09 16:43:52,660 [INFO] pac_man: [Level 01] Pacgum cell values: {5: 1}
+2026-11-09 16:43:52,660 [INFO] pac_man: [Level 01] Pac-Man: (17, 7)
+2026-11-09 16:43:52,660 [INFO] pac_man: [Level 01] Ghosts: [(4, 1), (32, 1), (0, 14), (33, 14)]
+2026-11-09 16:43:52,660 [INFO] pac_man: [Level 01] Super-pacgums: [(5, 0), (30, 1), (6, 14), (32, 14)]
+2026-11-09 16:43:52,660 [INFO] pac_man: [Level 01] Pacgums: 1 placed
+2026-11-09 16:43:52,660 [INFO] pac_man: [Level 01] Pacgum positions: [(2, 14)]
+2026-11-09 16:44:04,670 [INFO] pac_man: GAME OVER
+2026-11-09 16:44:16,810 [ERROR] pac_man: Unhandled application error
+Traceback (most recent call last):
+  File "/home/jaitowerr/42madrid/milestone_4/Pac-Man/src/main.py", line 20, in main
+    return app.run()
+  File "/home/jaitowerr/42madrid/milestone_4/Pac-Man/src/core/app.py", line 171, in run
+    self._highscores_loop()
+  File "/home/jaitowerr/42madrid/milestone_4/Pac-Man/src/core/app.py", line 476, in _highscores_loop
+    self._engine._blit_highscores_title()
+  File "/home/jaitowerr/42madrid/milestone_4/Pac-Man/src/core/engine.py", line 595, in _blit_highscores_title
+    title_x: int = (self.win_px[0] - self.page_highscores_title.sur.get_width()) // 2
+AttributeError: 'NoneType' object has no attribute 'sur'
+2026-11-09 16:44:16,811 [INFO] pac_man: Quiting game. See you soon!
+2026-11-09 16:45:08,479 [ERROR] pac_man: Error: width 40 out of range, using 35.
+2026-11-09 16:45:08,479 [ERROR] pac_man: Error: height 8 out of range, using 15.
+2026-11-09 16:45:08,479 [ERROR] pac_man: Error: width 10 out of range, using 15.
+2026-11-09 16:45:08,479 [ERROR] pac_man: Error: width 99 out of range, using 35.
+2026-11-09 16:45:08,479 [ERROR] pac_man: Error: height 99 out of range, using 35.
+2026-11-09 16:45:08,479 [ERROR] pac_man: Error: width 10 out of range, using 15.
+2026-11-09 16:45:08,479 [ERROR] pac_man: Error: height 10 out of range, using 15.
+2026-11-09 16:45:08,479 [ERROR] pac_man: Error: width 3 out of range, using 15.
+2026-11-09 16:45:08,479 [ERROR] pac_man: Error: width 150 out of range, using 35.
+2026-11-09 16:45:08,479 [ERROR] pac_man: Error: height 5 out of range, using 15.
+2026-11-09 16:45:08,479 [ERROR] pac_man: Error: width -20 out of range, using 15.
+2026-11-09 16:45:08,479 [ERROR] pac_man: Error: height 1000 out of range, using 35.
+2026-11-09 16:45:08,479 [ERROR] pac_man: Error: invalid width 'abc', using 15.
+2026-11-09 16:45:08,479 [ERROR] pac_man: Error: width 12 out of range, using 15.
+2026-11-09 16:45:08,479 [ERROR] pac_man: Error: invalid height 'None', using 15.
+2026-11-09 16:45:08,479 [ERROR] pac_man: Error: height 1 out of range, using 15.
+2026-11-09 16:45:08,529 [INFO] pac_man: Highscores loaded: 10
+2026-11-09 16:45:09,413 [INFO] pac_man: [Level 01] Generating level
+2026-11-09 16:45:09,413 [INFO] pac_man: [Level 01] Pacgum cell values: {5: 1}
+2026-11-09 16:45:09,413 [INFO] pac_man: [Level 01] Pac-Man: (17, 7)
+2026-11-09 16:45:09,413 [INFO] pac_man: [Level 01] Ghosts: [(4, 1), (32, 1), (0, 14), (33, 14)]
+2026-11-09 16:45:09,413 [INFO] pac_man: [Level 01] Super-pacgums: [(5, 0), (30, 1), (6, 14), (32, 14)]
+2026-11-09 16:45:09,413 [INFO] pac_man: [Level 01] Pacgums: 1 placed
+2026-11-09 16:45:09,413 [INFO] pac_man: [Level 01] Pacgum positions: [(2, 14)]
+2026-11-09 16:45:19,721 [INFO] pac_man: GAME OVER
+2026-11-09 16:45:23,536 [INFO] pac_man: Quiting game. See you soon!
