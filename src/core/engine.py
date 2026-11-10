@@ -2,7 +2,7 @@
 
 import pygame
 from pygame import Surface
-from typing import Tuple, List, Dict
+from typing import Tuple, List, Dict, Callable
 from src.maze.bitmap import BitMap
 from src.core.player import Player
 from src.core.ghost import Ghost
@@ -221,7 +221,7 @@ class GraphicEngine:
         x = coord.x * self.tile_size
         y = coord.y * self.tile_size
 
-        walls = {
+        walls: Dict[Dir, Callable[[int, int], Tuple[int, int]]] = {
             Dir.UP: lambda i, t: (x + i, y + t),
             Dir.RIGHT: lambda i, t: (x + self.tile_size - 1 - t, y + i),
             Dir.DOWN: lambda i, t: (x + i, y + self.tile_size - 1 - t),
@@ -330,7 +330,7 @@ class GraphicEngine:
             x -= item.sur.get_width() // 2
             item.xy = (x, y)
             self.window.blit(item.sur, (x, y))
-            if item == menu._active_item:
+            if item == menu._active_item and menu.selector is not None:
                 self.window.blit(menu.selector, (x - 12, y))
         self._put_logo()
         self.window.blit(
@@ -360,7 +360,7 @@ class GraphicEngine:
         self.window.blit(panel, (panel_x, panel_y))
         for item in menu._items:
             self.window.blit(item.sur, item.xy)
-            if item == menu._active_item:
+            if item == menu._active_item and menu.selector is not None:
                 self.window.blit(menu.selector, (item.xy[0] - 10, item.xy[1]))
 
     def _get_band_size(self, total_h: int) -> Tuple[int, int]:

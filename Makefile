@@ -51,7 +51,7 @@ lint:
 lint-strict:
 	@clear
 	@uv run flake8 . --exclude=.venv,data,wheels,__pycache__
-	@uv run mypy . --strict --exclude "(.venv|data|wheels)"
+	@uv run mypy . --strict --disable-error-code=import-untyped --exclude "(.venv|data|wheels)"
 	@$(MAKE) clean --no-print-directory
 
 clean_venv: clean

@@ -157,8 +157,8 @@ class App:
 
                     if self.state == AppState.PLAYER_NAME:
                         self._congratulations("GAME OVER", "PRESS SPACE")
-                        self._enter_player_name()
-                        if self.state == AppState.HIGHSCORE:
+                        player_name_state = self._enter_player_name()
+                        if player_name_state == AppState.HIGHSCORE:
                             self._highscores_loop()
                         self._return_to_menu = True
                         break
@@ -203,8 +203,13 @@ class App:
             self.ghost_spawns,
         )
         self.pacgum_spawns = self.maze.select_pacgum_spawns(
-            reachable, self.pacman_start, self.ghost_spawns, self.super_pacgum_spawns, self.config.pacgum)
-        counts = {}
+            reachable,
+            self.pacman_start,
+            self.ghost_spawns,
+            self.super_pacgum_spawns,
+            self.config.pacgum,
+        )
+        counts: dict[int, int] = {}
         for cell in self.pacgum_spawns:
             value = self.maze.grid[cell[1]][cell[0]]
             counts[value] = counts.get(value, 0) + 1
@@ -409,7 +414,7 @@ class App:
             pygame.display.flip()
             self._engine.window.fill((0, 0, 0, 0))
 
-    def _enter_player_name(self) -> None:
+    def _enter_player_name(self) -> AppState:
         """Muestra la pantalla de nombre hasta confirmar o cancelar."""
         self.player_name.set_name("")
         self.state = AppState.PLAYER_NAME
@@ -429,6 +434,7 @@ class App:
                 break
             pygame.display.flip()
             self._engine.window.fill((0, 0, 0, 0))
+        return self.state
 
     def _finish_player_name(self) -> None:
         """Guarda la puntuación y termina la entrada del nombre.

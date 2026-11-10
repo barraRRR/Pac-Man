@@ -59,7 +59,7 @@ class Item:
 class Menu:
     """Mantiene las opciones y la selección activa de un menú."""
 
-    selector: Surface = pygame.Surface((1, 1))
+    selector: Surface | None = None
 
     def __init__(
         self,
