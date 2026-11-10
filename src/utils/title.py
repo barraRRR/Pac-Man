@@ -14,11 +14,22 @@ class Title:
     """
     Crea textos para mostrar en la interfaz
     """
-    def __init__(self, text: str, size: int = _FONT_BODY_SIZE, color: Tuple[int, int, int, int] = _FONT_COLOR) -> None:
+
+    def __init__(
+        self,
+        text: str,
+        size: int = _FONT_BODY_SIZE,
+        color: Tuple[int, int, int, int] = _FONT_COLOR,
+    ) -> None:
         """Renderiza el texto indicado con tamaño y color seleccionados."""
         self.sur: pygame.Surface = self._render(text, color, size)
 
-    def _render(self, text: str, color: Tuple[int, int, int, int] = _FONT_COLOR, size: int = _FONT_BODY_SIZE) -> pygame.Surface:
+    def _render(
+        self,
+        text: str,
+        color: Tuple[int, int, int, int] = _FONT_COLOR,
+        size: int = _FONT_BODY_SIZE,
+    ) -> pygame.Surface:
         """Crea y devuelve la superficie del texto."""
         if not pygame.font.get_init():
             pygame.font.init()
@@ -26,9 +37,9 @@ class Title:
         return font.render(text, True, color)
 
     def blit_title(
-            self,
-            window: Surface,
-            dest: Tuple[int, int]
-        ) -> None:
+        self,
+        window: Surface,
+        dest: Tuple[int, int]
+    ) -> None:
         """Dibuja el texto en la ventana en la posición indicada."""
         window.blit(self.sur, dest)

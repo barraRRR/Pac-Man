@@ -1,7 +1,13 @@
 """Modelos y validación de la configuración del juego."""
 
 from typing import Any, Dict, List, Optional, Tuple, ClassVar
-from pydantic import BaseModel, Field, ValidationInfo, field_validator, model_validator
+from pydantic import (
+    BaseModel,
+    Field,
+    ValidationInfo,
+    field_validator,
+    model_validator,
+)
 import json
 import re
 from src.utils.logger import logger
@@ -15,11 +21,11 @@ class Level(BaseModel):
 
     MIN_SIZE: ClassVar[int] = 15
     MAX_SIZE: ClassVar[int] = 35
-    
+
     @field_validator("width", "height", mode="before")
     @classmethod
     def acotar(cls, valor: Any, info: ValidationInfo) -> int:
-        """Acota el tamaño entre MIN_SIZE y MAX_SIZE; si no es un número, usa DEFAULT_SIZE."""
+        """Acota el tamaño entre los límites configurados."""
         try:
             numero = int(valor)
         except (TypeError, ValueError):
@@ -31,7 +37,7 @@ class Level(BaseModel):
             logger.error("Error: %s %s out of range, using %s.",
                          info.field_name, numero, acotado)
         return acotado
-    
+
 
 class Config(BaseModel):
     """Parámetros de configuración con valores por defecto y rangos válidos."""
@@ -47,19 +53,32 @@ class Config(BaseModel):
         "level_max_time": (1, None, 90),
     }
 
-    highscore_filename: str = "highscore.csv"   # Archivo donde se guardan las puntuaciones en disco.
-    level: List[Level] = Field(default_factory=lambda: [Level() for _ in range(10)])  # Lista de niveles (mínimo 10).
+    # Archivo donde se guardan las puntuaciones en disco.
+    highscore_filename: str = "highscore.csv"
+    # Lista de niveles (mínimo 10).
+    level: List[Level] = Field(default_factory=lambda: [
+                               Level() for _ in range(10)])
     lives: int = Field(default=3)       # Vidas iniciales (mínimo 1, máximo 9).
-    pacgum: int = Field(default=42)       # Cantidad de bolitas normales en el mapa (mínimo 0).
-    points_per_pacgum: int = Field(default=10)     # Puntos por cada bolitas y fantasma (no negativos).
+    # Cantidad de bolitas normales en el mapa (mínimo 0).
+    pacgum: int = Field(default=42)
+    # Puntos por cada bolitas y fantasma (no negativos).
+    points_per_pacgum: int = Field(default=10)
     points_per_super_pacgum: int = Field(default=50)
     points_per_ghost: int = Field(default=200)
     seed: int = 42
-    level_max_time: int = Field(default=90)       # Tiempo máximo por nivel en segundos (mínimo 1).
+    # Tiempo máximo por nivel en segundos (mínimo 1).
+    level_max_time: int = Field(default=90)
 
     @classmethod
-    def _acoteo(cls, nombre: str, valor: Any, minimo: Any, maximo: Any, defecto: int) -> int:
-        """Convierte a int y lo acota al rango; si no es número, usa el defecto."""
+    def _acoteo(
+        cls,
+        nombre: str,
+        valor: Any,
+        minimo: Any,
+        maximo: Any,
+        defecto: int,
+    ) -> int:
+        """Convierte el valor a entero y lo limita al rango."""
         try:
             numero = int(valor)
         except (TypeError, ValueError, OverflowError):
@@ -103,7 +122,7 @@ class Config(BaseModel):
                              "using highscore.csv.", nombre_archivo)
                 datos["highscore_filename"] = "highscore.csv"
 
-        # El subject pide mínimo 10 niveles: los que falten se rellenan con 15x15
+        # Se completan hasta diez niveles con el tamaño predeterminado.
         niveles = datos.get("level")
         if isinstance(niveles, list) and len(niveles) < 10:
             logger.error("Error: only %s levels found, filling up to 10.",
@@ -121,19 +140,16 @@ class Config(BaseModel):
             logger.exception("No se pudo leer la configuración: %s",
                              config_file_path)
             raise
-            
-        # TEAM NOTE: antes de procesar y parsear el json, le quitamos los comentarios para evitar un JSONError al cargarlo.
-        # Este patrón lo vemos juntos mejor. Básicamente crea 4 grupos. El primero recoje todo lo válido y los otros son grupos que incluyen los comentarios
+
+        # El patrón conserva cadenas y elimina comentarios JSON.
         pattern = r'("(?:\\.|[^"\\])*")|//.*|/\*[\s\S]*?\*/|#.*'
 
-        # Creamos una función que recibe un objeto Match y comprobamos si hay coincidencia con el primer grupo de paréntesis
-        def replacer(match: re.Match):
+        def replacer(match: re.Match[str]) -> str:
             """Conserva cadenas JSON y elimina los fragmentos de comentario."""
             if match.group(1):
                 return match.group(1)
             return ""
 
-        # Aquí re.sub() actúa como función de orden superior para ejectura replacer
         config_clean: str = re.sub(pattern, replacer, config_raw)
         try:
             config_dict: Dict[str, Any] = json.loads(config_clean)

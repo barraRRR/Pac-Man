@@ -37,7 +37,8 @@ class Entity:
         self.state: State = State.INIT
         self.pos: Coord = Coord()
         self.color: Color = Color(0, 0, 0, 0)
-        self.delta: Dir = None
+        self.delta: Optional[Dir] = None
+        self.points: int = 0
         self.alive: bool = True
         self.spawn_pos: Coord = Coord(self.pos.get())
         self._update_entity_map(True)
@@ -128,6 +129,8 @@ class Entity:
 
     def animation_finished(self) -> bool:
         """Indica si una animacion no circular ha llegado a su ultimo frame."""
+        if self.delta is None:
+            return False
         frames = self._frames.get(self.delta, [])
         return (
             self.delta == Dir.DEATH
@@ -136,13 +139,12 @@ class Entity:
             and self._timer_frame >= ANI_SPEED
         )
 
-
     def _init_surface(self, tile_size: int) -> None:
         """Crea una superficie transparente del tamaño de una casilla."""
         self.sur: Surface = Surface((tile_size, tile_size), SRCALPHA)
         self.sur.fill((0, 0, 0, 0))
 
-    def _move(self, bitmap: BitMap, dir: Dir) -> None:
+    def _move_in_direction(self, bitmap: BitMap, dir: Dir) -> None:
         """Avanza una casilla si el mapa no bloquea la dirección."""
         if bitmap.grid[self.pos.y][self.pos.x] & dir.value:
             raise HitWallError

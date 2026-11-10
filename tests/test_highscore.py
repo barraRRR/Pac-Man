@@ -116,7 +116,6 @@ def test_decode_valid_base64_but_broken_text_returns_none() -> None:
     assert HighScore._decode("////") is None
 
 
-
 # --- save (#45) -------------------------------------------------------------
 
 
@@ -125,7 +124,8 @@ def test_save_creates_folder_and_file(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """Crea el directorio y el archivo al guardar puntuaciones."""
-    monkeypatch.setattr(HighScore, "SCORES_FOLDER", str(tmp_path / "highscore"))
+    monkeypatch.setattr(HighScore, "SCORES_FOLDER",
+                        str(tmp_path / "highscore"))
     monkeypatch.setattr(HighScore, "scores", [{"name": "Ana", "score": 846}])
     HighScore.save()
     assert (tmp_path / "highscore" / "highscore.csv").is_file()
@@ -158,6 +158,7 @@ def test_saved_file_is_not_plain_csv(
     HighScore.save()
     content = (tmp_path / "highscore.csv").read_text(encoding="ascii")
     assert "Ana" not in content
+
 
 def test_save_total_failure_keeps_memory_and_returns_false(
     tmp_path: pathlib.Path,
@@ -341,7 +342,6 @@ def test_register_writes_the_obfuscated_file(
     assert HighScore.load() == [{"name": "Ana", "score": 10}]
 
 
-
 def test_real_registration_flow_creates_loads_and_keeps_top_ten() -> None:
     """Prueba el registro real, la lectura y el límite del Top 10."""
     path = pathlib.Path(HighScore.SCORES_FOLDER) / HighScore.filename
@@ -411,8 +411,9 @@ def test_real_registration_flow_creates_loads_and_keeps_top_ten() -> None:
         if previous_file is not None:
             path.write_bytes(previous_file)
 
+
 def test_print_real_highscore_file() -> None:
-    """Lee el archivo real de puntuaciones y muestra el ranking descodificado."""
+    """Lee y muestra el ranking real de puntuaciones."""
     path = pathlib.Path(HighScore.SCORES_FOLDER) / HighScore.filename
 
     assert path.is_file(), f"Highscore file not found: {path}"
@@ -426,6 +427,7 @@ def test_print_real_highscore_file() -> None:
 
     for position, record in enumerate(ranking, start=1):
         print(f"{position}. {record['name']} - {record['score']}")
+
 
 def test_load_with_missing_file_starts_empty(
     tmp_path: pathlib.Path,
@@ -442,6 +444,7 @@ def test_load_with_missing_file_starts_empty(
     assert HighScore.scores == []
     # Que no exista archivo es lo normal: ni un aviso por stderr.
     assert capsys.readouterr().err == ""
+
 
 def test_register_keeps_duplicate_names(
     tmp_path: pathlib.Path,

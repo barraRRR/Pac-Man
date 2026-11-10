@@ -9,7 +9,8 @@ from src.core.pacgum import PacGum, SuperPacGum
 from src.core.engine import GraphicEngine
 from src.utils.utils import Coord, Dir
 from src.ux_ui.menu import ItemType, Menu
-from typing import List, Dict, Callable
+from typing import List, Dict, Callable, cast
+from functools import partial
 from src.utils.error import HitWallError
 import pygame
 import random
@@ -74,13 +75,13 @@ class App:
             pacgum=self.pacgum,
             score=self.score
         )
-        self.list_key: Dir = []
+        self.list_key: list[Dir] = []
         self._pause: bool = False
         self._return_to_menu: bool = False
         self._super_timer_ms: int = 0
         self._death_timer_ms: int = 0
         self._death_in_progress: bool = False
-        self._level_timer_ms: int = 0 #Tiempo de juego por nivel
+        self._level_timer_ms: int = 0  # Tiempo de juego por nivel
 
         HighScore.filename = self.config.highscore_filename
         HighScore.security = False
@@ -91,22 +92,22 @@ class App:
     @property
     def blinky(self) -> Blinky:
         """Devuelve la instancia de Blinky."""
-        return self.ghosts["blinky"]
+        return cast(Blinky, self.ghosts["blinky"])
 
     @property
     def pinky(self) -> Pinky:
         """Devuelve la instancia de Pinky."""
-        return self.ghosts["pinky"]
+        return cast(Pinky, self.ghosts["pinky"])
 
     @property
     def inky(self) -> Inky:
         """Devuelve la instancia de Inky."""
-        return self.ghosts["inky"]
+        return cast(Inky, self.ghosts["inky"])
 
     @property
     def clyde(self) -> Clyde:
         """Devuelve la instancia de Clyde."""
-        return self.ghosts["clyde"]
+        return cast(Clyde, self.ghosts["clyde"])
 
     def run(self) -> int:
         """Recorre los niveles en orden y ejecuta los momentos del juego."""
@@ -122,7 +123,9 @@ class App:
         while True:
             option: ItemType = self._menu_loop(
                 self._engine.menu_init,
-                lambda: self._engine._blit_menu_init(self._engine.menu_init)
+                lambda: self._engine._blit_menu_init(
+                    self._engine.menu_init
+                )
             )
             if option == ItemType.QUIT:
                 break
@@ -142,12 +145,14 @@ class App:
                     self._spawn_entities()
                     self._game_loop()
 
-                    if (number == len(self.config.level)
+                    if (
+                        number == len(self.config.level)
                         and self.state == AppState.RUN
                         and not self._return_to_menu
                     ):
                         if self._level_completed():
-                            self._congratulations("YOU ARE THE WINNER!", "PRESS SPACE")
+                            self._congratulations(
+                                "YOU ARE THE WINNER!", "PRESS SPACE")
                         self.state = AppState.PLAYER_NAME
 
                     if self.state == AppState.PLAYER_NAME:
@@ -219,6 +224,8 @@ class App:
 
     def _spawn_entities(self) -> None:
         """Coloca a Pac-Man, los fantasmas y las pacgums del nivel."""
+        if self.pacman_start is None:
+            raise RuntimeError("The level has not been initialized.")
         self.player.pos.set_at(self.pacman_start)
         self.player.spawn_pos.set_at(self.pacman_start)
 
@@ -227,7 +234,6 @@ class App:
             ghost.pos.set_at(spawn)
             ghost.spawn_pos.set_at(spawn)
             ghost._reset()
-        
             ghost._ghost_spawns = self.ghost_spawns
 
         self.pacgum.clear()
@@ -275,7 +281,10 @@ class App:
 
     def _confirm_menu_pause(self) -> None:
         """Aplica la opción seleccionada en el menú de pausa."""
-        option = self._engine.menu_pause._active_item._item_type
+        active_item = self._engine.menu_pause._active_item
+        if active_item is None:
+            raise RuntimeError("The pause menu has no active item.")
+        option = active_item._item_type
         if option == ItemType.RESUME:
             self._pause = False
             self.state = AppState.RUN
@@ -300,10 +309,10 @@ class App:
         self.player.invincible = not self.player.invincible
         state = "ON" if self.player.invincible else "OFF"
         logger.info(f"Cheat mode - invincible: {state}")
-        
+
     def _handle_events(
         self,
-        key_dict: Dict[int, Callable[[], None]],
+        key_dict: Dict[int, Callable[[], object]],
     ) -> bool:
         """Ejecuta la acción asociada a cada tecla pulsada."""
         for event in pygame.event.get():
@@ -326,7 +335,7 @@ class App:
 
         return True
 
-    def _menu_loop(self, menu: Menu, func: Callable[[Menu], None]) -> ItemType:
+    def _menu_loop(self, menu: Menu, func: Callable[[], None]) -> ItemType:
         """Mantiene activo el menú hasta confirmar una opción o salir."""
         while True:
             self.clock.tick(_FPS)
@@ -340,6 +349,8 @@ class App:
                     elif event.key == pygame.K_DOWN:
                         menu._select_item(True)
                     elif event.key == pygame.K_SPACE:
+                        if menu._active_item is None:
+                            raise RuntimeError("The menu has no active item.")
                         return menu._active_item._item_type
             pygame.display.flip()
             self._engine.window.fill((0, 0, 0, 0))
@@ -364,15 +375,19 @@ class App:
                 if event.type == pygame.QUIT:
                     self._end_game()
                     raise SystemExit(0)
-                if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+                if (
+                    event.type == pygame.KEYDOWN
+                    and event.key == pygame.K_SPACE
+                ):
                     waiting = False
             pygame.display.flip()
             self._engine.window.fill((0, 0, 0, 0))
 
     def _congratulations(
-            self,
-            title_str: str = "LEVEL COMPLETE",
-            sub_str: str = "PRESS SPACE FOR NEXT LEVEL") -> None:
+        self,
+        title_str: str = "LEVEL COMPLETE",
+        sub_str: str = "PRESS SPACE FOR NEXT LEVEL",
+    ) -> None:
         """Muestra la banda de nivel completado y espera SPACE.
 
         Repinta la escena tal como quedó al completar el nivel.
@@ -386,7 +401,10 @@ class App:
                 if event.type == pygame.QUIT:
                     self._end_game()
                     raise SystemExit(0)
-                if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+                if (
+                    event.type == pygame.KEYDOWN
+                    and event.key == pygame.K_SPACE
+                ):
                     waiting = False
             pygame.display.flip()
             self._engine.window.fill((0, 0, 0, 0))
@@ -441,7 +459,10 @@ class App:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     waiting = False
-                elif event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+                elif (
+                    event.type == pygame.KEYDOWN
+                    and event.key == pygame.K_SPACE
+                ):
                     waiting = False
 
             pygame.display.flip()
@@ -462,7 +483,10 @@ class App:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     waiting = False
-                elif event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+                elif (
+                    event.type == pygame.KEYDOWN
+                    and event.key == pygame.K_SPACE
+                ):
                     waiting = False
             pygame.display.flip()
 
@@ -475,7 +499,7 @@ class App:
         )
         return (remaining_ms + 999) // 1000
 
-    def _game_loop(self):
+    def _game_loop(self) -> None:
         """Actualiza el nivel hasta que termine o se vuelva al menú."""
         self._engine._update_maze(self.maze)
         self._engine._put_maze(self.maze)
@@ -483,7 +507,11 @@ class App:
         self.state = AppState.RUN
 
         running = True
-        while running and not self._return_to_menu and not self._level_completed():
+        while (
+            running
+            and not self._return_to_menu
+            and not self._level_completed()
+        ):
             dt: int = self.clock.tick(_FPS)
 
             if not self._pause and not self._death_in_progress:
@@ -511,7 +539,7 @@ class App:
                         moved: bool = False
                         if len(self.list_key) == 2:
                             try:
-                                self.player._move(
+                                self.player._move_in_direction(
                                     self.maze._bitmap, self.list_key[1])
                                 self.list_key.pop(0)
                                 moved = True
@@ -519,7 +547,7 @@ class App:
                                 pass
                         if not moved:
                             try:
-                                self.player._move(
+                                self.player._move_in_direction(
                                     self.maze._bitmap, self.list_key[0])
                             except HitWallError:
                                 if len(self.list_key) == 2:
@@ -541,7 +569,7 @@ class App:
 
                 if super_pacgums_after < super_pacgums_before:
                     self._super_timer_ms = 0
-                
+
                 if self.player.lives < lives_before:
                     self.list_key.clear()
                     self._start_player_death()
@@ -574,7 +602,7 @@ class App:
                         Ghost.edible = False
                         Ghost.show_white = False
                         self._super_timer_ms = 0
-                
+
                 if self.player.lives < lives_before:
                     self.list_key.clear()
                     if not self._death_in_progress:
@@ -584,10 +612,9 @@ class App:
                     self.state = AppState.PLAYER_NAME
                     running = False
 
-
             else:
                 self._engine._blit_menu_pause(self._engine.menu_pause)
-            
+
             if running:
                 running = self._handle_events(get_keys(self))
             pygame.display.flip()
@@ -602,11 +629,10 @@ class App:
         return all(not pacgum.alive for pacgum in self.pacgum)
 
 
-
-def get_keys(app: App) -> Dict[int, Callable[[], None]]:
+def get_keys(app: App) -> Dict[int, Callable[[], object]]:
     """Devuelve las acciones de teclado correspondientes a una pantalla."""
     if app.state == AppState.INIT:
-        menu = app._engine.menu_init
+        menu: Menu = app._engine.menu_init
         return {
             pygame.K_UP: lambda: menu._select_item(False),
             pygame.K_w: lambda: menu._select_item(False),
@@ -637,13 +663,12 @@ def get_keys(app: App) -> Dict[int, Callable[[], None]]:
             pygame.K_s: lambda: menu._select_item(True),
             pygame.K_SPACE: app._toggle_pause,
         }
-    
+
     if app.state == AppState.PLAYER_NAME:
-        keys = {
-            getattr(pygame, f"K_{char}"):
-            lambda char=char: app.player_name.build_name(char)
-            for char in "abcdefghijklmnopqrstuvwxyz0123456789"
-        }
+        keys: Dict[int, Callable[[], object]] = {}
+        for char in "abcdefghijklmnopqrstuvwxyz0123456789":
+            key = getattr(pygame, f"K_{char}")
+            keys[key] = partial(app.player_name.build_name, char)
         keys[pygame.K_BACKSPACE] = app.player_name.delete_last
         keys[pygame.K_SPACE] = app._finish_player_name
         return keys

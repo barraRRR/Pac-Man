@@ -12,7 +12,7 @@ LEFT = 8
 class BitMap:
     """Envuelve las máscaras de pared de cada casilla del laberinto."""
 
-    def __init__(self, grid: List[List[int]] = None) -> None:
+    def __init__(self, grid: List[List[int]] | None = None) -> None:
         """Inicializa el mapa con una cuadrícula opcional."""
         self._grid: List[List[int]] = grid if grid is not None else []
 

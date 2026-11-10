@@ -110,6 +110,6 @@ class Player(Entity):
         """Devuelve las vidas actuales del jugador."""
         return self._lives
 
-    def _reset_lives(self, lives:int) -> None:
+    def _reset_lives(self, lives: int) -> None:
         """Restaura las vidas al valor inicial de una partida nueva."""
         self._lives = lives

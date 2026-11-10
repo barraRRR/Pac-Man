@@ -24,7 +24,6 @@ class ItemType(str, Enum):
     QUIT = "EXIT"
     RESUME = "RESUME"
     MAIN_MENU = "MAIN MENU"
-    
 
 
 class Item:
@@ -33,10 +32,10 @@ class Item:
     def __init__(self, item_type: ItemType) -> None:
         """Crea un elemento asociado a una opción."""
         self._item_type: ItemType = item_type
-        self.sur: Surface | None = None
-        self.xy: Tuple[int, int] = None
+        self.sur: Surface = Surface((1, 1))
+        self.xy: Tuple[int, int] = (0, 0)
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         """Devuelve el hash de la opción del elemento."""
         return hash(self._item_type)
 
@@ -44,7 +43,7 @@ class Item:
             self,
             font_path: str | None = None,
             size_font: int | None = None,
-            ) -> None:
+    ) -> None:
         """Renderiza el texto del elemento con la fuente seleccionada."""
         if not pygame.font.get_init():
             pygame.font.init()
@@ -60,14 +59,14 @@ class Item:
 class Menu:
     """Mantiene las opciones y la selección activa de un menú."""
 
-    selector: Surface = None
+    selector: Surface = pygame.Surface((1, 1))
 
     def __init__(
-            self,
-            bg_color: Color = _MENU_BACKGROUND
-        ) -> None:
+        self,
+        bg_color: Color | tuple[int, int, int, int] = _MENU_BACKGROUND
+    ) -> None:
         """Inicializa el menú y crea el selector si aún no existe."""
-        self._bg_color: Color = bg_color
+        self._bg_color: Color | tuple[int, int, int, int] = bg_color
         self._items: List[Item] = []
         self._active_item: Item | None = None
         if self.selector is None:
@@ -85,7 +84,7 @@ class Menu:
         self,
         font_path: str | None = None,
         size_font: int | None = None
-        ) -> None:
+    ) -> None:
         """Renderiza y guarda las superficies de sus elementos."""
         for item in self._items:
             item._render_item(font_path, size_font)
@@ -112,7 +111,8 @@ class MenuInit(Menu):
             Item(ItemType.INSTRUCTIONS),
             Item(ItemType.QUIT)
         ])
-        self._render_item_list("assets/font/font_emulogic.ttf", FONT_MENU_INIT_SIZE)
+        self._render_item_list(
+            "assets/font/font_emulogic.ttf", FONT_MENU_INIT_SIZE)
         self._active_item = self._items[0]
 
 

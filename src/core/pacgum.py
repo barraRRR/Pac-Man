@@ -18,6 +18,7 @@ class PacGum(Entity):
         self.color.set(PACGUM_COLOR)
         self.points: int = points
 
+
 class SuperPacGum(PacGum):
     """Pacgum especial que permite comer fantasmas temporalmente."""
 

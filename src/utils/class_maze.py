@@ -28,7 +28,7 @@ class Maze:
 
         self._col: int = 0
         self._row: int = 0
-        self._size: Tuple[int, int] = 0
+        self._size: Tuple[int, int] = (0, 0)
         self._frontier: Tuple[int, int] = (0, 0)
 
     @property
@@ -56,7 +56,7 @@ class Maze:
         """Devuelve las coordenadas del límite del laberinto."""
         return (self._col - 1, self._row - 1)
 
-    def generate_level(self, number:int, width: int, height:int) -> None:
+    def generate_level(self, number: int, width: int, height: int) -> None:
         """Genera el mapa de un nivel y guarda sus cuadrícula.
 
         Args:
@@ -66,7 +66,8 @@ class Maze:
         """
         semilla = self._seed if number == 1 else 0
 
-        generator_map = MazeGenerator(size=(width, height), perfect=False, seed=semilla)
+        generator_map = MazeGenerator(
+            size=(width, height), perfect=False, seed=semilla)
 
         self._bitmap.grid.clear()
         self._bitmap.grid.extend(generator_map.maze)
@@ -127,7 +128,7 @@ class Maze:
         return ghost_spawns
 
     def reachable_cells(self, start: tuple[int, int]) -> set[tuple[int, int]]:
-        """Devuelve las celdas con camino desde start, en coordenadas (x, y)."""
+        """Devuelve las celdas alcanzables desde ``start``."""
         if not self.grid:
             raise ValueError("Maze has not been generated.")
 
@@ -172,7 +173,7 @@ class Maze:
 
                 next_cell = self.grid[next_y][next_x]
 
-                # Solo se puede pasar si no hay pared en ninguno de los dos lados.
+                # Comprueba que ambas casillas estén abiertas.
                 if current_cell & wall or next_cell & opposite_wall:
                     continue
 
@@ -223,18 +224,17 @@ class Maze:
 
         return [top_left, top_right, bottom_left, bottom_right]
 
-
     def select_super_pacgum_spawns(
         self,
         reachable: set[tuple[int, int]],
         ghost_spawns: list[tuple[int, int]],
     ) -> list[tuple[int, int]]:
-        """Elige una super-pacgum alcanzable por zona, sin pisar a los fantasmas.
+        """Elige una super-pacgum alcanzable en cada zona.
 
         Args:
             reachable: celdas alcanzables desde Pac-Man, calculadas una
                 sola vez por nivel y reutilizadas en todas las selecciones.
-            ghost_spawns: posiciones ya ocupadas por los fantasmas.
+            ghost_spawns: posiciones ocupadas por los fantasmas.
         """
         ghost_positions = set(ghost_spawns)
         super_pacgum_spawns: list[tuple[int, int]] = []

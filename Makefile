@@ -44,14 +44,14 @@ clean:
 
 lint:
 	@clear
-	@uv run flake8 . --exclude=.venv,data,__pycache__
-	@uv run mypy . --exclude "(.venv|data)" --warn-return-any --warn-unused-ignores --ignore-missing-imports --disallow-untyped-defs --check-untyped-defs
+	@uv run flake8 . --exclude=.venv,data,wheels,__pycache__
+	@uv run mypy . --exclude "(.venv|data|wheels)" --warn-return-any --warn-unused-ignores --ignore-missing-imports --disallow-untyped-defs --check-untyped-defs
 	@$(MAKE) clean --no-print-directory
 
 lint-strict:
 	@clear
-	@uv run flake8 . --exclude=.venv,data,__pycache__
-	@uv run mypy . --strict --exclude "(.venv|data)"
+	@uv run flake8 . --exclude=.venv,data,wheels,__pycache__
+	@uv run mypy . --strict --exclude "(.venv|data|wheels)"
 	@$(MAKE) clean --no-print-directory
 
 clean_venv: clean

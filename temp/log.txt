@@ -576,3 +576,64 @@ AttributeError: 'NoneType' object has no attribute 'sur'
 2026-11-09 16:45:09,413 [INFO] pac_man: [Level 01] Pacgum positions: [(2, 14)]
 2026-11-09 16:45:19,721 [INFO] pac_man: GAME OVER
 2026-11-09 16:45:23,536 [INFO] pac_man: Quiting game. See you soon!
+2026-11-11 00:15:11,604 [ERROR] pac_man: Error: name is longer than 10 characters, keeping "ABCDEFGHIJ".
+2026-11-11 00:15:11,618 [ERROR] pac_man: Error: name is longer than 10 characters, keeping "  ABCDEFGH".
+2026-11-11 00:15:11,626 [ERROR] pac_man: Error: could not save the highscore file (attempt 1 of 3).
+Traceback (most recent call last):
+  File "/home/jaitowerr/42madrid/milestone_4/Pac-Man/src/score/highscore.py", line 193, in save
+    path.write_text(cls._encode(text), encoding="ascii")
+  File "/home/jaitowerr/42madrid/milestone_4/Pac-Man/tests/test_highscore.py", line 175, in broken_write
+    raise OSError("disk full")
+OSError: disk full
+2026-11-11 00:15:11,627 [INFO] pac_man: Retrying in 3...
+2026-11-11 00:15:11,627 [INFO] pac_man: Retrying in 2...
+2026-11-11 00:15:11,627 [INFO] pac_man: Retrying in 1...
+2026-11-11 00:15:11,627 [ERROR] pac_man: Error: could not save the highscore file (attempt 2 of 3).
+Traceback (most recent call last):
+  File "/home/jaitowerr/42madrid/milestone_4/Pac-Man/src/score/highscore.py", line 193, in save
+    path.write_text(cls._encode(text), encoding="ascii")
+  File "/home/jaitowerr/42madrid/milestone_4/Pac-Man/tests/test_highscore.py", line 175, in broken_write
+    raise OSError("disk full")
+OSError: disk full
+2026-11-11 00:15:11,627 [INFO] pac_man: Retrying in 3...
+2026-11-11 00:15:11,627 [INFO] pac_man: Retrying in 2...
+2026-11-11 00:15:11,627 [INFO] pac_man: Retrying in 1...
+2026-11-11 00:15:11,627 [ERROR] pac_man: Error: total failure saving the highscore. The ranking survives in memory: play again and we will try again.
+2026-11-11 00:15:11,631 [ERROR] pac_man: Error: could not save the highscore file (attempt 1 of 3).
+Traceback (most recent call last):
+  File "/home/jaitowerr/42madrid/milestone_4/Pac-Man/src/score/highscore.py", line 193, in save
+    path.write_text(cls._encode(text), encoding="ascii")
+  File "/home/jaitowerr/42madrid/milestone_4/Pac-Man/tests/test_highscore.py", line 199, in flaky_write
+    raise OSError("temporary glitch")
+OSError: temporary glitch
+2026-11-11 00:15:11,631 [INFO] pac_man: Retrying in 3...
+2026-11-11 00:15:11,631 [INFO] pac_man: Retrying in 2...
+2026-11-11 00:15:11,631 [INFO] pac_man: Retrying in 1...
+2026-11-11 00:15:11,637 [ERROR] pac_man: Error: score must be a non-negative integer.
+2026-11-11 00:15:11,642 [ERROR] pac_man: Error: player name cannot be empty.
+2026-11-11 00:16:28,293 [ERROR] pac_man: Error: width 40 out of range, using 35.
+2026-11-11 00:16:28,293 [ERROR] pac_man: Error: height 8 out of range, using 15.
+2026-11-11 00:16:28,293 [ERROR] pac_man: Error: width 10 out of range, using 15.
+2026-11-11 00:16:28,293 [ERROR] pac_man: Error: width 99 out of range, using 35.
+2026-11-11 00:16:28,293 [ERROR] pac_man: Error: height 99 out of range, using 35.
+2026-11-11 00:16:28,293 [ERROR] pac_man: Error: width 10 out of range, using 15.
+2026-11-11 00:16:28,293 [ERROR] pac_man: Error: height 10 out of range, using 15.
+2026-11-11 00:16:28,293 [ERROR] pac_man: Error: width 3 out of range, using 15.
+2026-11-11 00:16:28,293 [ERROR] pac_man: Error: width 150 out of range, using 35.
+2026-11-11 00:16:28,293 [ERROR] pac_man: Error: height 5 out of range, using 15.
+2026-11-11 00:16:28,293 [ERROR] pac_man: Error: width -20 out of range, using 15.
+2026-11-11 00:16:28,293 [ERROR] pac_man: Error: height 1000 out of range, using 35.
+2026-11-11 00:16:28,293 [ERROR] pac_man: Error: invalid width 'abc', using 15.
+2026-11-11 00:16:28,293 [ERROR] pac_man: Error: width 12 out of range, using 15.
+2026-11-11 00:16:28,294 [ERROR] pac_man: Error: invalid height 'None', using 15.
+2026-11-11 00:16:28,294 [ERROR] pac_man: Error: height 1 out of range, using 15.
+2026-11-11 00:16:28,332 [INFO] pac_man: Highscores loaded: 10
+2026-11-11 00:16:31,170 [INFO] pac_man: [Level 01] Generating level
+2026-11-11 00:16:31,170 [INFO] pac_man: [Level 01] Pacgum cell values: {5: 1}
+2026-11-11 00:16:31,170 [INFO] pac_man: [Level 01] Pac-Man: (17, 7)
+2026-11-11 00:16:31,170 [INFO] pac_man: [Level 01] Ghosts: [(4, 1), (32, 1), (0, 14), (33, 14)]
+2026-11-11 00:16:31,170 [INFO] pac_man: [Level 01] Super-pacgums: [(5, 0), (30, 1), (6, 14), (32, 14)]
+2026-11-11 00:16:31,170 [INFO] pac_man: [Level 01] Pacgums: 1 placed
+2026-11-11 00:16:31,170 [INFO] pac_man: [Level 01] Pacgum positions: [(2, 14)]
+2026-11-11 00:16:31,753 [INFO] pac_man: Game pause
+2026-11-11 00:16:32,807 [INFO] pac_man: Return to main menu
