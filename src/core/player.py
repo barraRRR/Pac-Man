@@ -1,4 +1,4 @@
-"""Implementa el movimiento, las colisiones y las vidas de Pac-Man."""
+"""Implement Pac-Man's movement, collisions, and lives."""
 
 from src.utils.utils import Dir
 from src.core.entity import Entity, State, ANI_SPEED
@@ -17,10 +17,10 @@ PLAYER_MOVEMENT_INTERVAL = 220
 
 
 class Player(Entity):
-    """Representa al jugador y gestiona su puntuación y estado de muerte."""
+    """Represent the player and manage its score and death state."""
 
     def __init__(self, lives: int, score: Score) -> None:
-        """Crea Pac-Man con las vidas y el marcador de la partida."""
+        """Create Pac-Man with the game's lives and score tracker."""
         super().__init__()
         self.color.set(PLAYER_COLOR)
         self.images: dict[str, list[Surface]] = self._load_images()
@@ -31,13 +31,13 @@ class Player(Entity):
         self.ani_path: str = PLAYER_ANI_PATH
         self.set_movement_interval(PLAYER_MOVEMENT_INTERVAL)
 
-        # ==== MODO TRUCO ====
-        # Si es True, los fantasmas no pueden matar a Pac-Man (issue #124).
+        # ==== CHEAT MODE ====
+        # When True, ghosts cannot kill Pac-Man (issue #124).
         self.invincible: bool = False
 
     @staticmethod
     def _load_images() -> dict[str, list[Surface]]:
-        """Carga los frames PNG de cada animacion del jugador."""
+        """Load the player's PNG animation frames."""
         base = Path("assets/animations/player")
         images = {}
 
@@ -50,7 +50,7 @@ class Player(Entity):
         return images
 
     def _die(self) -> None:
-        """Inicia la muerte del jugador, salvo que sea invencible."""
+        """Start the player's death sequence unless they are invincible."""
         if self.invincible:
             return
         if self._dying:
@@ -65,7 +65,7 @@ class Player(Entity):
         self._timer_frame = 0
 
     def finish_death(self) -> None:
-        """Termina la animacion y deja al jugador listo para continuar."""
+        """Finish the animation and ready the player to continue."""
         self._set_position(self.spawn_pos)
         self.alive = True
         self._dying = False
@@ -77,11 +77,11 @@ class Player(Entity):
 
     @property
     def dying(self) -> bool:
-        """Indica si el jugador esta reproduciendo su animacion de muerte."""
+        """Return whether the player is playing the death animation."""
         return self._dying
 
     def _eat(self, target: Entity) -> None:
-        """Resuelve qué ocurre cuando Pac-Man toca otra entidad."""
+        """Resolve what happens when Pac-Man touches another entity."""
         if isinstance(target, Ghost):
             if not target.alive:
                 return
@@ -99,7 +99,7 @@ class Player(Entity):
                 Ghost.edible = True
 
     def resolve_tile(self) -> None:
-        """Resuelve las colisiones con las entidades de la casilla."""
+        """Resolve collisions with entities on the current tile."""
         for ent in list(Entity.entity_map.get(self.pos.get(), [])):
             if ent == self:
                 continue
@@ -107,9 +107,9 @@ class Player(Entity):
 
     @property
     def lives(self) -> int:
-        """Devuelve las vidas actuales del jugador."""
+        """Return the player's current lives."""
         return self._lives
 
     def _reset_lives(self, lives: int) -> None:
-        """Restaura las vidas al valor inicial de una partida nueva."""
+        """Restore the initial number of lives for a new game."""
         self._lives = lives

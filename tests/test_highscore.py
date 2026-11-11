@@ -1,4 +1,4 @@
-"""Pruebas del saneamiento de nombres y el ranking de puntuaciones."""
+"""Tests for name cleaning and the score leaderboard."""
 
 import pathlib
 
@@ -11,59 +11,59 @@ from src.score.highscore import HighScore
 
 
 def test_valid_name_passes_unchanged() -> None:
-    """Conserva un nombre válido sin modificarlo."""
+    """Keep a valid name unchanged."""
     assert HighScore.clean_name("Ana") == "Ana"
 
 
 def test_internal_spaces_are_kept() -> None:
-    """Conserva los espacios situados entre caracteres."""
+    """Keep spaces between characters."""
     assert HighScore.clean_name("Pac Man") == "Pac Man"
 
 
 def test_leading_spaces_kept_and_trailing_removed() -> None:
-    """Conserva espacios iniciales y elimina los finales."""
-    # Acordado: solo se limpia el final del nombre.
+    """Keep leading spaces and remove trailing spaces."""
+    # As agreed, only trailing spaces are removed.
     assert HighScore.clean_name("  Ana  ") == "  Ana"
 
 
 def test_forbidden_characters_are_removed() -> None:
-    """Elimina los caracteres no permitidos del nombre."""
+    """Remove disallowed characters from the name."""
     assert HighScore.clean_name("A-B") == "AB"
     assert HighScore.clean_name('"Ana"') == "Ana"
 
 
 def test_real_tab_and_newline_are_removed() -> None:
-    """Elimina tabuladores y saltos de línea reales."""
+    """Remove actual tabs and newline characters."""
     assert HighScore.clean_name("A\tB\nC") == "ABC"
 
 
 def test_literal_backslash_removed_but_letter_kept() -> None:
-    """Elimina la barra literal y conserva la letra siguiente."""
-    # La barra escrita a mano desaparece y la letra se queda: "\t" -> "t".
+    """Remove the literal backslash and keep the following letter."""
+    # The manually typed backslash is removed while the letter remains: "\t" -> "t".
     assert HighScore.clean_name("A\\tB") == "AtB"
 
 
 def test_all_spaces_gives_empty_name() -> None:
-    """Devuelve un nombre vacío si solo quedan espacios."""
+    """Return an empty name if only spaces remain."""
     assert HighScore.clean_name("   \t ") == ""
 
 
 def test_name_of_exactly_ten_characters_is_kept() -> None:
-    """Conserva nombres cuya longitud coincide con el máximo."""
+    """Keep names whose length exactly matches the limit."""
     assert HighScore.clean_name("ABCDEFGHIJ") == "ABCDEFGHIJ"
 
 
 def test_long_name_is_truncated_with_warning(
     capsys: pytest.CaptureFixture[str],
 ) -> None:
-    """Recorta los nombres largos y registra un aviso."""
+    """Truncate long names and log a warning."""
     assert HighScore.clean_name("ABCDEFGHIJK") == "ABCDEFGHIJ"
     assert "Error" in capsys.readouterr().err
 
 
 def test_leading_spaces_count_toward_the_limit() -> None:
-    """Cuenta los espacios iniciales dentro del límite del nombre."""
-    # 12 posiciones al recortar: 2 espacios + 8 letras.
+    """Count leading spaces toward the name length limit."""
+    # The 12-character limit includes 2 spaces and 8 letters.
     assert HighScore.clean_name("  ABCDEFGHIJK") == "  ABCDEFGH"
 
 
@@ -71,48 +71,48 @@ def test_leading_spaces_count_toward_the_limit() -> None:
 
 
 def test_zero_and_positive_scores_are_valid() -> None:
-    """Acepta puntuaciones enteras no negativas."""
+    """Accept non-negative integer scores."""
     assert HighScore.is_valid_score(0)
     assert HighScore.is_valid_score(1)
     assert HighScore.is_valid_score(846)
 
 
 def test_negative_score_is_invalid() -> None:
-    """Rechaza puntuaciones negativas."""
+    """Reject negative scores."""
     assert not HighScore.is_valid_score(-1)
 
 
 def test_boolean_is_not_a_score() -> None:
-    """Rechaza booleanos aunque Python los trate como enteros."""
-    # Trampa de Python: True y False son enteros; los descartamos a mano.
+    """Reject booleans even though Python treats them as integers."""
+    # Python treats True and False as integers, so reject them explicitly.
     assert not HighScore.is_valid_score(True)
     assert not HighScore.is_valid_score(False)
 
 
 def test_other_types_are_invalid() -> None:
-    """Rechaza puntuaciones que no sean enteros."""
+    """Reject scores that are not integers."""
     assert not HighScore.is_valid_score("846")
     assert not HighScore.is_valid_score(3.5)
     assert not HighScore.is_valid_score(None)
 
 
-# --- ofuscación (#45) -------------------------------------------------------
+# --- Obfuscation (#45) -------------------------------------------------------
 
 
 def test_encode_decode_round_trip() -> None:
-    """Recupera el texto original tras codificarlo y descodificarlo."""
+    """Recover the original text after encoding and decoding."""
     text = "Ana,846\nPac Man ñ,42\n"
     assert HighScore._decode(HighScore._encode(text)) == text
 
 
 def test_decode_garbage_returns_none() -> None:
-    """Rechaza contenido que no tenga una codificación válida."""
+    """Reject content that does not have a valid encoding."""
     assert HighScore._decode("not-valid-base64!!") is None
 
 
 def test_decode_valid_base64_but_broken_text_returns_none() -> None:
-    """Rechaza datos descodificados que no sean texto UTF-8."""
-    # Base64 válido cuyo contenido descodificado no es UTF-8: dañado.
+    """Reject decoded data that is not UTF-8 text."""
+    # Valid base64 whose decoded content is not UTF-8 is corrupted.
     assert HighScore._decode("////") is None
 
 
@@ -123,7 +123,7 @@ def test_save_creates_folder_and_file(
     tmp_path: pathlib.Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """Crea el directorio y el archivo al guardar puntuaciones."""
+    """Create the directory and file when saving scores."""
     monkeypatch.setattr(HighScore, "SCORES_FOLDER",
                         str(tmp_path / "highscore"))
     monkeypatch.setattr(HighScore, "scores", [{"name": "Ana", "score": 846}])
@@ -135,7 +135,7 @@ def test_save_then_load_round_trip(
     tmp_path: pathlib.Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """Carga correctamente las puntuaciones guardadas."""
+    """Load saved scores successfully."""
     monkeypatch.setattr(HighScore, "SCORES_FOLDER", str(tmp_path))
     monkeypatch.setattr(HighScore, "scores", [
         {"name": "Ana", "score": 846},
@@ -152,7 +152,7 @@ def test_saved_file_is_not_plain_csv(
     tmp_path: pathlib.Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """Guarda el ranking sin dejarlo como CSV en texto plano."""
+    """Save the leaderboard without leaving it as plain-text CSV."""
     monkeypatch.setattr(HighScore, "SCORES_FOLDER", str(tmp_path))
     monkeypatch.setattr(HighScore, "scores", [{"name": "Ana", "score": 846}])
     HighScore.save()
@@ -165,13 +165,13 @@ def test_save_total_failure_keeps_memory_and_returns_false(
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
 ) -> None:
-    """Mantiene el ranking en memoria cuando falla el guardado."""
+    """Keep the leaderboard in memory when saving fails."""
     monkeypatch.setattr(HighScore, "SCORES_FOLDER", str(tmp_path))
     monkeypatch.setattr(HighScore, "RETRY_SECONDS", 0)
     monkeypatch.setattr(HighScore, "scores", [{"name": "Ana", "score": 1}])
 
     def broken_write(self: pathlib.Path, data: str, encoding: str = "") -> int:
-        """Simula un error de escritura por falta de espacio."""
+        """Simulate a write error caused by insufficient disk space."""
         raise OSError("disk full")
 
     monkeypatch.setattr(pathlib.Path, "write_text", broken_write)
@@ -185,7 +185,7 @@ def test_save_succeeds_after_one_failed_attempt(
     tmp_path: pathlib.Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """Reintenta el guardado y tiene éxito tras un fallo transitorio."""
+    """Retry saving and succeed after a transient failure."""
     monkeypatch.setattr(HighScore, "SCORES_FOLDER", str(tmp_path))
     monkeypatch.setattr(HighScore, "RETRY_SECONDS", 0)
     monkeypatch.setattr(HighScore, "scores", [{"name": "Ana", "score": 1}])
@@ -193,7 +193,7 @@ def test_save_succeeds_after_one_failed_attempt(
     calls: list[int] = []
 
     def flaky_write(self: pathlib.Path, data: str, encoding: str = "") -> int:
-        """Falla una vez y luego delega en la escritura real."""
+        """Fail once, then delegate to the real write operation."""
         calls.append(1)
         if len(calls) == 1:
             raise OSError("temporary glitch")
@@ -207,7 +207,7 @@ def test_save_succeeds_after_one_failed_attempt(
 
 @pytest.fixture
 def full_ranking() -> list[dict[str, str | int]]:
-    """Ranking ya lleno: diez registros de 100 a 91 puntos."""
+    """A full leaderboard with ten entries scoring from 100 to 91."""
     return [{"name": f"player{i}", "score": 100 - i} for i in range(10)]
 
 
@@ -215,7 +215,7 @@ def test_register_adds_record_and_returns_true(
     tmp_path: pathlib.Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """Añade una puntuación válida al ranking."""
+    """Add a valid score to the leaderboard."""
     monkeypatch.setattr(HighScore, "SCORES_FOLDER", str(tmp_path))
     monkeypatch.setattr(HighScore, "scores", [])
     assert HighScore.register("Ana", 50) is True
@@ -226,7 +226,7 @@ def test_register_sorts_by_score_descending(
     tmp_path: pathlib.Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """Ordena las puntuaciones de mayor a menor."""
+    """Sort scores in descending order."""
     monkeypatch.setattr(HighScore, "SCORES_FOLDER", str(tmp_path))
     monkeypatch.setattr(HighScore, "scores", [{"name": "Ana", "score": 10}])
     HighScore.register("Carl", 30)
@@ -242,7 +242,7 @@ def test_register_tie_keeps_earlier_entry_first(
     tmp_path: pathlib.Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """Mantiene primero el registro anterior cuando hay un empate."""
+    """Keep the earlier entry first when scores are tied."""
     monkeypatch.setattr(HighScore, "SCORES_FOLDER", str(tmp_path))
     monkeypatch.setattr(HighScore, "scores", [{"name": "Ana", "score": 50}])
     assert HighScore.register("Bea", 50) is True
@@ -257,7 +257,7 @@ def test_register_rejects_equal_score_when_full(
     monkeypatch: pytest.MonkeyPatch,
     full_ranking: list[dict[str, str | int]],
 ) -> None:
-    """Rechaza un empate cuando el ranking ya está completo."""
+    """Reject a tie when the leaderboard is already full."""
     monkeypatch.setattr(HighScore, "SCORES_FOLDER", str(tmp_path))
     monkeypatch.setattr(HighScore, "scores", full_ranking)
     assert HighScore.register("Zoe", 91) is False
@@ -270,7 +270,7 @@ def test_register_rejects_lower_score_when_full(
     monkeypatch: pytest.MonkeyPatch,
     full_ranking: list[dict[str, str | int]],
 ) -> None:
-    """Rechaza puntuaciones menores cuando el ranking está completo."""
+    """Reject lower scores when the leaderboard is already full."""
     monkeypatch.setattr(HighScore, "SCORES_FOLDER", str(tmp_path))
     monkeypatch.setattr(HighScore, "scores", full_ranking)
     assert HighScore.register("Zoe", 1) is False
@@ -282,7 +282,7 @@ def test_register_higher_score_drops_last_when_full(
     monkeypatch: pytest.MonkeyPatch,
     full_ranking: list[dict[str, str | int]],
 ) -> None:
-    """Incluye la puntuación superior y elimina la más baja."""
+    """Include the higher score and remove the lowest one."""
     monkeypatch.setattr(HighScore, "SCORES_FOLDER", str(tmp_path))
     monkeypatch.setattr(HighScore, "scores", full_ranking)
     assert HighScore.register("Zoe", 95) is True
@@ -297,7 +297,7 @@ def test_register_rejects_invalid_score(
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
 ) -> None:
-    """Rechaza puntuaciones negativas sin alterar el ranking."""
+    """Reject negative scores without changing the leaderboard."""
     monkeypatch.setattr(HighScore, "SCORES_FOLDER", str(tmp_path))
     monkeypatch.setattr(HighScore, "scores", [])
     assert HighScore.register("Ana", -5) is False
@@ -310,7 +310,7 @@ def test_register_rejects_empty_name(
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
 ) -> None:
-    """Rechaza nombres vacíos sin alterar el ranking."""
+    """Reject empty names without changing the leaderboard."""
     monkeypatch.setattr(HighScore, "SCORES_FOLDER", str(tmp_path))
     monkeypatch.setattr(HighScore, "scores", [])
     assert HighScore.register("   ", 100) is False
@@ -322,7 +322,7 @@ def test_register_cleans_the_name(
     tmp_path: pathlib.Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """Sanea el nombre antes de guardarlo en el ranking."""
+    """Clean the name before adding it to the leaderboard."""
     monkeypatch.setattr(HighScore, "SCORES_FOLDER", str(tmp_path))
     monkeypatch.setattr(HighScore, "scores", [])
     assert HighScore.register("  Ana<3  ", 10) is True
@@ -333,7 +333,7 @@ def test_register_writes_the_obfuscated_file(
     tmp_path: pathlib.Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """Guarda el registro y confirma que se puede volver a cargar."""
+    """Save the entry and confirm it can be loaded again."""
     monkeypatch.setattr(HighScore, "SCORES_FOLDER", str(tmp_path))
     monkeypatch.setattr(HighScore, "scores", [])
     HighScore.register("Ana", 10)
@@ -343,7 +343,7 @@ def test_register_writes_the_obfuscated_file(
 
 
 def test_real_registration_flow_creates_loads_and_keeps_top_ten() -> None:
-    """Prueba el registro real, la lectura y el límite del Top 10."""
+    """Test actual registration, loading, and the Top 10 limit."""
     path = pathlib.Path(HighScore.SCORES_FOLDER) / HighScore.filename
 
     previous_file = path.read_bytes() if path.is_file() else None
@@ -352,7 +352,7 @@ def test_real_registration_flow_creates_loads_and_keeps_top_ten() -> None:
     try:
         HighScore.scores = []
 
-        # Primer tramo: registrar cuatro puntuaciones y leer el archivo.
+        # First stage: register four scores and read the file.
         first_entries = [
             ("Aitor", 40),
             ("Luna", 100),
@@ -374,7 +374,7 @@ def test_real_registration_flow_creates_loads_and_keeps_top_ten() -> None:
         assert HighScore.scores == expected_first
         assert HighScore.load() == expected_first
 
-        # Segundo tramo: añadir ocho registros; deben quedar los diez mejores.
+        # Second stage: add eight entries; the top ten should remain.
         more_entries = [
             ("Olga", 110),
             ("Paco", 30),
@@ -413,7 +413,7 @@ def test_real_registration_flow_creates_loads_and_keeps_top_ten() -> None:
 
 
 def test_print_real_highscore_file() -> None:
-    """Lee y muestra el ranking real de puntuaciones."""
+    """Read and display the actual score leaderboard."""
     path = pathlib.Path(HighScore.SCORES_FOLDER) / HighScore.filename
 
     assert path.is_file(), f"Highscore file not found: {path}"
@@ -434,7 +434,7 @@ def test_load_with_missing_file_starts_empty(
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
 ) -> None:
-    """Si el archivo no existe, el ranking empieza vacío y sin quejas."""
+    """Start with an empty leaderboard and no warnings if the file is missing."""
     monkeypatch.setattr(HighScore, "SCORES_FOLDER", str(tmp_path))
     monkeypatch.setattr(
         HighScore, "scores", [{"name": "Viejo", "score": 999}]
@@ -442,7 +442,7 @@ def test_load_with_missing_file_starts_empty(
 
     assert HighScore.load() == []
     assert HighScore.scores == []
-    # Que no exista archivo es lo normal: ni un aviso por stderr.
+    # A missing file is expected; do not write a warning to stderr.
     assert capsys.readouterr().err == ""
 
 
@@ -450,7 +450,7 @@ def test_register_keeps_duplicate_names(
     tmp_path: pathlib.Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """Dos jugadores con el mismo nombre conviven: no se deduplica."""
+    """Allow two players with the same name; do not deduplicate them."""
     monkeypatch.setattr(HighScore, "SCORES_FOLDER", str(tmp_path))
     monkeypatch.setattr(HighScore, "scores", [])
 
@@ -465,6 +465,6 @@ def test_register_keeps_duplicate_names(
     ]
     assert HighScore.scores == expected
 
-    # Los duplicados también sobreviven al archivo: guardar y volver a leer.
+    # Duplicate names also survive saving and reloading.
     HighScore.scores = []
     assert HighScore.load() == expected

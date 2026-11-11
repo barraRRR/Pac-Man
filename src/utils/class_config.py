@@ -1,4 +1,4 @@
-"""Modelos y validación de la configuración del juego."""
+"""Models and validation for the game configuration."""
 
 from typing import Any, Dict, List, Optional, Tuple, ClassVar
 from pydantic import (
@@ -14,7 +14,7 @@ from src.utils.logger import logger
 
 
 class Level(BaseModel):
-    """Un nivel del juego: dimensiones del laberinto en celdas."""
+    """A game level defined by the maze dimensions in tiles."""
 
     width: int = 15
     height: int = 15
@@ -25,7 +25,7 @@ class Level(BaseModel):
     @field_validator("width", "height", mode="before")
     @classmethod
     def acotar(cls, valor: Any, info: ValidationInfo) -> int:
-        """Acota el tamaño entre los límites configurados."""
+        """Clamp the size to the configured limits."""
         try:
             numero = int(valor)
         except (TypeError, ValueError):
@@ -40,9 +40,9 @@ class Level(BaseModel):
 
 
 class Config(BaseModel):
-    """Parámetros de configuración con valores por defecto y rangos válidos."""
+    """Configuration parameters with default values and valid ranges."""
 
-    # Cada rango contiene el mínimo, el máximo y el valor por defecto.
+    # Each range contains the minimum, maximum, and default value.
     LIMITES: ClassVar[Dict[str, Tuple[Optional[int], Optional[int], int]]] = {
         "lives": (1, 9, 3),
         "pacgum": (0, None, 42),
@@ -53,20 +53,20 @@ class Config(BaseModel):
         "level_max_time": (1, None, 90),
     }
 
-    # Archivo donde se guardan las puntuaciones en disco.
+    # File used to store scores on disk.
     highscore_filename: str = "highscore.csv"
-    # Lista de niveles (mínimo 10).
+    # Level list (minimum of 10).
     level: List[Level] = Field(default_factory=lambda: [
                                Level() for _ in range(10)])
-    lives: int = Field(default=3)       # Vidas iniciales (mínimo 1, máximo 9).
-    # Cantidad de bolitas normales en el mapa (mínimo 0).
+    lives: int = Field(default=3)       # Starting lives (minimum 1, maximum 9).
+    # Number of regular pac-gums in the maze (minimum 0).
     pacgum: int = Field(default=42)
-    # Puntos por cada bolitas y fantasma (no negativos).
+    # Points per regular pac-gum, super pac-gum, and ghost (non-negative).
     points_per_pacgum: int = Field(default=10)
     points_per_super_pacgum: int = Field(default=50)
     points_per_ghost: int = Field(default=200)
     seed: int = 42
-    # Tiempo máximo por nivel en segundos (mínimo 1).
+    # Maximum level duration in seconds (minimum 1).
     level_max_time: int = Field(default=90)
 
     @classmethod
@@ -78,7 +78,7 @@ class Config(BaseModel):
         maximo: Any,
         defecto: int,
     ) -> int:
-        """Convierte el valor a entero y lo limita al rango."""
+        """Convert the value to an integer and clamp it to the range."""
         try:
             numero = int(valor)
         except (TypeError, ValueError, OverflowError):
@@ -98,19 +98,19 @@ class Config(BaseModel):
     @model_validator(mode="before")
     @classmethod
     def acotar_rangos(cls, datos: Any) -> Any:
-        """Acota los rangos válidos antes de que el modelo los valide."""
+        """Clamp values to valid ranges before model validation."""
         if not isinstance(datos, dict):
             return datos
-        # Trabajamos con una copia para no tocar el diccionario original
+        # Work on a copy to avoid modifying the original dictionary.
         datos = dict(datos)
 
-        # Campos numéricos: se acotan al rango y se avisa si había que corregir
+        # Clamp numeric fields and log a warning if a value changes.
         for nombre, (minimo, maximo, defecto) in cls.LIMITES.items():
             if nombre in datos:
                 datos[nombre] = cls._acoteo(nombre, datos[nombre],
                                             minimo, maximo, defecto)
 
-        # Nombre del archivo de highscores: debe ser .csv y no solo números
+        # The high-score filename must end in .csv and cannot be only digits.
         if "highscore_filename" in datos:
             nombre_archivo = datos["highscore_filename"]
             valido = (isinstance(nombre_archivo, str)
@@ -122,7 +122,7 @@ class Config(BaseModel):
                              "using highscore.csv.", nombre_archivo)
                 datos["highscore_filename"] = "highscore.csv"
 
-        # Se completan hasta diez niveles con el tamaño predeterminado.
+        # Fill the list to ten levels using the default dimensions.
         niveles = datos.get("level")
         if isinstance(niveles, list) and len(niveles) < 10:
             logger.error("Error: only %s levels found, filling up to 10.",
@@ -132,7 +132,7 @@ class Config(BaseModel):
 
     @classmethod
     def json_parser(cls, config_file_path: str) -> "Config":
-        """Lee un archivo JSON (con comentarios) y construye la Config."""
+        """Read a JSON file (with comments) and build a Config."""
         try:
             with open(config_file_path, "r", encoding="utf-8") as file:
                 config_raw: str = file.read()
@@ -141,11 +141,11 @@ class Config(BaseModel):
                              config_file_path)
             raise
 
-        # El patrón conserva cadenas y elimina comentarios JSON.
+        # Preserve strings while removing JSON-style comments.
         pattern = r'("(?:\\.|[^"\\])*")|//.*|/\*[\s\S]*?\*/|#.*'
 
         def replacer(match: re.Match[str]) -> str:
-            """Conserva cadenas JSON y elimina los fragmentos de comentario."""
+            """Preserve JSON strings and remove comment fragments."""
             if match.group(1):
                 return match.group(1)
             return ""

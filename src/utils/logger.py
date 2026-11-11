@@ -1,4 +1,4 @@
-"""Configura el registro de mensajes del juego en consola y archivo."""
+"""Configure game logging to the console and a file."""
 
 import logging
 import sys
@@ -11,7 +11,7 @@ _LOG_FILE = Path(__file__).resolve().parents[2] / "temp" / "log.txt"
 
 def get_logger(name: str | None = None) -> logging.Logger:
     """
-    Devuelve un logger que escribe en pantalla y en ``repo/temp/log.txt``
+    Return a logger that writes to the console and ``repo/temp/log.txt``.
     """
     logger = logging.getLogger(name or _LOGGER_NAME)
     if logger.handlers:

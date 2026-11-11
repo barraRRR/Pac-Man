@@ -1,13 +1,13 @@
-"""Excepciones de movimiento propias del laberinto."""
+"""Maze-specific movement exceptions."""
 
 
 class MovementError(Exception):
-    """Error base para movimientos no válidos."""
+    """Base error for invalid movement."""
 
 
 class HitWallError(MovementError):
-    """Señala que una entidad intentó avanzar contra una pared."""
+    """Indicate that an entity tried to move into a wall."""
 
 
 class UnreachableTileError(MovementError):
-    """Señala que no se puede alcanzar una casilla vecina."""
+    """Indicate that a neighboring tile cannot be reached."""

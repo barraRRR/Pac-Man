@@ -1,4 +1,4 @@
-"""Coordina los estados, niveles, entidades y eventos de la partida."""
+"""Coordinate the game's states, levels, entities, and events."""
 
 from src.utils.class_config import Config, Level
 from src.utils.class_maze import Maze
@@ -26,7 +26,7 @@ _DEFAULT_PLAYER_NAME = "PLAYER"
 
 
 class AppState(Enum):
-    """Estados posibles de la aplicación."""
+    """Possible application states."""
 
     INIT = "init"
     NEWLEVEL = "newlevel"
@@ -39,10 +39,10 @@ class AppState(Enum):
 
 
 class App:
-    """Coordina la lógica del juego y prepara el estado de cada nivel."""
+    """Coordinate game logic and prepare each level's state."""
 
     def __init__(self, config: Config) -> None:
-        """Construye la App con la configuración y deja el estado vacío."""
+        """Build the app from the configuration with an empty game state."""
         self.config: Config = config
         self.maze: Maze = Maze(config.seed)
         self.pacman_start: tuple[int, int] | None = None
@@ -81,7 +81,7 @@ class App:
         self._super_timer_ms: int = 0
         self._death_timer_ms: int = 0
         self._death_in_progress: bool = False
-        self._level_timer_ms: int = 0  # Tiempo de juego por nivel
+        self._level_timer_ms: int = 0  # Elapsed time in the current level.
 
         HighScore.filename = self.config.highscore_filename
         HighScore.security = False
@@ -91,26 +91,26 @@ class App:
 
     @property
     def blinky(self) -> Blinky:
-        """Devuelve la instancia de Blinky."""
+        """Return the Blinky instance."""
         return cast(Blinky, self.ghosts["blinky"])
 
     @property
     def pinky(self) -> Pinky:
-        """Devuelve la instancia de Pinky."""
+        """Return the Pinky instance."""
         return cast(Pinky, self.ghosts["pinky"])
 
     @property
     def inky(self) -> Inky:
-        """Devuelve la instancia de Inky."""
+        """Return the Inky instance."""
         return cast(Inky, self.ghosts["inky"])
 
     @property
     def clyde(self) -> Clyde:
-        """Devuelve la instancia de Clyde."""
+        """Return the Clyde instance."""
         return cast(Clyde, self.ghosts["clyde"])
 
     def run(self) -> int:
-        """Recorre los niveles en orden y ejecuta los momentos del juego."""
+        """Run levels in order and execute each stage of the game."""
         self.clock: pygame.time.Clock = pygame.time.Clock()
         levels = [
             (level.width, level.height)
@@ -179,7 +179,7 @@ class App:
         return 0
 
     def _start_level(self, number: int, level: Level) -> None:
-        """Prepara el nivel actual: genera el mapa y deja el estado listo."""
+        """Prepare the current level by generating its map and state."""
         self.maze.generate_level(
             number=number,
             width=level.width,
@@ -228,7 +228,7 @@ class App:
                     level_label, self.pacgum_spawns)
 
     def _spawn_entities(self) -> None:
-        """Coloca a Pac-Man, los fantasmas y las pacgums del nivel."""
+        """Place Pac-Man, the ghosts, and the level's pac-gums."""
         if self.pacman_start is None:
             raise RuntimeError("The level has not been initialized.")
         self.player.pos.set_at(self.pacman_start)
@@ -254,7 +254,7 @@ class App:
             entity._update_entity_map(True)
 
     def _start_player_death(self) -> None:
-        """Oculta los fantasmas mientras Pac-Man reproduce su muerte."""
+        """Hide the ghosts while Pac-Man's death animation plays."""
         self._death_in_progress = True
         self._death_timer_ms = 0
         for ghost in self.ghosts.values():
@@ -262,7 +262,7 @@ class App:
             ghost.current_corridor.clear()
 
     def _update_player_death(self, dt: int) -> None:
-        """Reproduce la muerte y recoloca los fantasmas en sus esquinas."""
+        """Play the death animation and return the ghosts to their corners."""
         self._death_timer_ms += dt
         if self._death_timer_ms < PLAYER_DEATH_DURATION_MS:
             return
@@ -276,7 +276,7 @@ class App:
         self._death_in_progress = False
 
     def _push_direction(self, dir: Dir) -> None:
-        """Encola el giro solicitado y sustituye la pendiente si hace falta."""
+        """Queue the requested turn, replacing the pending turn if needed."""
         if dir in self.list_key:
             return
         if len(self.list_key) < 2:
@@ -285,7 +285,7 @@ class App:
             self.list_key[1] = dir
 
     def _confirm_menu_pause(self) -> None:
-        """Aplica la opción seleccionada en el menú de pausa."""
+        """Apply the option selected in the pause menu."""
         active_item = self._engine.menu_pause._active_item
         if active_item is None:
             raise RuntimeError("The pause menu has no active item.")
@@ -301,7 +301,7 @@ class App:
             logger.info("Return to main menu")
 
     def _toggle_pause(self) -> None:
-        """Pausa la partida o confirma la opción seleccionada."""
+        """Pause the game or confirm the selected option."""
         if self._pause:
             self._confirm_menu_pause()
         else:
@@ -310,7 +310,7 @@ class App:
             logger.info("Game pause")
 
     def _toggle_invincible(self) -> None:
-        """Activa o desactiva la invencibilidad del jugador."""
+        """Toggle the player's invincibility."""
         self.player.invincible = not self.player.invincible
         state = "ON" if self.player.invincible else "OFF"
         logger.info(f"Cheat mode - invincible: {state}")
@@ -319,7 +319,7 @@ class App:
         self,
         key_dict: Dict[int, Callable[[], object]],
     ) -> bool:
-        """Ejecuta la acción asociada a cada tecla pulsada."""
+        """Execute the action associated with each pressed key."""
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self._end_game()
@@ -341,7 +341,7 @@ class App:
         return True
 
     def _menu_loop(self, menu: Menu, func: Callable[[], None]) -> ItemType:
-        """Mantiene activo el menú hasta confirmar una opción o salir."""
+        """Keep the menu active until an option is confirmed or the game exits."""
         while True:
             self.clock.tick(_FPS)
             func()
@@ -361,10 +361,10 @@ class App:
             self._engine.window.fill((0, 0, 0, 0))
 
     def _level_intro(self, number: int) -> None:
-        """Muestra la banda de inicio de nivel y espera SPACE para jugar.
+        """Show the level intro banner and wait for SPACE to start.
 
-        Pinta la escena del nivel nuevo con la banda encima y no deja
-        entrar al game loop hasta que se pulse la barra espaciadora.
+        Draw the new level's scene with the banner and do not enter the game
+        loop until the space bar is pressed.
         """
         self._engine._put_maze(self.maze)
         self._engine._put_entities()
@@ -393,9 +393,9 @@ class App:
         title_str: str = "LEVEL COMPLETE",
         sub_str: str = "PRESS SPACE FOR NEXT LEVEL",
     ) -> None:
-        """Muestra la banda de nivel completado y espera SPACE.
+        """Show the level-complete banner and wait for SPACE.
 
-        Repinta la escena tal como quedó al completar el nivel.
+        Redraw the scene as it appeared when the level was completed.
         """
         waiting: bool = True
         while waiting:
@@ -415,7 +415,7 @@ class App:
             self._engine.window.fill((0, 0, 0, 0))
 
     def _enter_player_name(self) -> AppState:
-        """Muestra la pantalla de nombre hasta confirmar o cancelar."""
+        """Show the name-entry screen until the player confirms or cancels."""
         self.player_name.set_name("")
         self.state = AppState.PLAYER_NAME
 
@@ -437,10 +437,10 @@ class App:
         return self.state
 
     def _finish_player_name(self) -> None:
-        """Guarda la puntuación y termina la entrada del nombre.
+        """Save the score and finish name entry.
 
-        Si el nombre queda vacío tras limpiarlo (nada escrito o solo
-        espacios), se guarda con el nombre por defecto.
+        If the cleaned name is empty (nothing entered or only spaces), save
+        the score with the default name.
         """
         name: str = self.player_name.get_name()
         if not HighScore.clean_name(name):
@@ -449,10 +449,10 @@ class App:
         self.state = AppState.HIGHSCORE
 
     def _highscores_loop(self) -> None:
-        """Muestra la pantalla de highscores hasta pulsar SPACE.
+        """Show the high-score screen until SPACE is pressed.
 
-        Misma idea que la intro de nivel: se repite el dibujo en cada
-        frame y se espera la barra para volver al menú principal.
+        As with the level intro, redraw each frame and wait for SPACE to
+        return to the main menu.
         """
         waiting = True
         while waiting:
@@ -475,10 +475,10 @@ class App:
         self.state = AppState.INIT
 
     def _instructions_loop(self) -> None:
-        """Muestra la pantalla de instrucciones hasta pulsar SPACE.
+        """Show the instructions screen until SPACE is pressed.
 
-        Misma idea que la intro de nivel: se repite el dibujo y se
-        espera la barra para volver al menú principal.
+        As with the level intro, redraw the screen and wait for SPACE to
+        return to the main menu.
         """
         waiting: bool = True
         while waiting:
@@ -498,7 +498,7 @@ class App:
 
     @property
     def remaining_seconds(self) -> int:
-        """Devuelve los segundos restantes del nivel, sin bajar de cero."""
+        """Return the remaining level time in seconds, never below zero."""
         remaining_ms = max(
             0,
             self.config.level_max_time * 1000 - self._level_timer_ms
@@ -506,7 +506,7 @@ class App:
         return (remaining_ms + 999) // 1000
 
     def _game_loop(self) -> None:
-        """Actualiza el nivel hasta que termine o se vuelva al menú."""
+        """Update the level until it ends or the game returns to the menu."""
         self._engine._update_maze(self.maze)
         self._engine._put_maze(self.maze)
         self._engine._put_entities()
@@ -539,7 +539,7 @@ class App:
                     self.state = AppState.PLAYER_NAME
                     running = False
             elif not self._pause:
-                # Movimiento de Pac-Man.
+                # Move Pac-Man.
                 for _ in range(self.player.movement_ticks(dt)):
                     if self.list_key:
                         moved: bool = False
@@ -580,7 +580,7 @@ class App:
                     self.list_key.clear()
                     self._start_player_death()
 
-                # Movimiento y colisiones de los fantasmas.
+                # Move the ghosts and resolve their collisions.
                 if not self._death_in_progress:
                     for ghost in self.ghosts.values():
                         ghost._move(
@@ -594,7 +594,7 @@ class App:
                         if self._death_in_progress:
                             break
 
-                # ====SUPER PACGUM====
+                # ==== SUPER PAC-GUM ====
                 if Ghost.edible and not self._death_in_progress:
                     self._super_timer_ms += dt
 
@@ -627,16 +627,16 @@ class App:
             self._engine.window.fill((0, 0, 0, 0))
 
     def _end_game(self) -> None:
-        """Cierra los módulos de Pygame."""
+        """Shut down Pygame."""
         pygame.quit()
 
     def _level_completed(self) -> bool:
-        """True cuando ya no queda ninguna pacgum viva en el nivel."""
+        """Return True when no pac-gums remain alive in the level."""
         return all(not pacgum.alive for pacgum in self.pacgum)
 
 
 def get_keys(app: App) -> Dict[int, Callable[[], object]]:
-    """Devuelve las acciones de teclado correspondientes a una pantalla."""
+    """Return the keyboard actions for the current screen."""
     if app.state == AppState.INIT:
         menu: Menu = app._engine.menu_init
         return {

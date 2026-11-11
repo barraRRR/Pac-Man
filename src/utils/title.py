@@ -1,4 +1,4 @@
-"""Crea superficies de texto para dibujarlas en la interfaz."""
+"""Create text surfaces for drawing in the interface."""
 
 import pygame
 from pygame import Surface
@@ -12,7 +12,7 @@ _FONT_PATH = "assets/font/font_emulogic.ttf"
 
 class Title:
     """
-    Crea textos para mostrar en la interfaz
+    Create text to display in the interface.
     """
 
     def __init__(
@@ -21,7 +21,7 @@ class Title:
         size: int = _FONT_BODY_SIZE,
         color: Tuple[int, int, int, int] = _FONT_COLOR,
     ) -> None:
-        """Renderiza el texto indicado con tamaño y color seleccionados."""
+        """Render the specified text with the selected size and color."""
         self.sur: pygame.Surface = self._render(text, color, size)
 
     def _render(
@@ -30,10 +30,10 @@ class Title:
         color: Tuple[int, int, int, int] = _FONT_COLOR,
         size: int = _FONT_BODY_SIZE,
     ) -> pygame.Surface:
-        """Crea y devuelve la superficie del texto."""
+        """Create and return the text surface."""
         if not pygame.font.get_init():
             pygame.font.init()
-        font = pygame.font.Font(_FONT_PATH, size)        # Proteger
+        font = pygame.font.Font(_FONT_PATH, size)
         return font.render(text, True, color)
 
     def blit_title(
@@ -41,5 +41,5 @@ class Title:
         window: Surface,
         dest: Tuple[int, int]
     ) -> None:
-        """Dibuja el texto en la ventana en la posición indicada."""
+        """Draw the text in the window at the specified position."""
         window.blit(self.sur, dest)

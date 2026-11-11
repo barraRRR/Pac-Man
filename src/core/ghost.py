@@ -1,4 +1,4 @@
-"""Define la lógica de movimiento y los comportamientos de los fantasmas."""
+"""Define ghost movement logic and behavior."""
 
 from src.utils.utils import Coord, Dir
 from src.core.entity import Entity, State, ANI_SPEED
@@ -18,7 +18,7 @@ PINKY_COLOR = (255, 192, 203, 255)
 INKY_COLOR = (46, 109, 180, 255)
 CLYDE_COLOR = (238, 70, 36, 255)
 
-# Cuanta menos, más rápido
+# Lower values mean faster movement.
 BLINKY_SPEED = 300
 PINKY_SPEED = 500
 INKY_SPEED = 500
@@ -34,7 +34,7 @@ SCARED_GHOST = "assets/animations/ghosts/scared_ghost"
 
 
 class Ghost(Entity):
-    """Implementa rutas y estados compartidos por todos los fantasmas."""
+    """Implement paths and states shared by all ghosts."""
 
     path_map: Dict[
         Tuple[Tuple[int, int], Tuple[int, int]],
@@ -52,7 +52,7 @@ class Ghost(Entity):
     show_white: bool = False
 
     def __init__(self, name: str, points: int) -> None:
-        """Inicializa un fantasma con nombre y puntos de captura."""
+        """Initialize a ghost with a name and capture score."""
         super().__init__()
         self.name: str = name
         self.ani_path: str = ""
@@ -74,12 +74,12 @@ class Ghost(Entity):
         bitmap: BitMap,
         directions: List[Dir] | None = None,
     ) -> None:
-        """Define el movimiento específico de cada tipo de fantasma."""
+        """Define the movement specific to each ghost type."""
         raise NotImplementedError
 
     @classmethod
     def _load_scared_frames(cls) -> None:
-        """Carga una vez los fotogramas de fantasma asustado."""
+        """Load the scared ghost frames once."""
         if cls._frames_scared:
             return
 
@@ -102,7 +102,7 @@ class Ghost(Entity):
         cls._frames_flashing = frames[1::2]
 
     def get_frame(self, dt: int) -> Surface:
-        """Devuelve el fotograma asustado escalado al tamaño normal."""
+        """Return the scared ghost frame scaled to the normal size."""
         if not self.edible or not self._frames_scared:
             return super().get_frame(dt)
 
@@ -197,14 +197,14 @@ class Ghost(Entity):
         return path
 
     def _update_delta(self, step: Coord) -> None:
-        """Actualiza la dirección hacia la siguiente casilla."""
+        """Update the direction toward the next tile."""
         try:
             self.delta = self.pos._get_delta(step)
         except UnreachableTileError:
             pass
 
     def _get_corridor(self, path: List[Coord]) -> None:
-        """Guarda el tramo recto inicial de una ruta."""
+        """Store the initial straight segment of a path."""
         self.current_corridor.clear()
         if len(path) < 2:
             return
@@ -220,19 +220,19 @@ class Ghost(Entity):
             self.current_corridor.append(step)
 
     def _follow_corridor(self) -> None:
-        """Avanza a la siguiente casilla del pasillo actual."""
+        """Move to the next tile in the current corridor."""
         self._set_position(self.current_corridor[1])
         self._update_delta(self.current_corridor[1])
         self.current_corridor.pop(0)
 
     def _die(self) -> None:
-        """Devuelve al fantasma a su posición inicial."""
+        """Return the ghost to its spawn position."""
         self.current_corridor.clear()
         self._set_position(self.spawn_pos)
         self.alive = True
 
     def _update_respawn(self, dt: int) -> None:
-        """Espera 10 segundos y reactiva al fantasma en su esquina."""
+        """Wait 10 seconds, then reactivate the ghost in its corner."""
         if self.state != State.EATEN:
             self.state = State.EATEN
             self._respawn_timer_ms = 0
@@ -245,7 +245,7 @@ class Ghost(Entity):
             self._die()
 
     def resolve_tile(self) -> None:
-        """Comprueba si el fantasma alcanza al jugador en su casilla."""
+        """Check whether the ghost reaches the player on their tile."""
         if not self.alive:
             return
         from src.core.player import Player
@@ -254,7 +254,7 @@ class Ghost(Entity):
                 ent._die()
 
     def _reset(self) -> None:
-        """Reinicia el fantasma y sus temporizadores."""
+        """Reset the ghost and its timers."""
         self.alive = True
         self._timer_ms = 0
         self.current_corridor.clear()
@@ -269,7 +269,7 @@ class Ghost(Entity):
         bitmap: BitMap,
         opposite: bool = False
     ) -> int:
-        """Devuelve el cuarto de una casilla o su diagonal opuesta."""
+        """Return a tile's quadrant or its diagonally opposite quadrant."""
         middle_x: int = len(bitmap.grid[0]) // 2
         middle_y: int = len(bitmap.grid) // 2
 
@@ -277,16 +277,16 @@ class Ghost(Entity):
         is_top: bool = pos.y < middle_y
 
         if is_top and is_left:
-            quadrant: int = 1    # arriba-izquierda
+            quadrant: int = 1                # Top-left.
         elif is_top:
-            quadrant = 2         # arriba-derecha
+            quadrant = 2                     # Top-right.
         elif is_left:
-            quadrant = 4         # abajo-izquierda
+            quadrant = 4                     # Bottom-left.
         else:
-            quadrant = 3         # abajo-derecha
+            quadrant = 3                     # Bottom-right.
 
         if opposite:
-            # Diagonal del mapa: 1 <-> 3 y 2 <-> 4
+            # Map diagonals: 1 <-> 3 and 2 <-> 4.
             quadrant = quadrant + 2 if quadrant <= 2 else quadrant - 2
 
         return quadrant
@@ -297,7 +297,7 @@ class Ghost(Entity):
         bitmap: BitMap,
         ghost_spawns: List[Tuple[int, int]]
     ) -> Coord | None:
-        """Busca una salida de fantasma en el cuarto opuesto a Pac-Man."""
+        """Find a ghost spawn in the quadrant opposite Pac-Man."""
         target_quadrant: int = self._get_quadrant(
             target, bitmap, opposite=True)
 
@@ -311,17 +311,17 @@ class Ghost(Entity):
         return None
 
     def _get_nearby_cell(self, center: Coord, bitmap: BitMap) -> Coord | None:
-        """Elige al azar una casilla transitable a 1-3 pasos de center."""
+        """Choose a random walkable tile 1-3 steps from ``center``."""
         candidates: List[Coord] = []
         visited: Set[Coord] = {center}
         frontier: List[Coord] = [center]
 
-        for _ in range(3):   # tres anillos de expansion
+        for _ in range(3):           # Three expansion rings.
             next_frontier: List[Coord] = []
             for cell in frontier:
                 for dir in [Dir.UP, Dir.RIGHT, Dir.DOWN, Dir.LEFT]:
                     if bitmap.grid[cell.y][cell.x] & dir.value:
-                        continue   # pared en esa direccion
+                        continue                           # Wall in that direction.
                     neighbour: Coord = Coord(cell.get())
                     neighbour.step(dir)
                     if neighbour in visited:
@@ -341,7 +341,7 @@ class Ghost(Entity):
         dt: int,
         bitmap: BitMap
     ) -> None:
-        """Huida por cuartos mientras dura la super-pacgum."""
+        """Flee between quadrants while the super pac-gum is active."""
 
         self.current_corridor.clear()
 
@@ -386,10 +386,10 @@ class Ghost(Entity):
 
 
 class Blinky(Ghost):
-    """Fantasma rojo que persigue directamente a Pac-Man."""
+    """Red ghost that directly chases Pac-Man."""
 
     def __init__(self, points: int) -> None:
-        """Crea a Blinky con su color, velocidad y animaciones."""
+        """Create Blinky with its color, speed, and animations."""
         super().__init__(name="Blinky", points=points)
         self.color.set(BLINKY_COLOR)
         self.speed: int = BLINKY_SPEED
@@ -405,7 +405,7 @@ class Blinky(Ghost):
         bitmap: BitMap,
         directions: List[Dir] | None = None
     ) -> None:
-        """Persigue a Pac-Man o huye mientras dura la super-pacgum."""
+        """Chase Pac-Man or flee while the super pac-gum is active."""
         if not self.alive:
             self._update_respawn(dt)
             return
@@ -430,10 +430,10 @@ class Blinky(Ghost):
 
 
 class Pinky(Ghost):
-    """Fantasma rosa que intenta anticipar la ruta de Pac-Man."""
+    """Pink ghost that tries to anticipate Pac-Man's path."""
 
     def __init__(self, points: int) -> None:
-        """Crea a Pinky con su color, velocidad y animaciones."""
+        """Create Pinky with its color, speed, and animations."""
         super().__init__(name="Pinky", points=points)
         self.color.set(PINKY_COLOR)
         self.speed: int = PINKY_SPEED
@@ -448,7 +448,7 @@ class Pinky(Ghost):
         bitmap: BitMap,
         directions: List[Dir] | None = None
     ) -> None:
-        """Mueve a Pinky: respawn, huida con la super-pacgum o caza por BFS."""
+        """Move Pinky: respawn, flee from the super pac-gum, or hunt with BFS."""
         if not self.alive:
             self._update_respawn(dt)
             return
@@ -476,11 +476,11 @@ class Pinky(Ghost):
         directions: List[Dir] | None,
         bitmap: BitMap
     ) -> Coord:
-        """Predice hasta cuatro casillas de la ruta prevista de Pac-Man."""
-        # Copia: la prediccion no puede pisar la posicion real del jugador.
+        """Predict up to four tiles along Pac-Man's expected path."""
+        # Use a copy so the prediction does not change the player's actual position.
         predicted: Coord = Coord(target.get())
 
-        # SI NO TENGO datos, voy a por ti
+        # If no data is available, chase the player directly.
         if not directions:
             return predicted
 
@@ -492,13 +492,13 @@ class Pinky(Ghost):
         for _ in range(4):
             walls: int = bitmap.grid[predicted.y][predicted.x]
 
-            # Intenta la segunda tecla pendiente antes de seguir recto.
+            # Try the second queued direction before continuing straight.
             if pending_direction is not None:
                 if not walls & pending_direction.value:
                     current_direction = pending_direction
                     pending_direction = None
 
-            # Si no puede avanzar en la dirección elegida, termina aquí.
+            # If movement in the chosen direction is blocked, stop here.
             if walls & current_direction.value:
                 break
 
@@ -508,10 +508,10 @@ class Pinky(Ghost):
 
 
 class Inky(Ghost):
-    """Fantasma cian que calcula una emboscada junto a Blinky."""
+    """Cyan ghost that plans an ambush with Blinky."""
 
     def __init__(self, points: int) -> None:
-        """Crea a Inky con su color, velocidad y animaciones."""
+        """Create Inky with its color, speed, and animations."""
         super().__init__(name="Inky", points=points)
         self.color.set(INKY_COLOR)
         self.speed: int = INKY_SPEED
@@ -526,7 +526,7 @@ class Inky(Ghost):
         bitmap: BitMap,
         directions: List[Dir] | None = None
     ) -> None:
-        """Mueve a Inky según el respawn, la huida o la emboscada."""
+        """Move Inky according to respawn, fleeing, or ambush behavior."""
         if not self.alive:
             self._update_respawn(dt)
             return
@@ -554,7 +554,7 @@ class Inky(Ghost):
                 self._set_position(path[1])
 
     def _find_blinky(self) -> Coord | None:
-        """Busca a Blinky y devuelve una copia de su posición."""
+        """Find Blinky and return a copy of its position."""
         for entities in Entity.entity_map.values():
             for ent in entities:
                 if isinstance(ent, Blinky):
@@ -567,7 +567,7 @@ class Inky(Ghost):
         directions: List[Dir] | None,
         bitmap: BitMap
     ) -> Coord | None:
-        """Avanza hasta dos casillas o hasta encontrar una pared."""
+        """Move up to two tiles or until a wall is reached."""
         if not directions:
             return None
         pac_ahead: Coord = Coord(target.get())
@@ -584,26 +584,26 @@ class Inky(Ghost):
         directions: List[Dir] | None,
         bitmap: BitMap
     ) -> Coord:
-        """Calcula el punto de emboscada de Inky a partir de Blinky."""
+        """Calculate Inky's ambush target relative to Blinky."""
         blinky_pos: Coord | None = self._find_blinky()
         pac_ahead: Coord | None = self._get_pacman_ahead(
             target, directions, bitmap
         )
 
-        # Sin socio o sin rumbo conocido, no hay pinza: caza directa.
+        # Without a partner or a known direction, skip the pincer and chase directly.
         if blinky_pos is None or pac_ahead is None:
             return target
 
-        # Vector de Blinky al punto de mira, doblado desde Blinky.
+        # Double the vector from Blinky to the target, starting at Blinky.
         vector: Coord = pac_ahead - blinky_pos
         return blinky_pos + vector + vector
 
 
 class Clyde(Ghost):
-    """Fantasma naranja que huye a su salida si Pac-Man está cerca."""
+    """Orange ghost that flees to its spawn when Pac-Man is nearby."""
 
     def __init__(self, points: int) -> None:
-        """Crea a Clyde con su color, velocidad y animaciones."""
+        """Create Clyde with its color, speed, and animations."""
         super().__init__(name="Clyde", points=points)
         self.color.set(CLYDE_COLOR)
         self.speed: int = CLYDE_SPEED
@@ -618,7 +618,7 @@ class Clyde(Ghost):
         bitmap: BitMap,
         directions: List[Dir] | None = None
     ) -> None:
-        """Persigue a Pac-Man o vuelve a su salida si está cerca."""
+        """Chase Pac-Man or return to spawn when nearby."""
         if not self.alive:
             self._update_respawn(dt)
             return

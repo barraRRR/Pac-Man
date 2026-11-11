@@ -1,4 +1,4 @@
-"""Carga la configuración y arranca la aplicación."""
+"""Load the configuration and start the application."""
 
 from src.utils.class_config import Config
 from src.core.app import App
@@ -9,7 +9,7 @@ import sys
 
 
 def main() -> int:
-    """Aquí comprobamos que nos hayan pasado el archivo de configuración."""
+    """Check that a configuration file was provided."""
     if len(sys.argv) != 2:
         logger.error(
             "Error: Expected exactly one config file.\n"

@@ -265,11 +265,11 @@ El flujo, simplificado, es este:
 app = App(config)
 app.run()
 
-# App prepara los niveles en orden
+# App prepares the levels in order.
 for number, level in enumerate(self.config.level, start=1):
     self._start_level(number, level)
 
-# Maze elige la semilla y crea el generador
+# Maze selects the seed and creates the generator.
 seed = self._seed if number == 1 else 0
 generator = MazeGenerator(
     size=(width, height),
@@ -977,7 +977,6 @@ pygame.QUIT se atiende igual en _level_intro, _congratulations y
 _game_loop: se llama a _end_game() y se lanza SystemExit(0). Antes, la X
 se ignoraba en las pantallas intermedias y podía dejar el juego en un estado
 inesperado.
-
 
 
 

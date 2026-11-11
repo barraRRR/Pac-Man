@@ -12,7 +12,7 @@ check-uv:
 install: check-uv
 	@$(UV) sync
 
-# Si no pasan argumentos a make run, usamos config.json por defecto
+# Use config.json by default when no arguments are passed to make run.
 RUN_ARGS := $(filter-out run --,$(MAKECMDGOALS))
 ifeq ($(RUN_ARGS),)
 RUN_ARGS := config.json
@@ -29,8 +29,6 @@ run:
 	@echo "|__| /__/   \__\_____|       |__|  |__/__/   \__\__| \__|"
 	@echo "\033[0m"
 	-@uv run python pac-man.py $(RUN_ARGS)
-# 	@echo "\033[1;31m"
-# 	@echo "\nEND OF PROGRAM - SEE YOU SOON!"
 	@echo "\033[0m"
 	@$(MAKE) clean --no-print-directory
 
