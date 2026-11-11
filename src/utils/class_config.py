@@ -58,7 +58,7 @@ class Config(BaseModel):
     # Level list (minimum of 10).
     level: List[Level] = Field(default_factory=lambda: [
                                Level() for _ in range(10)])
-    lives: int = Field(default=3)       # Starting lives (minimum 1, maximum 9).
+    lives: int = Field(default=3)       # Starting lives: 1 to 9.
     # Number of regular pac-gums in the maze (minimum 0).
     pacgum: int = Field(default=42)
     # Points per regular pac-gum, super pac-gum, and ghost (non-negative).

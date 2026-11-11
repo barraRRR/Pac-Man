@@ -62,7 +62,10 @@ class Entity:
         return self.timer(dt)
 
     def _load_frames(self, asset_path: str, tile_size: int) -> None:
-        """Load frames into a ``Surface`` and raise a contextual error if missing."""
+        """Load and scale directional PNG frames from ``asset_path``.
+
+        Raise ``RuntimeError`` with the asset path if a file cannot be loaded.
+        """
         try:
             dir_path = Path(asset_path)
             for subfolder in dir_path.iterdir():

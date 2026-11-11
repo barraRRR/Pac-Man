@@ -61,7 +61,7 @@ class HighScore:
 
     @classmethod
     def is_valid_score(cls, score: object) -> bool:
-        """Check that ``score`` is a non-negative integer, but not a boolean."""
+        """Check for a non-negative integer score, excluding booleans."""
         if isinstance(score, bool):
             return False
         if isinstance(score, int) and score >= 0:

@@ -39,7 +39,7 @@ def test_real_tab_and_newline_are_removed() -> None:
 
 def test_literal_backslash_removed_but_letter_kept() -> None:
     """Remove the literal backslash and keep the following letter."""
-    # The manually typed backslash is removed while the letter remains: "\t" -> "t".
+    # A manually typed backslash is removed; the letter remains: "\t" -> "t".
     assert HighScore.clean_name("A\\tB") == "AtB"
 
 
@@ -434,7 +434,10 @@ def test_load_with_missing_file_starts_empty(
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
 ) -> None:
-    """Start with an empty leaderboard and no warnings if the file is missing."""
+    """Start with an empty leaderboard if the score file is missing.
+
+    No warning should be logged for this expected case.
+    """
     monkeypatch.setattr(HighScore, "SCORES_FOLDER", str(tmp_path))
     monkeypatch.setattr(
         HighScore, "scores", [{"name": "Viejo", "score": 999}]

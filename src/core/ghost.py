@@ -335,7 +335,7 @@ class Ghost(Entity):
             for cell in frontier:
                 for dir in [Dir.UP, Dir.RIGHT, Dir.DOWN, Dir.LEFT]:
                     if bitmap.grid[cell.y][cell.x] & dir.value:
-                        continue                           # Wall in that direction.
+                        continue  # Wall in that direction.
                     neighbour: Coord = Coord(cell.get())
                     neighbour.step(dir)
                     if neighbour in visited:
@@ -468,7 +468,12 @@ class Pinky(Ghost):
         bitmap: BitMap,
         directions: List[Dir] | None = None
     ) -> None:
-        """Move Pinky: respawn, flee from the super pac-gum, or hunt with BFS."""
+        """Move Pinky according to its current state.
+
+        Dead Pinky advances its respawn timer; edible Pinky uses the shared
+        fleeing behavior; otherwise, it follows a BFS route to its predicted
+        target.
+        """
         if not self.alive:
             self._update_respawn(dt)
             return
@@ -502,7 +507,7 @@ class Pinky(Ghost):
         turn is queued, use it as soon as its direction is open. With no
         queued direction, return Pac-Man's current position.
         """
-        # Use a copy so the prediction does not change the player's actual position.
+        # Predict from a copy to preserve the player's actual position.
         predicted: Coord = Coord(target.get())
 
         # If no data is available, chase the player directly.
@@ -620,7 +625,7 @@ class Inky(Ghost):
             target, directions, bitmap
         )
 
-        # Without a partner or a known direction, skip the pincer and chase directly.
+        # Without Blinky or a direction, chase Pac-Man directly.
         if blinky_pos is None or pac_ahead is None:
             return target
 

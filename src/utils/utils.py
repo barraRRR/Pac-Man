@@ -155,7 +155,7 @@ class Logo:
 
 
 def make_interval_ticker(interval: float) -> Callable[[float], int]:
-    """Create a callable that counts elapsed intervals without losing remainder.
+    """Create a callable that counts elapsed intervals and retains remainder.
 
     Each call adds its ``dt`` to a retained accumulator, returns the number of
     complete ``interval`` periods, and carries any leftover time into the

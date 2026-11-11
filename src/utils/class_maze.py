@@ -132,7 +132,7 @@ class Maze:
         return ghost_spawns
 
     def reachable_cells(self, start: tuple[int, int]) -> set[tuple[int, int]]:
-        """Return every tile reachable from ``start`` using breadth-first search.
+        """Return tiles reachable from ``start`` using breadth-first search.
 
         A neighboring tile is reachable only if the current tile has no wall
         in that direction and the neighbor has no wall on its opposite side.

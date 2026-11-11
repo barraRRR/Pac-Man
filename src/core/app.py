@@ -357,7 +357,11 @@ class App:
         return True
 
     def _menu_loop(self, menu: Menu, func: Callable[[], None]) -> ItemType:
-        """Keep the menu active until an option is confirmed or the game exits."""
+        """Keep the menu active until an option is confirmed or the game exits.
+
+        Move the selection with the arrow keys and return the active option
+        when SPACE is pressed. Return ``QUIT`` if the window closes.
+        """
         while True:
             self.clock.tick(_FPS)
             func()

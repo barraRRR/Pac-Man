@@ -100,7 +100,7 @@ class Menu:
 
 
 class MenuInit(Menu):
-    """Main menu with options to start, view scores, see instructions, or exit."""
+    """Main menu for starting, viewing scores, instructions, or exiting."""
 
     def __init__(self) -> None:
         """Create and render the main menu options."""
