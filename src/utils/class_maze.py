@@ -59,6 +59,9 @@ class Maze:
     def generate_level(self, number: int, width: int, height: int) -> None:
         """Generate a level map and store its grid.
 
+        Pass the configured seed to the generator only for level 1; later
+        levels use seed 0.
+
         Args:
             number: Level number (starting at 1).
             width: Level width in tiles.
@@ -80,7 +83,8 @@ class Maze:
         Return the walkable cell closest to the center as ``(x, y)``.
 
         Search the grid and choose the non-solid (not 15) cell with the
-        shortest distance to the center.
+        shortest squared Euclidean distance to the center. Ties resolve to
+        the first cell encountered in row-major order.
         """
         height_map = len(self.grid)
         width = len(self.grid[0])
@@ -128,7 +132,13 @@ class Maze:
         return ghost_spawns
 
     def reachable_cells(self, start: tuple[int, int]) -> set[tuple[int, int]]:
-        """Return the cells reachable from ``start``."""
+        """Return every tile reachable from ``start`` using breadth-first search.
+
+        A neighboring tile is reachable only if the current tile has no wall
+        in that direction and the neighbor has no wall on its opposite side.
+        The result includes ``start``. Raise ``ValueError`` if the maze has
+        not been generated or ``start`` is outside its bounds.
+        """
         if not self.grid:
             raise ValueError("Maze has not been generated.")
 
@@ -187,7 +197,8 @@ class Maze:
 
         The zones are ordered top-left, top-right, bottom-left, and
         bottom-right. Within each zone, tiles are traversed row by row,
-        from left to right.
+        from left to right. Each zone covers one fifth of the maze's width
+        and height, rounded down with a minimum of one tile.
         """
         if not self.grid:
             raise ValueError("Maze has not been generated.")
@@ -229,7 +240,10 @@ class Maze:
         reachable: set[tuple[int, int]],
         ghost_spawns: list[tuple[int, int]],
     ) -> list[tuple[int, int]]:
-        """Choose one reachable super pac-gum tile in each zone.
+        """Choose a reachable super pac-gum tile in each corner zone.
+
+        Randomly select from reachable cells that are not occupied by a
+        ghost. Raise ``ValueError`` if any zone has no eligible cell.
 
         Args:
             reachable: Cells reachable from Pac-Man, calculated once per

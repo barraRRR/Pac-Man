@@ -101,7 +101,13 @@ class Entity:
             ) from error
 
     def get_frame(self, dt: int) -> Surface:
-        """Return the animation frame corresponding to ``dt``."""
+        """Advance and return the frame selected by the current direction.
+
+        Accumulate elapsed milliseconds and advance once per animation
+        interval. Regular animations loop; the death animation stays on its
+        final frame. If the direction has no frames, fall back to the right
+        animation or the entity's existing surface.
+        """
         if self.delta is None:
             self.delta = Dir.RIGHT
 
@@ -128,7 +134,12 @@ class Entity:
         return self._cur_frame
 
     def animation_finished(self) -> bool:
-        """Return whether a non-looping animation has reached its last frame."""
+        """Check whether the death animation meets its completion conditions.
+
+        Return ``True`` only for the death direction when frames exist, the
+        current frame is the last one, and the frame timer has reached
+        ``ANI_SPEED``. Looping directions never count as finished.
+        """
         if self.delta is None:
             return False
         frames = self._frames.get(self.delta, [])

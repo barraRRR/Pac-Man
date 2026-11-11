@@ -151,10 +151,15 @@ class Ghost(Entity):
             target: Coord,
             bitmap: BitMap
     ) -> List[Coord]:
-        """Find shortest path from entry to exit using BFS.
+        """Find the shortest open-tile path with breadth-first search.
 
         Returns:
-            List of coordinates from entry to exit, or empty list if no path.
+            Coordinates from ``start`` through ``target``, including both
+            endpoints. Return an empty list if they are the same tile or no
+            route exists.
+
+        Cache successful paths by their start and target coordinates so
+        repeated ghost decisions can reuse the search result.
         """
         if start == target:
             return []
@@ -204,7 +209,12 @@ class Ghost(Entity):
             pass
 
     def _get_corridor(self, path: List[Coord]) -> None:
-        """Store the initial straight segment of a path."""
+        """Store the path's initial straight segment and set its direction.
+
+        The segment begins at the ghost's current tile and stops before the
+        first turn. This lets the ghost follow a corridor without recalculating
+        its route at every tile.
+        """
         self.current_corridor.clear()
         if len(path) < 2:
             return
@@ -311,7 +321,11 @@ class Ghost(Entity):
         return None
 
     def _get_nearby_cell(self, center: Coord, bitmap: BitMap) -> Coord | None:
-        """Choose a random walkable tile 1-3 steps from ``center``."""
+        """Choose a random walkable tile one to three moves from ``center``.
+
+        Expand through open neighboring tiles, without revisiting any tile.
+        Return ``None`` if ``center`` has no reachable neighbor.
+        """
         candidates: List[Coord] = []
         visited: Set[Coord] = {center}
         frontier: List[Coord] = [center]
@@ -341,7 +355,13 @@ class Ghost(Entity):
         dt: int,
         bitmap: BitMap
     ) -> None:
-        """Flee between quadrants while the super pac-gum is active."""
+        """Flee toward the spawn diagonally opposite Pac-Man.
+
+        Re-evaluate the opposite quadrant on each movement tick and pathfind
+        toward its ghost spawn. Once there, choose a nearby tile and move
+        between it and the spawn until Pac-Man changes quadrants or scared
+        mode ends.
+        """
 
         self.current_corridor.clear()
 
@@ -476,7 +496,12 @@ class Pinky(Ghost):
         directions: List[Dir] | None,
         bitmap: BitMap
     ) -> Coord:
-        """Predict up to four tiles along Pac-Man's expected path."""
+        """Predict Pac-Man's position up to four tiles ahead.
+
+        Follow the current queued direction and stop at a wall. If a second
+        turn is queued, use it as soon as its direction is open. With no
+        queued direction, return Pac-Man's current position.
+        """
         # Use a copy so the prediction does not change the player's actual position.
         predicted: Coord = Coord(target.get())
 
@@ -584,7 +609,12 @@ class Inky(Ghost):
         directions: List[Dir] | None,
         bitmap: BitMap
     ) -> Coord:
-        """Calculate Inky's ambush target relative to Blinky."""
+        """Calculate the ambush point from Pac-Man's position and Blinky.
+
+        Project Pac-Man up to two tiles along the current queued direction,
+        then double the vector from Blinky to that projected position. If
+        Blinky or a direction is unavailable, target Pac-Man directly.
+        """
         blinky_pos: Coord | None = self._find_blinky()
         pac_ahead: Coord | None = self._get_pacman_ahead(
             target, directions, bitmap
@@ -618,7 +648,12 @@ class Clyde(Ghost):
         bitmap: BitMap,
         directions: List[Dir] | None = None
     ) -> None:
-        """Chase Pac-Man or return to spawn when nearby."""
+        """Chase Pac-Man unless the shortest route is fewer than eight tiles.
+
+        When that distance threshold is met, head back to Clyde's spawn.
+        Eaten ghosts use the shared respawn timer, while scared ghosts use the
+        shared super-pac-gum fleeing behavior.
+        """
         if not self.alive:
             self._update_respawn(dt)
             return

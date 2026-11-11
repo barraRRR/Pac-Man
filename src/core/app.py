@@ -179,7 +179,12 @@ class App:
         return 0
 
     def _start_level(self, number: int, level: Level) -> None:
-        """Prepare the current level by generating its map and state."""
+        """Generate the map and initialize state for a level.
+
+        Reset per-level input and timers, then choose Pac-Man, ghost, and
+        pac-gum positions. Reachable cells are calculated once and reused for
+        all spawn selections.
+        """
         self.maze.generate_level(
             number=number,
             width=level.width,
@@ -276,7 +281,12 @@ class App:
         self._death_in_progress = False
 
     def _push_direction(self, dir: Dir) -> None:
-        """Queue the requested turn, replacing the pending turn if needed."""
+        """Queue a turn while keeping at most the current and next directions.
+
+        Ignore a direction already in the queue. A new direction fills the
+        second slot or replaces its previous value, so the latest pending
+        turn is the one Pac-Man will try next.
+        """
         if dir in self.list_key:
             return
         if len(self.list_key) < 2:
@@ -319,7 +329,13 @@ class App:
         self,
         key_dict: Dict[int, Callable[[], object]],
     ) -> bool:
-        """Execute the action associated with each pressed key."""
+        """Process queued Pygame events and dispatch mapped key actions.
+
+        Window-close events shut down Pygame and raise ``SystemExit``.
+        Movement into a wall is ignored. Return ``False`` only when Escape is
+        pressed during gameplay while invincibility is enabled; otherwise
+        return ``True``.
+        """
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self._end_game()
@@ -498,7 +514,11 @@ class App:
 
     @property
     def remaining_seconds(self) -> int:
-        """Return the remaining level time in seconds, never below zero."""
+        """Return remaining level time, rounded up to whole seconds.
+
+        Clamp expired time to zero so the HUD never displays a negative
+        countdown. Rounding up keeps a partially elapsed second visible.
+        """
         remaining_ms = max(
             0,
             self.config.level_max_time * 1000 - self._level_timer_ms
@@ -506,7 +526,13 @@ class App:
         return (remaining_ms + 999) // 1000
 
     def _game_loop(self) -> None:
-        """Update the level until it ends or the game returns to the menu."""
+        """Run the level until it is cleared, ended, or returned to the menu.
+
+        Advance the level timer only during active play, update and draw each
+        frame, then process player movement, pickups, ghost movement, and
+        collisions. Death animations pause movement; time expiration or loss
+        of all lives transitions the app to name entry.
+        """
         self._engine._update_maze(self.maze)
         self._engine._put_maze(self.maze)
         self._engine._put_entities()

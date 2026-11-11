@@ -155,7 +155,12 @@ class Logo:
 
 
 def make_interval_ticker(interval: float) -> Callable[[float], int]:
-    """Create an accumulator that counts complete time intervals."""
+    """Create a callable that counts elapsed intervals without losing remainder.
+
+    Each call adds its ``dt`` to a retained accumulator, returns the number of
+    complete ``interval`` periods, and carries any leftover time into the
+    next call. Raise ``ValueError`` if ``interval`` is not positive.
+    """
     if interval <= 0:
         raise ValueError("interval must be greater than zero")
 

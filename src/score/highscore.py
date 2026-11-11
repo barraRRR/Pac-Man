@@ -39,11 +39,10 @@ class HighScore:
     def clean_name(cls, name: str) -> str:
         """Prepare the name for storage according to the agreed rules.
 
-        Remove characters disallowed by the subject: a manually typed
-        backslash in "\\n" is removed while the letter remains ("\\t" becomes
-        "t"). Only trailing spaces are removed; leading spaces are kept, as
-        agreed. If the cleaned name exceeds the limit, truncate it and write
-        an English warning to stderr. Return "" if cleaning leaves no name.
+        Keep only ASCII letters, digits, and spaces; remove trailing spaces
+        but preserve leading and internal spaces. Truncate names longer than
+        ``MAX_NAME_LENGTH`` and log an error. Return an empty string if no
+        characters remain.
         """
         characters: list[str] = []
         for char in name:
@@ -62,12 +61,7 @@ class HighScore:
 
     @classmethod
     def is_valid_score(cls, score: object) -> bool:
-        """Check whether the score is a non-negative integer.
-
-        Return only the yes/no result. The caller decides whether to write an
-        English warning and skip the score (for example, when loading CSV rows
-        in #45), as it does for names.
-        """
+        """Check that ``score`` is a non-negative integer, but not a boolean."""
         if isinstance(score, bool):
             return False
         if isinstance(score, int) and score >= 0:
@@ -120,9 +114,9 @@ class HighScore:
     def _is_encoded(cls, raw: str) -> bool:
         """Check whether the file content is obfuscated.
 
-        Check whether the text is valid base64. A regular CSV written by
-        ``save()`` is never valid base64 because it contains commas, which
-        are not part of the base64 alphabet.
+        The format is inferred from strict base64 validity rather than the
+        ``security`` flag, allowing files written under either setting to be
+        read. Non-empty plain CSV contains commas and is not valid base64.
         """
         try:
             base64.b64decode(raw.encode("ascii"), validate=True)
@@ -137,8 +131,9 @@ class HighScore:
         Read both formats: valid base64 is deobfuscated; otherwise, treat the
         content as regular CSV. This means ``security`` controls only how
         data is written, so existing files remain readable if the flag
-        changes. If the file does not exist, start with an empty leaderboard;
-        if it is corrupted, write an English warning and start empty.
+        changes. Parse each row as a name and integer score. If the file does
+        not exist, start with an empty leaderboard; if any row is malformed
+        or the file is corrupted, log an error and start empty.
         """
 
         patch: Path = Path(cls.SCORES_FOLDER) / cls.filename
@@ -206,13 +201,12 @@ class HighScore:
     def register(cls, name: str, score: int) -> bool:
         """Register a score if it qualifies for the Top 10.
 
-        Clean the name and validate the score; if either fails, write an
-        English warning to stderr and leave the leaderboard unchanged. When
-        the leaderboard is full, only a score strictly greater than the
-        lowest one qualifies; a tie does not displace an earlier entry. Add
-        qualifying scores, sort them in descending order (stable sorting
-        preserves arrival order for ties), truncate to ten entries, and save
-        the file.
+        Clean the name and validate the score; if either fails, log an error
+        and leave the leaderboard unchanged. When the leaderboard is full,
+        only a score strictly greater than the lowest one qualifies; a tie
+        does not displace an earlier entry. Add qualifying scores, sort them
+        in descending order (stable sorting preserves arrival order for ties),
+        truncate to ten entries, and save the file.
 
         Return True if the entry is in the in-memory Top 10. ``save()`` writes
         its own warning if the disk write fails.

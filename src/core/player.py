@@ -81,7 +81,13 @@ class Player(Entity):
         return self._dying
 
     def _eat(self, target: Entity) -> None:
-        """Resolve what happens when Pac-Man touches another entity."""
+        """Resolve a collision with another entity.
+
+        Ignore dead targets. Contact with a live, non-edible ghost costs a
+        life unless Pac-Man is invincible. Other live entities are removed
+        and award their points; collecting a super pac-gum also makes ghosts
+        edible.
+        """
         if isinstance(target, Ghost):
             if not target.alive:
                 return
