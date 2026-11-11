@@ -1,3 +1,5 @@
+"""Almacena y valida las puntuaciones y el nombre del jugador."""
+
 import base64
 import csv
 import string
@@ -13,32 +15,21 @@ PROMPT_INTERVAL = 300
 
 
 class HighScore:
-    """Sistema de puntuaciones del juego.
+    """Valida, carga y guarda el ranking de puntuaciones."""
 
-    Valida registros con las reglas del subject, ofusca el archivo
-    (XOR con contraseña + base64) y lo lee y lo escribe. El Top 10 y
-    el registro de puntuaciones llegan en #47.
-    """
-
-    # Carpeta donde vive el archivo de puntuaciones, en la raíz.
     SCORES_FOLDER = "highscore"
 
-    # Longitud máxima del nombre, tal cual la pide el subject.
     MAX_NAME_LENGTH = 10
 
     # Caracteres permitidos en el nombre: letras ASCII, dígitos y espacio.
     VALID_CHARACTERS = string.ascii_letters + string.digits + " "
 
-    # Contraseña de ofuscación del archivo, acordada en equipo.
+    # Contraseña de ofuscación
     PASSWORD = "jajajaja"
 
     scores: list[dict[str, str | int]] = []
-
-    # Nombre ACTUAL del archivo de puntuaciones.
     filename: str = "highscore.csv"
 
-    # Reintentos al guardar: intentos totales y segundos de espera
-    # entre intento e intento.
     SAVE_ATTEMPTS = 3
     RETRY_SECONDS = 1
 
@@ -136,7 +127,7 @@ class HighScore:
         el alfabeto base64.
         """
         try:
-            base64.b64decode(raw.encode("ascii"), validate = True)
+            base64.b64decode(raw.encode("ascii"), validate=True)
             return True
         except ValueError:
             return False
@@ -167,7 +158,7 @@ class HighScore:
                     raise ValueError("File is corrupted or not base64.")
             else:
                 text = raw
-        
+
             rows: list[dict[str, str | int]] = []
             for row in csv.reader(text.splitlines()):
                 if not row:
@@ -251,7 +242,6 @@ class HighScore:
         cls.save()
         return True
 
-
     @classmethod
     def top(cls) -> int:
         """Devuelve la mejor puntuación del ranking, o 0 si está vacío.
@@ -262,22 +252,24 @@ class HighScore:
         if not cls.scores:
             return 0
         return int(cls.scores[0]["score"])
-            
+
 
 class Score(Title):
-    """
-    Registra el score de la partida en curso
-    """
+    """Mantiene y dibuja la puntuación de la partida actual."""
+
     def __init__(self) -> None:
+        """Inicializa el marcador en cero."""
         self._points: int = 0
         super().__init__(text=str(self._points))
 
-    def add(self, points) -> None:
+    def add(self, points: int) -> None:
+        """Añade puntos al marcador y actualiza su superficie."""
         self._points += points
         self.sur = self._render(text=str(self._points))
 
     @property
     def points(self) -> int:
+        """Devuelve la puntuación actual."""
         return self._points
 
     def reset(self) -> None:
@@ -287,41 +279,46 @@ class Score(Title):
 
 
 class PlayerName(Title):
+    """Gestiona el nombre escrito y el cursor parpadeante de entrada."""
+
     def __init__(self) -> None:
+        """Inicializa el nombre vacío y el temporizador del cursor."""
         super().__init__(text="")
         self._name = ""
         self.prompt = "|"
         self.timer = make_interval_ticker(PROMPT_INTERVAL)
         self.prompt_visible: bool = True
-    
+
     def set_name(self, new: str) -> bool:
+        """Establece el nombre si no supera la longitud permitida."""
         if len(new) > PLAYER_MAX_LEN_NAME:
             return False
-    
+
         self._name = new
         self.text = new
         self.sur = self._render(text=new)
         return True
-    
+
     def build_name(self, char: str) -> bool:
+        """Añade un carácter al nombre si queda espacio."""
         return self.set_name(self._name + char)
-    
+
     def delete_last(self) -> bool:
+        """Elimina el último carácter del nombre."""
         return self.set_name(self._name[:-2])
-    
+
     def get_name(self) -> str:
+        """Devuelve el nombre escrito."""
         return self._name
 
     def define_visible_prompt(self) -> None:
+        """Actualiza el carácter visible del cursor."""
         self.prompt = "|" if self.prompt_visible else " "
-    
+
     def get_prompt(self, dt: int) -> str:
+        """Devuelve el nombre junto al cursor parpadeante."""
         ticks = self.timer(dt)
         for _ in range(ticks):
             self.prompt_visible = not self.prompt_visible
             self.define_visible_prompt()
         return self._name + self.prompt
-
-
-
-

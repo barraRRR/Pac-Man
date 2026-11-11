@@ -1,3 +1,5 @@
+"""Configura el registro de mensajes del juego en consola y archivo."""
+
 import logging
 import sys
 from pathlib import Path

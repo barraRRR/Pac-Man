@@ -1,5 +1,8 @@
+"""Renderiza la pantalla de ayuda y los controles disponibles."""
+
 from pygame import Surface
 import pygame
+
 
 class Instructions:
     """Guarda el contenido de la pantalla de instrucciones.
@@ -14,9 +17,9 @@ class Instructions:
     _KEYCAP_COLOR = (255, 255, 255, 255)    # placa de la tecla
     _KEYCAP_TEXT_COLOR = (0, 0, 0, 255)     # texto sobre la placa
     # Margen
-    _KEYCAP_PAD_X = 14                      # margen horizontal dentro de la placa
-    _KEYCAP_PAD_Y = 8                       # margen vertical dentro de la placa
-    
+    _KEYCAP_PAD_X = 14
+    _KEYCAP_PAD_Y = 8
+
     _ENTRIES = {
         "ARROWS / WASD": "MOVE PAC-MAN",
         "SPACE": "PAUSE / CONFIRM",
@@ -29,23 +32,24 @@ class Instructions:
         for keys, description in self._ENTRIES.items():
             self.rows.append((
                 self._render_keycap(keys),
-                self._render_text(description, self._TEXT_SIZE, self._TEXT_COLOR),
+                self._render_text(
+                    description, self._TEXT_SIZE, self._TEXT_COLOR),
             ))
         self.hint: Surface = self._render_text(
             "PRESS SPACE TO GO TO MAIN MENU", self._HINT_SIZE, self._TEXT_COLOR
         )
 
     def _render_text(
-            self,
-            text: str,
-            size: int,
-            color: tuple[int, int, int, int]
-        ) -> Surface:
+        self,
+        text: str,
+        size: int,
+        color: tuple[int, int, int, int]
+    ) -> Surface:
         """Renderiza un texto con la fuente del proyecto."""
         if not pygame.font.get_init():
             pygame.font.init()
         font = pygame.font.Font(self._FONT_PATH, size)
-        return font.render(text, True, color)   #cierto, render devuelve el Surface, jaitowerr
+        return font.render(text, True, color)
 
     def _render_keycap(self, label: str) -> Surface:
         """Dibuja una tecla como placa con su nombre centrado.
@@ -64,4 +68,3 @@ class Instructions:
         cap.blit(text, ((w - text.get_width()) // 2,
                         (h - text.get_height()) // 2))
         return cap
-

@@ -1,5 +1,6 @@
-from enum import Enum
-from src.utils.utils import Coord, Color, Dir
+"""Define la lógica de movimiento y los comportamientos de los fantasmas."""
+
+from src.utils.utils import Coord, Dir
 from src.core.entity import Entity, State, ANI_SPEED
 from src.utils.error import UnreachableTileError
 import pygame
@@ -8,8 +9,6 @@ from pygame import Surface
 from src.maze.bitmap import BitMap
 from typing import List, Tuple, Set, Dict
 from collections import deque
-import pygame
-import time
 import random
 from pathlib import Path
 
@@ -35,8 +34,8 @@ SCARED_GHOST = "assets/animations/ghosts/scared_ghost"
 
 
 class Ghost(Entity):
-    """
-    """
+    """Implementa rutas y estados compartidos por todos los fantasmas."""
+
     path_map: Dict[
         Tuple[Tuple[int, int], Tuple[int, int]],
         List[Coord]
@@ -48,27 +47,39 @@ class Ghost(Entity):
     _frames_scared: List[Surface] = []
     _frames_flashing: List[Surface] = []
 
-    _scaled_scared_frames: Dict[Tuple[int, int], Tuple[List[Surface], List[Surface]]] = {}
+    _scaled_scared_frames: Dict[Tuple[int, int],
+                                Tuple[List[Surface], List[Surface]]] = {}
     show_white: bool = False
 
-
     def __init__(self, name: str, points: int) -> None:
+        """Inicializa un fantasma con nombre y puntos de captura."""
         super().__init__()
         self.name: str = name
+        self.ani_path: str = ""
         self._timer_ms: int = 0
         self._respawn_timer_ms: int = 0
         self.points: int = points
         self.current_corridor: List[Coord] = []
-        # Huida por cuartos: salidas del nivel y estado del ciclo.
         self._ghost_spawns: List[Tuple[int, int]] = []
-        self._flee_spawn: Coord | None = None   # ancla: salida del cuarto opuesto
-        self._flee_target: Coord | None = None  # destino actual de la huida
+        self._flee_spawn: Coord | None = None
+        self._flee_target: Coord | None = None
         self._scared_frame_timer_ms: int = 0
         self._scared_frame_index: int = 0
 
+    def _move(
+        self,
+        target: Coord,
+        dt: int,
+        tile_size: int,
+        bitmap: BitMap,
+        directions: List[Dir] | None = None,
+    ) -> None:
+        """Define el movimiento específico de cada tipo de fantasma."""
+        raise NotImplementedError
+
     @classmethod
     def _load_scared_frames(cls) -> None:
-        """Carga una unica vez los frames asustados que comparten los 4 fantasmas."""
+        """Carga una vez los fotogramas de fantasma asustado."""
         if cls._frames_scared:
             return
 
@@ -87,11 +98,11 @@ class Ghost(Entity):
             logger.warning("No scared frames found in %s", SCARED_GHOST)
             return
 
-        cls._frames_scared = frames[0::2]    # azules: frames 00 y 02
-        cls._frames_flashing = frames[1::2]  # blancos: frames 01 y 03
+        cls._frames_scared = frames[0::2]
+        cls._frames_flashing = frames[1::2]
 
     def get_frame(self, dt: int) -> Surface:
-        """Devuelve el frame asustado azul o blanco, escalado al tamaño normal."""
+        """Devuelve el fotograma asustado escalado al tamaño normal."""
         if not self.edible or not self._frames_scared:
             return super().get_frame(dt)
 
@@ -134,7 +145,6 @@ class Ghost(Entity):
 
         return frames[self._scared_frame_index]
 
-
     def _find_path(
             self,
             start: Coord,
@@ -176,7 +186,7 @@ class Ghost(Entity):
 
         path: List[Coord] = []
         if not found:
-            return []  # No path found, return empty list
+            return []
         current: Coord = target
         while current != start:
             path.append(Coord(current.get()))
@@ -186,29 +196,15 @@ class Ghost(Entity):
         self.path_map[cache_key] = path
         return path
 
-    def _move(
-        self,
-        target: Coord,
-        dt: int,
-        tile_size: int,
-        bitmap: BitMap,
-        fps: int = 60
-    ) -> None:
-        pass
-
     def _update_delta(self, step: Coord) -> None:
-        """
-        Actualiza el delta según la siguiente casilla
-        """
+        """Actualiza la dirección hacia la siguiente casilla."""
         try:
             self.delta = self.pos._get_delta(step)
         except UnreachableTileError:
             pass
 
     def _get_corridor(self, path: List[Coord]) -> None:
-        """
-        Devuelve la lista de casillas del pasillo que tiene por delante
-        """
+        """Guarda el tramo recto inicial de una ruta."""
         self.current_corridor.clear()
         if len(path) < 2:
             return
@@ -224,20 +220,16 @@ class Ghost(Entity):
             self.current_corridor.append(step)
 
     def _follow_corridor(self) -> None:
-        """
-        """
+        """Avanza a la siguiente casilla del pasillo actual."""
         self._set_position(self.current_corridor[1])
         self._update_delta(self.current_corridor[1])
         self.current_corridor.pop(0)
 
     def _die(self) -> None:
-        """
-        El jugador alcanza o es aclanzado por un Ghost not edible
-        """
+        """Devuelve al fantasma a su posición inicial."""
         self.current_corridor.clear()
         self._set_position(self.spawn_pos)
         self.alive = True
-        # implementar cooldown
 
     def _update_respawn(self, dt: int) -> None:
         """Espera 10 segundos y reactiva al fantasma en su esquina."""
@@ -253,9 +245,7 @@ class Ghost(Entity):
             self._die()
 
     def resolve_tile(self) -> None:
-        """
-        Interactua con el resto de Entity de la casilla
-        """
+        """Comprueba si el fantasma alcanza al jugador en su casilla."""
         if not self.alive:
             return
         from src.core.player import Player
@@ -264,7 +254,7 @@ class Ghost(Entity):
                 ent._die()
 
     def _reset(self) -> None:
-        """Deja el fantasma listo para una partida nueva: visible y con su reloj a cero."""
+        """Reinicia el fantasma y sus temporizadores."""
         self.alive = True
         self._timer_ms = 0
         self.current_corridor.clear()
@@ -279,7 +269,7 @@ class Ghost(Entity):
         bitmap: BitMap,
         opposite: bool = False
     ) -> int:
-        """Devuelve el cuarto de una casilla, o el diagonal si opposite es True."""
+        """Devuelve el cuarto de una casilla o su diagonal opuesta."""
         middle_x: int = len(bitmap.grid[0]) // 2
         middle_y: int = len(bitmap.grid) // 2
 
@@ -308,7 +298,8 @@ class Ghost(Entity):
         ghost_spawns: List[Tuple[int, int]]
     ) -> Coord | None:
         """Busca una salida de fantasma en el cuarto opuesto a Pac-Man."""
-        target_quadrant: int = self._get_quadrant(target, bitmap, opposite=True)
+        target_quadrant: int = self._get_quadrant(
+            target, bitmap, opposite=True)
 
         for spawn_x, spawn_y in ghost_spawns:
             spawn_quadrant: int = self._get_quadrant(
@@ -348,25 +339,20 @@ class Ghost(Entity):
         self,
         target: Coord,
         dt: int,
-        tile_size: int,
         bitmap: BitMap
     ) -> None:
         """Huida por cuartos mientras dura la super-pacgum."""
 
         self.current_corridor.clear()
 
-        # Sin salidas del nivel no hay destino posible: quieto.
         if not self._ghost_spawns:
             return
 
-        # Mismo latido que la caza: un paso cada `speed` ms.
         ticks = self.movement_ticks(dt)
         if not ticks:
             return
 
         for _ in range(ticks):
-            # Ancla de la huida: salida del cuarto opuesto a Pac-Man.
-            # Si Pac-Man cambia de cuarto, se cambia de esquina.
             flee_spawn: Coord | None = self._get_opposite_spawn(
                 target, bitmap, self._ghost_spawns)
 
@@ -377,6 +363,8 @@ class Ghost(Entity):
                 self._flee_spawn = flee_spawn
                 self._flee_target = Coord(flee_spawn.get())
 
+            if self._flee_target is None:
+                continue
             path: List[Coord] = self._find_path(
                 start=self.pos,
                 target=self._flee_target,
@@ -387,7 +375,6 @@ class Ghost(Entity):
                 self._set_position(path[1])
                 continue
 
-            # Llegada al destino: alternar salida <-> casilla cercana.
             if self._flee_target == self._flee_spawn:
                 nearby: Coord | None = self._get_nearby_cell(
                     self._flee_spawn, bitmap
@@ -398,22 +385,16 @@ class Ghost(Entity):
                 self._flee_target = Coord(self._flee_spawn.get())
 
 
-
-
-
-
 class Blinky(Ghost):
-    """
-    Blinky (Rojo): Conocido como Shadow ("Sombra"), es el más agresivo y persigue directamente a Pac-Man.
-    """
+    """Fantasma rojo que persigue directamente a Pac-Man."""
 
     def __init__(self, points: int) -> None:
+        """Crea a Blinky con su color, velocidad y animaciones."""
         super().__init__(name="Blinky", points=points)
         self.color.set(BLINKY_COLOR)
         self.speed: int = BLINKY_SPEED
         self.set_movement_interval(self.speed)
 
-        # ***** LOAD_ANIMATION *****
         self.ani_path: str = BLINKY_ANI_PATH
 
     def _move(
@@ -422,24 +403,17 @@ class Blinky(Ghost):
         dt: int,
         tile_size: int,
         bitmap: BitMap,
-        fps: int = 60,
         directions: List[Dir] | None = None
     ) -> None:
-        """
-        """
+        """Persigue a Pac-Man o huye mientras dura la super-pacgum."""
         if not self.alive:
             self._update_respawn(dt)
             return
-        # if self.alive == False:
-        #     self._die()
-        # mientras dura la super-pacgum: misma huida por cuartos que Pinky.
         if self.edible:
-            self._move_superpacgum(target, dt, tile_size, bitmap)
+            self._move_superpacgum(target, dt, bitmap)
             return
         for _ in range(self.movement_ticks(dt)):
-            curr_target: Coord = (
-                target if self.edible == False else self.spawn_pos
-            )
+            curr_target: Coord = target
             if len(self.current_corridor) >= 2:
                 self._follow_corridor()
 
@@ -456,11 +430,10 @@ class Blinky(Ghost):
 
 
 class Pinky(Ghost):
-    """
-    Pinky (Rosa): Conocida como Speedy ("Rápida"), intenta emboscar a Pac-Man posicionándose por delante de él.
-    """
+    """Fantasma rosa que intenta anticipar la ruta de Pac-Man."""
 
     def __init__(self, points: int) -> None:
+        """Crea a Pinky con su color, velocidad y animaciones."""
         super().__init__(name="Pinky", points=points)
         self.color.set(PINKY_COLOR)
         self.speed: int = PINKY_SPEED
@@ -473,21 +446,17 @@ class Pinky(Ghost):
         dt: int,
         tile_size: int,
         bitmap: BitMap,
-        fps: int = 60,
         directions: List[Dir] | None = None
     ) -> None:
         """Mueve a Pinky: respawn, huida con la super-pacgum o caza por BFS."""
-        # sollo corre su reloj10 s.
         if not self.alive:
             self._update_respawn(dt)
             return
 
-        # mientras dura la super-pacgum, huida por cuartos.
         if self.edible:
-            self._move_superpacgum(target, dt, tile_size, bitmap)
+            self._move_superpacgum(target, dt, bitmap)
             return
 
-        # un paso de BFS cada `speed` ms hacia la casilla predicha.
         for _ in range(self.movement_ticks(dt)):
             curr_target: Coord = self._predict_pinky_target(
                 target, directions, bitmap
@@ -500,7 +469,6 @@ class Pinky(Ghost):
             if len(path) >= 2:
                 self.delta = self.pos._get_delta(path[1])
                 self._set_position(path[1])
-
 
     def _predict_pinky_target(
         self,
@@ -540,11 +508,10 @@ class Pinky(Ghost):
 
 
 class Inky(Ghost):
-    """
-    Inky (Cian / Azul claro): Conocido como Bashful ("Tímido"), tiene un comportamiento impredecible que combina las posiciones de Blinky y Pac-Man.
-    """
+    """Fantasma cian que calcula una emboscada junto a Blinky."""
 
     def __init__(self, points: int) -> None:
+        """Crea a Inky con su color, velocidad y animaciones."""
         super().__init__(name="Inky", points=points)
         self.color.set(INKY_COLOR)
         self.speed: int = INKY_SPEED
@@ -557,30 +524,25 @@ class Inky(Ghost):
         dt: int,
         tile_size: int,
         bitmap: BitMap,
-        fps: int = 60,
         directions: List[Dir] | None = None
     ) -> None:
-        """Mueve a Inky: respawn, huida con la super-pacgum o pinza con Blinky."""
-        # sollo corre su reloj10 s.
+        """Mueve a Inky según el respawn, la huida o la emboscada."""
         if not self.alive:
             self._update_respawn(dt)
             return
 
-        # mientras dura la super-pacgum, huida por cuartos.
         if self.edible:
-            self._move_superpacgum(target, dt, tile_size, bitmap)
+            self._move_superpacgum(target, dt, bitmap)
             return
 
-        # un paso de BFS cada `speed` ms hacia el punto de emboscada.
         for _ in range(self.movement_ticks(dt)):
-            curr_target: Coord = self._get_inky_target(target, directions, bitmap)
+            curr_target: Coord = self._get_inky_target(
+                target, directions, bitmap)
             path: List[Coord] = self._find_path(
                 start=self.pos,
                 target=curr_target,
                 bitmap=bitmap
             )
-            # el punto doblado puede caer en pared o fuera del mapa:
-            # sin ruta posible, Inky caza directo como Blinky.
             if len(path) < 2:
                 path = self._find_path(
                     start=self.pos,
@@ -592,44 +554,37 @@ class Inky(Ghost):
                 self._set_position(path[1])
 
     def _find_blinky(self) -> Coord | None:
-        """Localiza a Blinky en el mapa de entidades y copia su posicion.
-        Mismo acceso entre iguales que usa resolve_tile con el jugador:
-        Inky no mira dentro de App ni de Maze.
-        """
+        """Busca a Blinky y devuelve una copia de su posición."""
         for entities in Entity.entity_map.values():
             for ent in entities:
                 if isinstance(ent, Blinky):
                     return Coord(ent.pos.get())
         return None
-    
+
     def _get_pacman_ahead(
         self,
         target: Coord,
         directions: List[Dir] | None,
         bitmap: BitMap
     ) -> Coord | None:
-        """Avanza hasta dos casillas desde Pac-Man en su direccion actual,
-        parando en pared. Devuelve None si no se conoce su direccion."""
+        """Avanza hasta dos casillas o hasta encontrar una pared."""
         if not directions:
             return None
-        # Copia: la prediccion no puede pisar la posicion real del jugador.
         pac_ahead: Coord = Coord(target.get())
         current_direction: Dir = directions[0]
         for _ in range(2):
-            # Pared en esa direccion: el punto de mira se queda aqui.
             if bitmap.grid[pac_ahead.y][pac_ahead.x] & current_direction.value:
                 break
             pac_ahead.step(current_direction)
         return pac_ahead
-    
+
     def _get_inky_target(
         self,
         target: Coord,
         directions: List[Dir] | None,
         bitmap: BitMap
     ) -> Coord:
-        """Calcula el punto de emboscada: el vector de Blinky a dos casillas
-        por delante de Pac-Man, doblado desde Blinky (Inky clasico)."""
+        """Calcula el punto de emboscada de Inky a partir de Blinky."""
         blinky_pos: Coord | None = self._find_blinky()
         pac_ahead: Coord | None = self._get_pacman_ahead(
             target, directions, bitmap
@@ -642,14 +597,13 @@ class Inky(Ghost):
         # Vector de Blinky al punto de mira, doblado desde Blinky.
         vector: Coord = pac_ahead - blinky_pos
         return blinky_pos + vector + vector
-    
+
 
 class Clyde(Ghost):
-    """
-    Clyde (Naranja): Conocido como Pokey ("Lento"), persigue a Pac-Man cuando está lejos, pero se aleja a su rincón cuando se acerca demasiado.
-    """
+    """Fantasma naranja que huye a su salida si Pac-Man está cerca."""
 
     def __init__(self, points: int) -> None:
+        """Crea a Clyde con su color, velocidad y animaciones."""
         super().__init__(name="Clyde", points=points)
         self.color.set(CLYDE_COLOR)
         self.speed: int = CLYDE_SPEED
@@ -657,25 +611,22 @@ class Clyde(Ghost):
         self.set_movement_interval(self.speed)
 
     def _move(
-            self,
-            target: Coord,
-            dt: int,
-            tile_size: int,
-            bitmap: BitMap,
-            fps: int = 60,
-            directions: List[Dir] | None = None
-        ) -> None:
-        """
-        """
+        self,
+        target: Coord,
+        dt: int,
+        tile_size: int,
+        bitmap: BitMap,
+        directions: List[Dir] | None = None
+    ) -> None:
+        """Persigue a Pac-Man o vuelve a su salida si está cerca."""
         if not self.alive:
             self._update_respawn(dt)
             return
 
-        # mientras dura la super-pacgum, huida por cuartos.
         if self.edible:
-            self._move_superpacgum(target, dt, tile_size, bitmap)
+            self._move_superpacgum(target, dt, bitmap)
             return
-        
+
         for _ in range(self.movement_ticks(dt)):
 
             path_to_target: List[Coord] = self._find_path(
@@ -684,7 +635,7 @@ class Clyde(Ghost):
                 bitmap=bitmap
             )
             curr_target: Coord = (
-                self.spawn_pos if self.edible == True or
+                self.spawn_pos if self.edible or
                 len(path_to_target) < 8
                 else target
             )
@@ -703,22 +654,3 @@ class Clyde(Ghost):
                 self._get_corridor(path_to_target)
                 if len(self.current_corridor) >= 2:
                     self._follow_corridor()
-
-
-"""
-def direct_chase(ghost: Ghost, target: Coord, bitmap: BitMap) -> None:
-
-    if len(ghost.current_corridor) >= 2:
-        ghost._follow_corridor()
-
-    else:
-        ghost._get_corridor(
-            ghost._find_path(
-                start=ghost.pos,
-                target=target,
-                bitmap=bitmap
-            )
-        )
-        if len(ghost.current_corridor) >= 2:
-            ghost._follow_corridor()
-"""

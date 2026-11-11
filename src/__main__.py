@@ -1,3 +1,5 @@
+"""Permite iniciar el juego mediante ``python -m src``."""
+
 import sys
 from src.main import main
 
