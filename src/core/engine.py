@@ -1,4 +1,4 @@
-"""Prepara la ventana y dibuja los elementos de la interfaz del juego."""
+"""Prepare the window and draw the game's interface elements."""
 
 import pygame
 from pygame import Surface
@@ -55,7 +55,7 @@ _SCREEN_MARGIN = 0.90
 
 
 class GraphicEngine:
-    """Calcula dimensiones y renderiza los elementos visuales del juego."""
+    """Calculate dimensions and render the game's visual elements."""
 
     def __init__(
             self,
@@ -63,7 +63,7 @@ class GraphicEngine:
             ghosts: Dict[str, Ghost],
             pacgum: List[PacGum],
             score: Score) -> None:
-        """Guarda las entidades y prepara el estado gráfico inicial."""
+        """Store the entities and prepare the initial graphics state."""
         self.player: Player = player
         self.ghosts: Dict[str, Ghost] = ghosts
         self.pacgum: List[PacGum] = pacgum
@@ -95,14 +95,14 @@ class GraphicEngine:
         self.score: Score = score
 
     def _update_maze(self, new_maze: Maze) -> None:
-        """Actualiza el laberinto y recalcula sus dimensiones en pantalla."""
+        """Update the maze and recalculate its on-screen dimensions."""
         self.maze = new_maze
         self._calculate_dynamic_tile_size()
         self._calculate_line_px()
         self._calculate_maze_size_px()
 
     def _calculate_dynamic_tile_size(self) -> None:
-        """Calcula el tamaño de casilla que mejor se ajusta a la ventana."""
+        """Calculate the tile size that best fits the window."""
         if self.maze is None:
             raise RuntimeError("The maze has not been initialized.")
         maze = self.maze
@@ -118,11 +118,11 @@ class GraphicEngine:
         )
 
     def _calculate_line_px(self) -> None:
-        """Ajusta el grosor de los muros al tamaño de las casillas."""
+        """Adjust the wall thickness to the tile size."""
         self.line = _LINE if self.tile_size >= _STD_TILE_SIZE else _SAFE_LINE
 
     def _calculate_maze_size_px(self) -> None:
-        """Calcula el ancho y alto en píxeles del laberinto."""
+        """Calculate the maze width and height in pixels."""
         if self.maze is None:
             raise RuntimeError("The maze has not been initialized.")
         self.maze_px = (
@@ -133,10 +133,10 @@ class GraphicEngine:
     @staticmethod
     def _get_screen_limit() -> Tuple[int, int]:
         """
-        Devuelve el tamaño máximo de ventana que admite la pantalla.
+        Return the maximum window size supported by the screen.
 
-        Lee la resolución del monitor, le aplica _SCREEN_MARGIN y la limita
-        con _MAX_WINDOW. Si no se puede leer, usa solo _MAX_WINDOW.
+        Read the monitor resolution, apply _SCREEN_MARGIN, and cap it at
+        _MAX_WINDOW. If the resolution cannot be read, use _MAX_WINDOW.
         """
         try:
             info = pygame.display.Info()
@@ -154,11 +154,11 @@ class GraphicEngine:
         levels: List[Tuple[int, int]]
     ) -> Tuple[int, int]:
         """
-        Calcula el tamaño de ventana a partir del mapa más grande.
+        Calculate the window size based on the largest map.
 
-        Busca el ancho y el alto máximos entre todos los niveles, calcula el
-        espacio necesario con un tamaño de casilla objetivo, le suma un margen
-        en porcentaje y lo acota entre el tamaño base y el tope máximo.
+        Find the maximum width and height across all levels, calculate the
+        space required at the target tile size, add a percentage margin, and
+        clamp the result between the base and maximum sizes.
         """
         max_cols: int = max(cols for cols, _ in levels)
         max_rows: int = max(rows for _, rows in levels)
@@ -204,7 +204,7 @@ class GraphicEngine:
         coord: Coord | Tuple[int, int],
         color: Color | Tuple[int, int, int, int]
     ) -> None:
-        """Pinta un píxel usando coordenadas y color en formato compatible."""
+        """Draw a pixel using compatible coordinates and color values."""
         xy = coord.get() if isinstance(coord, Coord) else coord
         rgba = color.get() if isinstance(color, Color) else color
 
@@ -217,7 +217,7 @@ class GraphicEngine:
         value: int,
         color: Color | Tuple[int, int, int, int]
     ) -> None:
-        """Dibuja los muros de una casilla del laberinto."""
+        """Draw the walls of a maze tile."""
         x = coord.x * self.tile_size
         y = coord.y * self.tile_size
 
@@ -249,7 +249,7 @@ class GraphicEngine:
         self,
         pacgum: PacGum,
     ) -> None:
-        """Dibuja la pacgum como un círculo centrado en su casilla."""
+        """Draw a pac-gum as a circle centered on its tile."""
         size = 3 if isinstance(pacgum, SuperPacGum) else 8
         radius = max(1, self.tile_size // size // 2)
         center = self.tile_size // 2
@@ -264,7 +264,7 @@ class GraphicEngine:
                     )
 
     def _init_entities(self) -> None:
-        """Carga los fotogramas y prepara las superficies de las entidades."""
+        """Load the frames and prepare the entity surfaces."""
         self.player._load_frames(self.player.ani_path, self.tile_size)
         for ghost in self.ghosts.values():
             ghost._load_frames(ghost.ani_path, self.tile_size)
@@ -272,7 +272,7 @@ class GraphicEngine:
             pacgum._init_surface(self.tile_size)
 
     def _put_entities(self) -> None:
-        """Prepara y dibuja las pacgums del nivel."""
+        """Prepare and draw the level's pac-gums."""
         self._init_entities()
         for pacgum in self.pacgum:
             self._render_pacgum(pacgum)
@@ -284,17 +284,17 @@ class GraphicEngine:
     """
 
     def _init_window(self) -> None:
-        """Crea la ventana y la superficie de fondo."""
+        """Create the window and background surface."""
         self.window = pygame.display.set_mode(self.win_px)
         pygame.display.set_caption("Pac-Man")
         self.background = Surface(self.win_px)
 
     def _put_background(self) -> None:
-        """Rellena la superficie de fondo con el color de la interfaz."""
+        """Fill the background surface with the interface color."""
         self.background.fill(_BACKGROUND_COLOR)
 
     def _put_logo(self) -> None:
-        """Carga y dibuja el logotipo centrado en la parte superior."""
+        """Load and draw the logo centered at the top."""
         logo = self.logo._load_logo()
         scaled_logo: Surface = pygame.transform.smoothscale(
             logo, _LOGO_AREA)
@@ -311,15 +311,15 @@ class GraphicEngine:
     """
 
     def _init_menu_init(self) -> None:
-        """Prepara las superficies de texto del menú principal."""
+        """Prepare the text surfaces for the main menu."""
         self.menu_init._render_item_list()
 
     def _window_center(self) -> Tuple[int, int]:
-        """Centro de la ventana actual, no el de la constante de 600x800."""
+        """Return the current window center, not the fixed 600x800 center."""
         return (self.win_px[0] // 2, self.win_px[1] // 2)
 
     def _blit_menu_init(self, menu: Menu) -> None:
-        """Dibuja el menú principal y el logotipo en la ventana."""
+        """Draw the main menu and logo in the window."""
         if self.credits is None:
             self.credits = Title("Created by aitorres and jbarreir © 2026", 8)
         credits = self.credits
@@ -340,7 +340,7 @@ class GraphicEngine:
         )
 
     def _blit_menu_pause(self, menu: MenuPause) -> None:
-        """Muestra las opciones de pausa sobre la escena congelada."""
+        """Show the pause options over the frozen scene."""
         for i, item in enumerate(menu._items):
             x, y = self._window_center()
             y += i * _ITEM_LINE_SPACING
@@ -364,13 +364,13 @@ class GraphicEngine:
                 self.window.blit(menu.selector, (item.xy[0] - 10, item.xy[1]))
 
     def _get_band_size(self, total_h: int) -> Tuple[int, int]:
-        """Calcula el tamaño y la posición vertical de una banda."""
+        """Calculate a banner's size and vertical position."""
         band_h: int = (_INTRO_PAD + total_h + _INTRO_GAP + _INTRO_PAD)
         band_y: int = (self.win_px[1] - band_h) // 2
         return (band_h, band_y)
 
     def _get_title_x(self, title: Title) -> int:
-        """Devuelve la coordenada horizontal para centrar un título."""
+        """Return the horizontal coordinate for centering a title."""
         return (self.win_px[0] - title.sur.get_width()) // 2
 
     def _blit_panel(
@@ -378,7 +378,7 @@ class GraphicEngine:
             band_h: int,
             band_y: int
     ) -> None:
-        """Dibuja una banda opaca centrada verticalmente."""
+        """Draw an opaque banner centered vertically."""
         if (
             self.band is None
             or self.band.get_size() != (self.win_px[0], band_h)
@@ -397,7 +397,7 @@ class GraphicEngine:
             sub_size: int = _INTRO_SUB_SIZE,
             hint_size: int = _INTRO_SUB_SIZE,
     ) -> None:
-        """Dibuja el título, subtítulo y pista opcional en una banda."""
+        """Draw the title, subtitle, and optional hint in a banner."""
         title: Title = Title(
             text=title_str, size=title_size, color=_INTRO_TEXT_COLOR)
         sub: Title = Title(text=sub_str, size=sub_size,
@@ -430,7 +430,7 @@ class GraphicEngine:
             self.window.blit(hint.sur, (self._get_title_x(hint), hint_y))
 
     def _blit_instructions(self) -> None:
-        """Pega la pantalla de instrucciones renderizada por su objeto."""
+        """Blit the instructions screen rendered by its object."""
         self._put_logo()
 
         title_x: int = (
@@ -454,7 +454,7 @@ class GraphicEngine:
                                 _INSTR_HINT_Y))
 
     def _blit_highscores_title(self) -> None:
-        """Dibuja el logo y el título de la pantalla de puntuaciones."""
+        """Draw the logo and title on the high-score screen."""
         self._put_logo()
 
         if self.page_highscores_title is None:
@@ -470,7 +470,7 @@ class GraphicEngine:
         self,
         scores: List[Dict[str, str | int]]
     ) -> None:
-        """Dibuja los nombres y puntuaciones del ranking."""
+        """Draw the names and scores in the leaderboard."""
         first_row_y: int = 300
         row_spaccing: int = 35
         center_x: int = self.win_px[0] // 2
@@ -498,7 +498,7 @@ class GraphicEngine:
         bitmap: BitMap,
         color: Color | Tuple[int, int, int, int]
     ) -> None:
-        """Dibuja la cuadrícula en la superficie del laberinto."""
+        """Draw the grid on the maze surface."""
         for y, row in enumerate(bitmap.grid):
             for x, cell_value in enumerate(row):
                 self._render_cell(
@@ -510,7 +510,7 @@ class GraphicEngine:
         element_width: int,
         align: str = "center",
     ) -> int:
-        """Calcula la posición horizontal de un elemento alineado."""
+        """Calculate the horizontal position of an aligned element."""
         free: int = self.win_px[0] - element_width
 
         if align == "left":
@@ -520,12 +520,12 @@ class GraphicEngine:
         return free // 2
 
     def _cal_maze_top(self) -> int:
-        """Calcula el inicio vertical del mapa debajo del encabezado."""
+        """Calculate the map's vertical start below the header."""
         free: int = self.win_px[1] - self.maze_px[1]
         return max(_HEADER_AREA, free // 2)
 
     def _cal_maze_offset(self) -> Tuple[int, int]:
-        """Devuelve el desplazamiento del laberinto dentro de la ventana."""
+        """Return the maze offset within the window."""
         return (self._cal_left_padding(self.maze_px[0]), self._cal_maze_top())
 
     def _put_maze(
@@ -533,7 +533,7 @@ class GraphicEngine:
             new_maze: Maze,
             color: Color | Tuple[int, int, int, int] = _WALL_COLOR
     ) -> None:
-        """Actualiza el laberinto y prepara su superficie de dibujo."""
+        """Update the maze and prepare its drawing surface."""
         self._update_maze(new_maze)
         maze = self.maze
         if maze is None:
@@ -543,7 +543,7 @@ class GraphicEngine:
         self._render_maze(maze.sur, maze._bitmap, color)
 
     def _blit_elements(self, dt: int, level: int = 1) -> None:
-        """Dibuja el laberinto, las entidades, el HUD y las vidas."""
+        """Draw the maze, entities, HUD, and remaining lives."""
         maze = self.maze
         if maze is None or maze.sur is None:
             raise RuntimeError("The maze has not been rendered.")
@@ -613,18 +613,18 @@ class GraphicEngine:
         )
 
     def _set_highscore(self, points: int) -> None:
-        """Pinta en el HUD el HIGH SCORE que le entrega App.
+        """Draw the high score supplied by App in the HUD.
 
-        App es quien conoce el ranking (Engine nunca importa HighScore);
-        aqui solo se regenera la superficie del texto con el nuevo valor.
+        App owns the leaderboard (Engine never imports HighScore); this method
+        only regenerates the text surface when the value changes.
         """
         self.highscore_int = Title(str(points).zfill(4))
 
     def _set_time(self, seconds: int) -> None:
-        """Pinta en el HUD el tiempo restante que le entrega App.
+        """Draw the remaining time supplied by App in the HUD.
 
-        App cuenta los segundos; aqui solo se convierten a MM:SS y se
-        regenera la superficie cuando el valor cambia.
+        App tracks the seconds; this method only converts them to MM:SS and
+        regenerates the surface when the value changes.
         """
         minutes = seconds // 60
         rest = seconds % 60

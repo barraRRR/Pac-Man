@@ -1,4 +1,4 @@
-"""Adapta el generador externo y selecciona casillas del laberinto."""
+"""Adapt the external generator and select maze tiles."""
 
 from mazegenerator import MazeGenerator
 from src.maze.bitmap import BitMap
@@ -10,17 +10,17 @@ from src.utils.logger import logger
 
 
 class Maze:
-    """Adaptador del laberinto: envuelve el paquete mazegenerator.
+    """Maze adapter that wraps the ``mazegenerator`` package.
 
-    Es la única clase del proyecto que conoce el paquete externo.
-    App decide cuándo generar cada nivel; Maze sabe cómo hacerlo.
+    This is the only project class that knows about the external package.
+    App decides when to generate each level; Maze handles how to do it.
     """
 
     def __init__(self, seed: int):
-        """Guarda la semilla base y deja el estado vacío.
+        """Store the base seed and initialize an empty state.
 
         Args:
-            seed: semilla de la configuración, usada solo para el nivel 1.
+            seed: Configuration seed, used only for level 1.
         """
         self._seed = seed
         self._bitmap: BitMap = BitMap()
@@ -33,36 +33,39 @@ class Maze:
 
     @property
     def grid(self) -> list[list[int]]:
-        """Devuelve la cuadrícula del nivel actual (solo lectura)."""
+        """Return the current level's grid (read-only)."""
         return self._bitmap.grid
 
     @property
     def size(self) -> Tuple[int, int]:
-        """Devuelve las dimensiones actuales del laberinto."""
+        """Return the current maze dimensions."""
         return (len(self.grid), len(self.grid[0]))
 
     @property
     def col(self) -> int:
-        """Devuelve la cantidad de columnas del laberinto."""
+        """Return the number of maze columns."""
         return self._col
 
     @property
     def row(self) -> int:
-        """Devuelve la cantidad de filas del laberinto."""
+        """Return the number of maze rows."""
         return self._row
 
     @property
     def frontier(self) -> Tuple[int, int]:
-        """Devuelve las coordenadas del límite del laberinto."""
+        """Return the coordinates of the maze boundary."""
         return (self._col - 1, self._row - 1)
 
     def generate_level(self, number: int, width: int, height: int) -> None:
-        """Genera el mapa de un nivel y guarda sus cuadrícula.
+        """Generate a level map and store its grid.
+
+        Pass the configured seed to the generator only for level 1; later
+        levels use seed 0.
 
         Args:
-            number: número del nivel (1 en adelante).
-            width: ancho del nivel en celdas.
-            height: alto del nivel en celdas.
+            number: Level number (starting at 1).
+            width: Level width in tiles.
+            height: Level height in tiles.
         """
         semilla = self._seed if number == 1 else 0
 
@@ -77,10 +80,11 @@ class Maze:
 
     def center_comecocos(self) -> tuple[int, int]:
         """
-        Devuelve la celda transitable más cercana al centro, como (x, y).
+        Return the walkable cell closest to the center as ``(x, y)``.
 
-        Recorre la cuadrícula y elige, entre las celdas que no son un
-        bloque sólido (15), la que menos distancia tiene al centro.
+        Search the grid and choose the non-solid (not 15) cell with the
+        shortest squared Euclidean distance to the center. Ties resolve to
+        the first cell encountered in row-major order.
         """
         height_map = len(self.grid)
         width = len(self.grid[0])
@@ -106,14 +110,14 @@ class Maze:
         self,
         reachable: set[tuple[int, int]],
     ) -> list[tuple[int, int]]:
-        """Elige al azar una casilla alcanzable de cada zona de esquina.
+        """Choose a random reachable tile from each corner zone.
 
-        El orden es el mismo que corner_zone_cells: arriba-izquierda,
-        arriba-derecha, abajo-izquierda y abajo-derecha.
+        The order matches ``corner_zone_cells``: top-left, top-right,
+        bottom-left, and bottom-right.
 
         Args:
-            reachable: celdas alcanzables desde Pac-Man, calculadas una
-                sola vez por nivel y reutilizadas en todas las selecciones.
+            reachable: Cells reachable from Pac-Man, calculated once per
+                level and reused for all selections.
         """
         ghost_spawns: list[tuple[int, int]] = []
 
@@ -128,7 +132,13 @@ class Maze:
         return ghost_spawns
 
     def reachable_cells(self, start: tuple[int, int]) -> set[tuple[int, int]]:
-        """Devuelve las celdas alcanzables desde ``start``."""
+        """Return tiles reachable from ``start`` using breadth-first search.
+
+        A neighboring tile is reachable only if the current tile has no wall
+        in that direction and the neighbor has no wall on its opposite side.
+        The result includes ``start``. Raise ``ValueError`` if the maze has
+        not been generated or ``start`` is outside its bounds.
+        """
         if not self.grid:
             raise ValueError("Maze has not been generated.")
 
@@ -139,18 +149,18 @@ class Maze:
         if not (0 <= start_x < width and 0 <= start_y < height):
             raise ValueError("Starting position is outside the maze.")
 
-        # Celdas descubiertas, para no recorrer una celda más de una vez.
+        # Discovered cells, so no cell is visited more than once.
         visited = {start}
 
-        # Celdas descubiertas que todavía tenemos que revisar.
+        # Discovered cells that still need to be checked.
         pending = deque([start])
 
-        # (dx, dy, pared de salida, pared opuesta de la celda vecina)
+        # (dx, dy, outgoing wall, opposite wall of the neighboring cell)
         directions = (
-            (0, -1, 1, 4),   # Arriba: N=1 y S=4
-            (1, 0, 2, 8),    # Derecha: E=2 y W=8
-            (0, 1, 4, 1),    # Abajo: S=4 y N=1
-            (-1, 0, 8, 2),  # Izquierda: W=8 y E=2
+            (0, -1, 1, 4),   # Up: N=1 and S=4.
+            (1, 0, 2, 8),    # Right: E=2 and W=8.
+            (0, 1, 4, 1),    # Down: S=4 and N=1.
+            (-1, 0, 8, 2),  # Left: W=8 and E=2.
         )
 
         while pending:
@@ -161,19 +171,19 @@ class Maze:
                 next_x = x + dx
                 next_y = y + dy
 
-                # Ignoramos vecinos que quedan fuera de la cuadrícula.
+                # Ignore neighbors outside the grid.
                 if not (0 <= next_x < width and 0 <= next_y < height):
                     continue
 
                 next_position = (next_x, next_y)
 
-                # No repetimos celdas que ya descubrimos.
+                # Skip cells that have already been discovered.
                 if next_position in visited:
                     continue
 
                 next_cell = self.grid[next_y][next_x]
 
-                # Comprueba que ambas casillas estén abiertas.
+                # Check that both cells are open.
                 if current_cell & wall or next_cell & opposite_wall:
                     continue
 
@@ -183,11 +193,12 @@ class Maze:
         return visited
 
     def corner_zone_cells(self) -> list[list[tuple[int, int]]]:
-        """Devuelve las casillas de las zonas de esquina en orden fijo.
+        """Return the corner-zone tiles in a fixed order.
 
-        El orden de las zonas es: arriba-izquierda, arriba-derecha,
-        abajo-izquierda y abajo-derecha. Dentro de cada zona, las casillas
-        se recorren por filas, de izquierda a derecha.
+        The zones are ordered top-left, top-right, bottom-left, and
+        bottom-right. Within each zone, tiles are traversed row by row,
+        from left to right. Each zone covers one fifth of the maze's width
+        and height, rounded down with a minimum of one tile.
         """
         if not self.grid:
             raise ValueError("Maze has not been generated.")
@@ -229,12 +240,15 @@ class Maze:
         reachable: set[tuple[int, int]],
         ghost_spawns: list[tuple[int, int]],
     ) -> list[tuple[int, int]]:
-        """Elige una super-pacgum alcanzable en cada zona.
+        """Choose a reachable super pac-gum tile in each corner zone.
+
+        Randomly select from reachable cells that are not occupied by a
+        ghost. Raise ``ValueError`` if any zone has no eligible cell.
 
         Args:
-            reachable: celdas alcanzables desde Pac-Man, calculadas una
-                sola vez por nivel y reutilizadas en todas las selecciones.
-            ghost_spawns: posiciones ocupadas por los fantasmas.
+            reachable: Cells reachable from Pac-Man, calculated once per
+                level and reused for all selections.
+            ghost_spawns: Positions occupied by the ghosts.
         """
         ghost_positions = set(ghost_spawns)
         super_pacgum_spawns: list[tuple[int, int]] = []
@@ -263,11 +277,11 @@ class Maze:
         super_pacgum_spawns: list[tuple[int, int]],
         requested: int,
     ) -> list[tuple[int, int]]:
-        """Elige casillas libres y alcanzables para las pacgums normales.
+        """Choose free, reachable tiles for regular pac-gums.
 
-        Descarta las celdas ocupadas por Pac-Man, fantasmas y
-        super-pacgums, y no repite casilla. Si no caben todas las
-        solicitadas, avisa y coloca solo las que quepan.
+        Exclude cells occupied by Pac-Man, ghosts, and super pac-gums, and
+        never select the same tile twice. If there is not enough room, log a
+        warning and place as many as possible.
         """
         if requested <= 0:
             return []

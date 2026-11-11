@@ -1,4 +1,4 @@
-"""Permite iniciar el juego mediante ``python -m src``."""
+"""Allow launching the game with ``python -m src``."""
 
 import sys
 from src.main import main

@@ -1,4 +1,4 @@
-"""Define las pacgums normales y las que activan el modo asustado."""
+"""Define regular pac-gums and the ones that activate scared mode."""
 
 from src.utils.utils import Coord
 from src.core.entity import Entity
@@ -9,10 +9,10 @@ SUPER_COLOR = (255, 240, 200, 255)
 
 
 class PacGum(Entity):
-    """Elemento que suma puntos cuando Pac-Man lo recoge."""
+    """An item that awards points when Pac-Man collects it."""
 
     def __init__(self, pos: Coord, points: int) -> None:
-        """Crea una pacgum en ``pos`` con la puntuación indicada."""
+        """Create a pac-gum at ``pos`` with the specified score value."""
         super().__init__()
         self.pos.set_at(pos)
         self.color.set(PACGUM_COLOR)
@@ -20,9 +20,9 @@ class PacGum(Entity):
 
 
 class SuperPacGum(PacGum):
-    """Pacgum especial que permite comer fantasmas temporalmente."""
+    """A special pac-gum that lets Pac-Man eat ghosts temporarily."""
 
     def __init__(self, pos: Coord, points: int) -> None:
-        """Crea una super-pacgum en ``pos``."""
+        """Create a super pac-gum at ``pos``."""
         super().__init__(pos, points)
         self.color.set(SUPER_COLOR)

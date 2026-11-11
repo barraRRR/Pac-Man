@@ -1,4 +1,4 @@
-"""Almacena y valida las puntuaciones y el nombre del jugador."""
+"""Store and validate scores and the player's name."""
 
 import base64
 import csv
@@ -15,16 +15,16 @@ PROMPT_INTERVAL = 300
 
 
 class HighScore:
-    """Valida, carga y guarda el ranking de puntuaciones."""
+    """Validate, load, and save the score leaderboard."""
 
     SCORES_FOLDER = "highscore"
 
     MAX_NAME_LENGTH = 10
 
-    # Caracteres permitidos en el nombre: letras ASCII, dígitos y espacio.
+    # Allowed name characters: ASCII letters, digits, and spaces.
     VALID_CHARACTERS = string.ascii_letters + string.digits + " "
 
-    # Contraseña de ofuscación
+    # Obfuscation password.
     PASSWORD = "jajajaja"
 
     scores: list[dict[str, str | int]] = []
@@ -37,14 +37,12 @@ class HighScore:
 
     @classmethod
     def clean_name(cls, name: str) -> str:
-        """Deja el nombre listo para guardar, aplicando las reglas acordadas.
+        """Prepare the name for storage according to the agreed rules.
 
-        Quita los caracteres que el subject no permite: la barra de un
-        "\\n" escrito a mano desaparece y la letra se queda ("\\t" entra,
-        "t" sale). Solo se quitan los espacios del final; los del
-        principio se conservan, así se ha acordado. Si el nombre limpio
-        supera el máximo, se recorta con un aviso en inglés por stderr.
-        Si tras limpiar no queda nada, devuelve "": jugador sin nombre.
+        Keep only ASCII letters, digits, and spaces; remove trailing spaces
+        but preserve leading and internal spaces. Truncate names longer than
+        ``MAX_NAME_LENGTH`` and log an error. Return an empty string if no
+        characters remain.
         """
         characters: list[str] = []
         for char in name:
@@ -63,12 +61,7 @@ class HighScore:
 
     @classmethod
     def is_valid_score(cls, score: object) -> bool:
-        """Comprueba que la puntuación sea un entero no negativo.
-
-        Devuelve solo la respuesta sí/no: el aviso en inglés y el "saltarse
-        esta puntuación" los decidirá quien llame (en #45, al cargar filas
-        del CSV), igual que pasa con el nombre.
-        """
+        """Check for a non-negative integer score, excluding booleans."""
         if isinstance(score, bool):
             return False
         if isinstance(score, int) and score >= 0:
@@ -77,11 +70,10 @@ class HighScore:
 
     @classmethod
     def _xor(cls, data: bytes) -> bytes:
-        """Aplica (o deshace) el XOR con la contraseña como clave repetida.
+        """Apply or undo XOR using the password as a repeating key.
 
-        El XOR es su propio inverso: aplicarlo dos veces devuelve el
-        original, así que un único método sirve para codificar y para
-        decodificar.
+        XOR is its own inverse: applying it twice restores the original, so
+        this method can both encode and decode.
         """
         key = cls.PASSWORD.encode("utf-8")
         return bytes(
@@ -91,10 +83,10 @@ class HighScore:
 
     @classmethod
     def _encode(cls, text: str) -> str:
-        """Convierte el CSV al formato de salida que pide security.
+        """Convert the CSV to the output format required by ``security``.
 
-        True lo ofusca (UTF-8, XOR con la contraseña y base64); False
-        lo devuelve tal cual, porque el archivo se queda en claro.
+        When True, obfuscate it (UTF-8, XOR with the password, then base64).
+        When False, return it unchanged so the file remains plain text.
         """
         if not cls.security:
             return text
@@ -104,11 +96,11 @@ class HighScore:
 
     @classmethod
     def _decode(cls, encoded: str) -> str | None:
-        """Deshace la ofuscación; devuelve None si el texto está dañado.
+        """Undo obfuscation, returning None if the text is corrupted.
 
-        None significa que el contenido no es base64 válido o que al
-        quitar la ofuscación no se recupera texto UTF-8: el archivo ha
-        sido manipulado o corrompido.
+        None means the content is not valid base64 or that removing the
+        obfuscation does not produce UTF-8 text; the file was modified or
+        corrupted.
         """
         try:
             encrypted = base64.b64decode(
@@ -120,11 +112,11 @@ class HighScore:
 
     @classmethod
     def _is_encoded(cls, raw: str) -> bool:
-        """Comprueba si el contenido del archivo está ofuscado.
+        """Check whether the file content is obfuscated.
 
-        Se mira si el texto es base64 válido. Un CSV normal escrito
-        por save() nunca lo es: lleva comas, y la coma no existe en
-        el alfabeto base64.
+        The format is inferred from strict base64 validity rather than the
+        ``security`` flag, allowing files written under either setting to be
+        read. Non-empty plain CSV contains commas and is not valid base64.
         """
         try:
             base64.b64decode(raw.encode("ascii"), validate=True)
@@ -134,14 +126,14 @@ class HighScore:
 
     @classmethod
     def load(cls) -> list[dict[str, str | int]]:
-        """Carga el ranking desde el archivo de puntuaciones.
+        """Load the leaderboard from the score file.
 
-        Lee los dos formatos: si el contenido es base64 válido lo
-        desofusca, y si no lo trata como CSV normal. Así security
-        decide solo cómo se ESCRIBE: un archivo antiguo se sigue
-        leyendo aunque el flag cambie. Si el archivo no existe, el
-        ranking empieza vacío; si está dañado, se avisa en inglés
-        y empieza vacío.
+        Read both formats: valid base64 is deobfuscated; otherwise, treat the
+        content as regular CSV. This means ``security`` controls only how
+        data is written, so existing files remain readable if the flag
+        changes. Parse each row as a name and integer score. If the file does
+        not exist, start with an empty leaderboard; if any row is malformed
+        or the file is corrupted, log an error and start empty.
         """
 
         patch: Path = Path(cls.SCORES_FOLDER) / cls.filename
@@ -151,7 +143,7 @@ class HighScore:
         try:
             raw: str = patch.read_text(encoding="ascii")
 
-            # base64 válido = ofuscado; si no, CSV en claro.
+            # Valid base64 means obfuscated; otherwise, treat it as plain CSV.
             if cls._is_encoded(raw):
                 text = cls._decode(raw)
                 if text is None:
@@ -174,15 +166,14 @@ class HighScore:
 
     @classmethod
     def save(cls) -> bool:
-        """Guarda el ranking en el archivo de puntuaciones.
+        """Save the leaderboard to the score file.
 
-        Construye el texto CSV con los registros en memoria y lo
-        codifica. Si el disco falla (permisos, disco lleno...),
-        reintenta unas cuantas veces con una cuenta atrás entre
-        intentos, avisando en inglés por stderr; si agota los
-        intentos, se rinde sin traceback y devuelve False: el
-        ranking sobrevive en memoria y el próximo guardado volverá
-        a intentarlo. Devuelve True si el archivo quedó escrito.
+        Build and encode CSV text from the in-memory records. If writing fails
+        (for example, due to permissions or a full disk), retry a few times
+        with a countdown between attempts and write English warnings to
+        stderr. If all attempts fail, return False without a traceback; the
+        in-memory leaderboard remains available for the next save attempt.
+        Return True if the file was written.
         """
         text = "".join(
             f"{record['name']},{record['score']}\n" for record in cls.scores)
@@ -208,18 +199,17 @@ class HighScore:
 
     @classmethod
     def register(cls, name: str, score: int) -> bool:
-        """Registra una puntuación en el Top 10, si es que entra.
+        """Register a score if it qualifies for the Top 10.
 
-        Limpia el nombre y valida la puntuación; si algo falla, avisa
-        en inglés por stderr y no toca nada. Con el ranking lleno,
-        solo entra una puntuación estrictamente mayor que la última:
-        un empate no desplaza a quien llegó antes. Si entra, se añade,
-        se ordena de mayor a menor (la ordenación estable conserva el
-        orden de llegada entre empates), se recorta a diez y se guarda
-        el archivo.
+        Clean the name and validate the score; if either fails, log an error
+        and leave the leaderboard unchanged. When the leaderboard is full,
+        only a score strictly greater than the lowest one qualifies; a tie
+        does not displace an earlier entry. Add qualifying scores, sort them
+        in descending order (stable sorting preserves arrival order for ties),
+        truncate to ten entries, and save the file.
 
-        Devuelve True si el registro quedó dentro del Top 10 en
-        memoria; si el disco falla, save() avisará por su cuenta.
+        Return True if the entry is in the in-memory Top 10. ``save()`` writes
+        its own warning if the disk write fails.
         """
         clean_name = cls.clean_name(name)
         if not clean_name:
@@ -244,10 +234,10 @@ class HighScore:
 
     @classmethod
     def top(cls) -> int:
-        """Devuelve la mejor puntuación del ranking, o 0 si está vacío.
+        """Return the leaderboard's highest score, or 0 if it is empty.
 
-        El ranking siempre queda ordenado de mayor a menor, así que la
-        primera fila es el récord que pinta el HUD del juego.
+        The leaderboard is always sorted in descending order, so its first
+        entry is the record displayed in the game HUD.
         """
         if not cls.scores:
             return 0
@@ -255,34 +245,34 @@ class HighScore:
 
 
 class Score(Title):
-    """Mantiene y dibuja la puntuación de la partida actual."""
+    """Track and draw the current game's score."""
 
     def __init__(self) -> None:
-        """Inicializa el marcador en cero."""
+        """Initialize the score to zero."""
         self._points: int = 0
         super().__init__(text=str(self._points))
 
     def add(self, points: int) -> None:
-        """Añade puntos al marcador y actualiza su superficie."""
+        """Add points to the score and update its surface."""
         self._points += points
         self.sur = self._render(text=str(self._points))
 
     @property
     def points(self) -> int:
-        """Devuelve la puntuación actual."""
+        """Return the current score."""
         return self._points
 
     def reset(self) -> None:
-        """Vuelve el marcador a cero y refresca lo que se pinta en el HUD."""
+        """Reset the score to zero and refresh the HUD surface."""
         self._points = 0
         self.sur = self._render(text=str(self._points))
 
 
 class PlayerName(Title):
-    """Gestiona el nombre escrito y el cursor parpadeante de entrada."""
+    """Manage the entered name and blinking input cursor."""
 
     def __init__(self) -> None:
-        """Inicializa el nombre vacío y el temporizador del cursor."""
+        """Initialize an empty name and the cursor timer."""
         super().__init__(text="")
         self._name = ""
         self.prompt = "|"
@@ -290,7 +280,7 @@ class PlayerName(Title):
         self.prompt_visible: bool = True
 
     def set_name(self, new: str) -> bool:
-        """Establece el nombre si no supera la longitud permitida."""
+        """Set the name if it does not exceed the allowed length."""
         if len(new) > PLAYER_MAX_LEN_NAME:
             return False
 
@@ -300,23 +290,23 @@ class PlayerName(Title):
         return True
 
     def build_name(self, char: str) -> bool:
-        """Añade un carácter al nombre si queda espacio."""
+        """Add a character to the name if there is room."""
         return self.set_name(self._name + char)
 
     def delete_last(self) -> bool:
-        """Elimina el último carácter del nombre."""
+        """Remove the last character from the name."""
         return self.set_name(self._name[:-2])
 
     def get_name(self) -> str:
-        """Devuelve el nombre escrito."""
+        """Return the entered name."""
         return self._name
 
     def define_visible_prompt(self) -> None:
-        """Actualiza el carácter visible del cursor."""
+        """Update the visible cursor character."""
         self.prompt = "|" if self.prompt_visible else " "
 
     def get_prompt(self, dt: int) -> str:
-        """Devuelve el nombre junto al cursor parpadeante."""
+        """Return the name followed by the blinking cursor."""
         ticks = self.timer(dt)
         for _ in range(ticks):
             self.prompt_visible = not self.prompt_visible

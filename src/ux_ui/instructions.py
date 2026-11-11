@@ -1,22 +1,22 @@
-"""Renderiza la pantalla de ayuda y los controles disponibles."""
+"""Render the help screen and available controls."""
 
 from pygame import Surface
 import pygame
 
 
 class Instructions:
-    """Guarda el contenido de la pantalla de instrucciones.
+    """Store the contents of the instructions screen.
     """
-    # Fuente del proyecto y tamaños
+    # Project font and text sizes.
     _FONT_PATH = "assets/font/font_emulogic.ttf"
-    _TEXT_SIZE = 12            # texto de las funciones
-    _KEYCAP_SIZE = 10          # texto dentro de la placa
-    _HINT_SIZE = 10            # pista de salida de abajo
-    # Colores:
+    _TEXT_SIZE = 12            # Instruction text.
+    _KEYCAP_SIZE = 10          # Text inside the keycap.
+    _HINT_SIZE = 10            # Bottom navigation hint.
+    # Colors.
     _TEXT_COLOR = (255, 255, 255, 255)
-    _KEYCAP_COLOR = (255, 255, 255, 255)    # placa de la tecla
-    _KEYCAP_TEXT_COLOR = (0, 0, 0, 255)     # texto sobre la placa
-    # Margen
+    _KEYCAP_COLOR = (255, 255, 255, 255)    # Keycap background.
+    _KEYCAP_TEXT_COLOR = (0, 0, 0, 255)     # Text on the keycap.
+    # Keycap padding.
     _KEYCAP_PAD_X = 14
     _KEYCAP_PAD_Y = 8
 
@@ -27,7 +27,7 @@ class Instructions:
     }
 
     def __init__(self) -> None:
-        """Renderiza de una vez todas las superficies de la pantalla."""
+        """Render all screen surfaces at once."""
         self.rows: list[tuple[Surface, Surface]] = []
         for keys, description in self._ENTRIES.items():
             self.rows.append((
@@ -45,17 +45,17 @@ class Instructions:
         size: int,
         color: tuple[int, int, int, int]
     ) -> Surface:
-        """Renderiza un texto con la fuente del proyecto."""
+        """Render text with the project font."""
         if not pygame.font.get_init():
             pygame.font.init()
         font = pygame.font.Font(self._FONT_PATH, size)
         return font.render(text, True, color)
 
     def _render_keycap(self, label: str) -> Surface:
-        """Dibuja una tecla como placa con su nombre centrado.
+        """Draw a key as a keycap with its label centered.
 
-        La anchura sale del texto mas los margenes, asi la barra
-        espaciadora queda mas ancha que una tecla normal a mano.
+        Calculate the width from the text and padding so the space bar is
+        wider than a regular key.
         """
         text: Surface = self._render_text(
             label, self._KEYCAP_SIZE, self._KEYCAP_TEXT_COLOR

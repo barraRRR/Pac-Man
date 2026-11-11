@@ -1,4 +1,4 @@
-"""Define la entidad base compartida por el jugador, fantasmas y pacgums."""
+"""Define the base entity shared by the player, ghosts, and pac-gums."""
 
 from enum import Enum
 from collections.abc import Callable
@@ -17,7 +17,7 @@ ANI_SPEED = 100
 
 
 class State(Enum):
-    """Estados de comportamiento que puede tener una entidad."""
+    """Behavior states an entity can have."""
 
     INIT = "init"
     NORMAL = "normal"
@@ -28,12 +28,12 @@ class State(Enum):
 
 
 class Entity:
-    """Mantiene posición, aspecto y colisiones de una entidad del juego."""
+    """Track a game entity's position, appearance, and collisions."""
 
     entity_map: Dict[Tuple[int, int], List["Entity"]] = {}
 
     def __init__(self) -> None:
-        """Inicializa el estado, posición y animación de la entidad."""
+        """Initialize the entity's state, position, and animation."""
         self.state: State = State.INIT
         self.pos: Coord = Coord()
         self.color: Color = Color(0, 0, 0, 0)
@@ -52,17 +52,20 @@ class Entity:
         self.timer: Optional[Callable[[float], int]] = None
 
     def set_movement_interval(self, interval: float) -> None:
-        """Configura el reloj de movimiento de la entidad."""
+        """Configure the entity's movement timer."""
         self.timer = make_interval_ticker(interval)
 
     def movement_ticks(self, dt: float) -> int:
-        """Devuelve los pasos de movimiento acumulados durante `dt`."""
+        """Return the movement steps accumulated during `dt`."""
         if self.timer is None:
             return 0
         return self.timer(dt)
 
     def _load_frames(self, asset_path: str, tile_size: int) -> None:
-        """Carga los frames a ``Surface`` y falla con contexto si faltan."""
+        """Load and scale directional PNG frames from ``asset_path``.
+
+        Raise ``RuntimeError`` with the asset path if a file cannot be loaded.
+        """
         try:
             dir_path = Path(asset_path)
             for subfolder in dir_path.iterdir():
@@ -101,7 +104,13 @@ class Entity:
             ) from error
 
     def get_frame(self, dt: int) -> Surface:
-        """Devuelve el fotograma de animación correspondiente a ``dt``."""
+        """Advance and return the frame selected by the current direction.
+
+        Accumulate elapsed milliseconds and advance once per animation
+        interval. Regular animations loop; the death animation stays on its
+        final frame. If the direction has no frames, fall back to the right
+        animation or the entity's existing surface.
+        """
         if self.delta is None:
             self.delta = Dir.RIGHT
 
@@ -128,7 +137,12 @@ class Entity:
         return self._cur_frame
 
     def animation_finished(self) -> bool:
-        """Indica si una animacion no circular ha llegado a su ultimo frame."""
+        """Check whether the death animation meets its completion conditions.
+
+        Return ``True`` only for the death direction when frames exist, the
+        current frame is the last one, and the frame timer has reached
+        ``ANI_SPEED``. Looping directions never count as finished.
+        """
         if self.delta is None:
             return False
         frames = self._frames.get(self.delta, [])
@@ -140,12 +154,12 @@ class Entity:
         )
 
     def _init_surface(self, tile_size: int) -> None:
-        """Crea una superficie transparente del tamaño de una casilla."""
+        """Create a transparent surface the size of one tile."""
         self.sur: Surface = Surface((tile_size, tile_size), SRCALPHA)
         self.sur.fill((0, 0, 0, 0))
 
     def _move_in_direction(self, bitmap: BitMap, dir: Dir) -> None:
-        """Avanza una casilla si el mapa no bloquea la dirección."""
+        """Move one tile if the map does not block the direction."""
         if bitmap.grid[self.pos.y][self.pos.x] & dir.value:
             raise HitWallError
 
@@ -156,13 +170,13 @@ class Entity:
             self._update_entity_map(True)
 
     def _set_position(self, position: Coord) -> None:
-        """Cambia la posición manteniendo actualizado el mapa de entidades."""
+        """Change the position while keeping the entity map up to date."""
         self._update_entity_map(False)
         self.pos.set_at(position)
         self._update_entity_map(True)
 
     def _update_entity_map(self, add: bool) -> None:
-        """Añade o elimina la entidad del índice de posiciones."""
+        """Add or remove the entity from the position index."""
         pos = self.pos.get()
         if pos not in Entity.entity_map:
             Entity.entity_map[pos] = []
@@ -172,6 +186,6 @@ class Entity:
             Entity.entity_map[pos].remove(self)
 
     def kill(self, other: "Entity") -> None:
-        """Marca otra entidad como eliminada y la devuelve a su salida."""
+        """Mark another entity as removed and return it to its spawn point."""
         other.alive = False
         other._set_position(other.spawn_pos)

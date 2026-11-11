@@ -1,4 +1,4 @@
-"""Tipos y utilidades compartidos por las entidades y la interfaz."""
+"""Types and utilities shared by entities and the interface."""
 
 from collections.abc import Callable
 from typing import Tuple, Union
@@ -13,7 +13,7 @@ _LOGO_PATH = "assets/logo/pacman_logo.png"
 
 
 class Dir(Enum):
-    """Direcciones de movimiento y estados de animación."""
+    """Movement directions and animation states."""
 
     UP = 1
     RIGHT = 2
@@ -24,44 +24,44 @@ class Dir(Enum):
 
 
 class Coord:
-    """Representa una posición entera dentro del laberinto."""
+    """Represent an integer position in the maze."""
 
     frontier: Tuple[int, int] = (0, 0)
 
     def __init__(self, xy: Tuple[int, int] | None = None) -> None:
-        """Inicializa la coordenada a partir de una tupla opcional."""
+        """Initialize the coordinate from an optional tuple."""
         self.x: int = xy[0] if xy else 0
         self.y: int = xy[1] if xy else 0
 
     def __eq__(self, other: object) -> bool:
-        """Compara esta coordenada con otra."""
+        """Compare this coordinate with another."""
         if not isinstance(other, Coord):
             return False
         return self.x == other.x and self.y == other.y
 
     def __hash__(self) -> int:
-        """Devuelve un hash basado en las coordenadas."""
+        """Return a hash based on the coordinates."""
         return hash((self.x, self.y))
 
     def __add__(self, other: object) -> "Coord | NotImplementedType":
-        """Suma dos coordenadas y devuelve una nueva posición."""
+        """Add two coordinates and return a new position."""
         if not isinstance(other, Coord):
             return NotImplemented
         return Coord((self.x + other.x, self.y + other.y))
 
     def __sub__(self, other: object) -> "Coord | NotImplementedType":
-        """Resta dos coordenadas y devuelve una nueva posición."""
+        """Subtract two coordinates and return a new position."""
         if not isinstance(other, Coord):
             return NotImplemented
         return Coord((self.x - other.x, self.y - other.y))
 
     @classmethod
     def _set_frontier(cls, maze_size: Tuple[int, int]) -> None:
-        """Actualiza el límite de coordenadas del laberinto."""
+        """Update the maze coordinate boundary."""
         cls.frontier = maze_size
 
     def get(self) -> Tuple[int, int]:
-        """Devuelve las coordenadas como una tupla ``(x, y)``."""
+        """Return the coordinates as an ``(x, y)`` tuple."""
         return (self.x, self.y)
 
     def off_get(
@@ -71,7 +71,7 @@ class Coord:
         left_padding: int
     ) -> Tuple[int, int]:
         """
-        Devuelve las coords con offset (margen de ventana)
+        Return the coordinates with the window padding offset.
         """
         return (
             (self.x * tile_size) + left_padding,
@@ -79,7 +79,7 @@ class Coord:
         )
 
     def set_at(self, xy: Union['Coord', Tuple[int, int]]) -> None:
-        """Copia las coordenadas desde otra posición o una tupla."""
+        """Copy the coordinates from another position or a tuple."""
         if isinstance(xy, Coord):
             self.y = xy.y
             self.x = xy.x
@@ -87,7 +87,7 @@ class Coord:
             self.x, self.y = xy
 
     def step(self, dir: Dir) -> None:
-        """Avanza una casilla en la dirección indicada."""
+        """Move one tile in the specified direction."""
         if dir == Dir.UP:
             self.y -= 1
         elif dir == Dir.RIGHT:
@@ -99,7 +99,7 @@ class Coord:
 
     def _get_delta(self, target: "Coord") -> Dir:
         """
-        Te dice hacia que direccion está target
+        Return the direction toward ``target``.
         """
 
         directions = {
@@ -116,10 +116,10 @@ class Coord:
 
 
 class Color:
-    """Almacena un color RGBA limitado al rango de 0 a 255."""
+    """Store an RGBA color with components limited to 0-255."""
 
     def __init__(self, r: int, g: int, b: int, alpha: int) -> None:
-        """Inicializa el color y acota sus componentes."""
+        """Initialize the color and clamp its components."""
         self._r: int = 0
         self._g: int = 0
         self._b: int = 0
@@ -127,42 +127,47 @@ class Color:
         self.set((r, g, b, alpha))
 
     def get(self) -> Tuple[int, int, int, int]:
-        """Devuelve los componentes RGBA."""
+        """Return the RGBA components."""
         return (self._r, self._g, self._b, self._alpha)
 
     def set(self, color: Tuple[int, int, int, int]) -> None:
-        """Actualiza los componentes RGBA y los limita a 0-255."""
+        """Update the RGBA components and clamp them to 0-255."""
         self._r, self._g, self._b, self._alpha = tuple(
             min(255, max(0, c)) for c in color
         )
 
 
 class Logo:
-    """Carga el logotipo desde el archivo de imagen indicado."""
+    """Load the logo from the specified image file."""
 
     img: Surface | None = None
 
     def __init__(self, path: str = _LOGO_PATH) -> None:
-        """Guarda la ruta del logotipo que se cargará."""
+        """Store the path to the logo to be loaded."""
         self._path: str = path
 
     @classmethod
     def _load_logo(cls, path: str = _LOGO_PATH) -> Surface:
-        """Carga la imagen del logotipo y la conserva en la clase."""
+        """Load the logo image and cache it on the class."""
         image = pygame.image.load(path).convert()
         cls.img = image
         return image
 
 
 def make_interval_ticker(interval: float) -> Callable[[float], int]:
-    """Crea un acumulador que cuenta los intervalos completos de tiempo."""
+    """Create a callable that counts elapsed intervals and retains remainder.
+
+    Each call adds its ``dt`` to a retained accumulator, returns the number of
+    complete ``interval`` periods, and carries any leftover time into the
+    next call. Raise ``ValueError`` if ``interval`` is not positive.
+    """
     if interval <= 0:
         raise ValueError("interval must be greater than zero")
 
     accumulator = 0.0
 
     def update(dt: float) -> int:
-        """Acumula el tiempo transcurrido y devuelve los pasos disponibles."""
+        """Accumulate elapsed time and return the available ticks."""
         nonlocal accumulator
         accumulator += dt
         ticks = 0

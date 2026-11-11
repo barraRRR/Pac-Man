@@ -1,1 +1,1 @@
-"""Paquete principal del juego Pac-Man."""
+"""Main package for the Pac-Man game."""

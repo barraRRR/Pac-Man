@@ -1,4 +1,4 @@
-"""Almacena el mapa de paredes como una cuadrícula de bits."""
+"""Store the wall map as a bit grid."""
 
 from typing import List
 
@@ -10,13 +10,13 @@ LEFT = 8
 
 
 class BitMap:
-    """Envuelve las máscaras de pared de cada casilla del laberinto."""
+    """Wrap the wall masks for each maze tile."""
 
     def __init__(self, grid: List[List[int]] | None = None) -> None:
-        """Inicializa el mapa con una cuadrícula opcional."""
+        """Initialize the map with an optional grid."""
         self._grid: List[List[int]] = grid if grid is not None else []
 
     @property
     def grid(self) -> List[List[int]]:
-        """Devuelve la cuadrícula de máscaras de pared."""
+        """Return the grid of wall masks."""
         return self._grid
