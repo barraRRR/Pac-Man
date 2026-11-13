@@ -8,6 +8,13 @@
 # cache
 __pycache__/
 .pytest_cache
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# runtime generated files
+temp/
+highscore/
 log.txt
 
 # edit
@@ -33,11 +40,6 @@ venv.bak/
 # mkdocs/Zensical documentation
 /site
 
-# mypy
-.mypy_cache/
-.dmypy.json
-dmypy.json
-
 # Visual Studio Code
 #   Visual Studio Code specific template is maintained in a separate VisualStudioCode.gitignore that
 #   can be found at https://github.com/github/gitignore/blob/main/Global/VisualStudioCode.gitignore
@@ -49,5 +51,6 @@ tempCodeRunnerFile.py
 
 *:Zone.Identifier
 
-#macOS
-.DS_Store/
+# macOS
+.DS_Store
+*.DS_Store

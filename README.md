@@ -1,6 +1,20 @@
 *This project has been created as part of the 42 curriculum by aitorres, jbarreir.*
 
+<div align="center">
+
 # Pac-Man
+
+<img width="400" height="auto" alt="pacman_logo" src="./assets/logo/pacman_logo.png" />
+
+### *One guy, four ghosts*
+
+![Language](https://img.shields.io/badge/language-Python-blue.svg)
+![Python Versions](https://img.shields.io/badge/python-3.10-blue.svg)
+![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)
+![License](https://img.shields.io/badge/license-MIT-green.svg)
+![42 School](https://img.shields.io/badge/school-42-black?logo=42&logoColor=white)
+
+</div>
 
 A faithful, object-oriented reimplementation of the 1980 arcade game in Python
 and Pygame, with procedurally generated mazes, four ghosts with distinct
@@ -12,13 +26,13 @@ behaviours, a persistent Top 10 leaderboard and a cheat mode for peer review.
 
 1. [Description](#description)
 2. [Instructions](#instructions)
-3. [Resources](#resources)
-4. [Configuration](#configuration)
-5. [Highscore](#highscore)
-6. [Maze Generation](#maze-generation)
-7. [Implementation](#implementation)
-8. [General Software Architecture](#general-software-architecture)
-9. [Project Management](#project-management)
+3. [Configuration](#configuration)
+4. [Highscore](#highscore)
+5. [Maze Generation](#maze-generation)
+6. [Implementation](#implementation)
+7. [General Software Architecture](#general-software-architecture)
+8. [Project Management](#project-management)
+9. [Resources & References](#resources--references)
 
 ---
 
@@ -33,10 +47,6 @@ be recognisable and playable, not a toy: the player moves through a maze, eats
 pac-gums, is chased by four ghosts, loses lives, races a per-level clock and
 leaves a score behind in a leaderboard that survives between runs.
 
-A second, equally important goal is the quality of the code itself. The project
-is written with type hints throughout, documented with PEP 257 docstrings,
-checked with `flake8` and `mypy`, and organised so that every module has one
-reason to change.
 
 ### Overview
 
@@ -222,46 +232,6 @@ that a display is available, since Pygame needs one. The game exits with code
 configuration file and the failing key. The maze looks different between runs:
 only level 1 uses the configured seed, later levels ask the generator for a
 random map.
-
----
-
-## Resources
-
-### Classic references
-
-- Pygame documentation: <https://www.pygame.org/docs/>
-- Pydantic documentation: <https://docs.pydantic.dev/>
-- `uv` documentation: <https://docs.astral.sh/uv/>
-- PEP 257, docstring conventions: <https://peps.python.org/pep-0257/>
-- PEP 484 and PEP 526, type hints and variable annotations.
-- `flake8` documentation: <https://flake8.pycqa.org/>
-- `mypy` documentation: <https://mypy.readthedocs.io/>
-- Python `collections.deque` documentation, used for the BFS frontier.
-- Wikipedia, *Breadth-first search*: <https://en.wikipedia.org/wiki/Breadth-first_search>
-- Wikipedia, *Pac-Man*: <https://en.wikipedia.org/wiki/Pac-Man>, for the
-  original ghost personalities and the super pac-gum timing.
-- The `mazegenerator` package shipped in `wheels/`, whose public interface is
-  the only external contract the project depends on.
-
-### Use of AI
-
-AI was used as a support tool, never as a replacement for understanding or for
-human review, in the spirit of chapter II of the subject. Every suggestion was
-read, tested and adapted by a team member before it reached `main`; code that
-was not understood was not merged. The concrete uses were:
-
-| Task | Where it was applied |
-|---|---|
-| Docstring and comment pass | Issue #136: PEP 257 docstrings across `src/`, removal of stale comments. |
-| Debugging the super pac-gum timer | Issue #110: the timer was only reset on expiry, so a second super pac-gum did not restart the effect. |
-| Debugging the carried-over movement | Issue #80: the direction buffer survived a level change, so Pac-Man kept walking into the new level. |
-| Sprite pipeline | Issue #51: explaining that `pygame.image.load` on a GIF returns only the first frame, and planning the PNG-per-frame extraction. |
-| Concept explanations | BFS for pathfinding and reachability, bitmask wall encoding, and the window-size formula derived from the largest level. |
-| README drafting | This document, written from the code, the subject and the team's notes. |
-
-No AI-generated code was merged without a test or a manual playthrough, and the
-peer review described in [Project Management](#project-management) applied to
-AI-assisted changes exactly as it applied to any other change.
 
 ---
 
@@ -721,8 +691,26 @@ which features were built and kept the two halves of the codebase aligned.
 `aitorres` owned the game mechanics and the documentation. Both reviewed each
 other's work before anything reached `main`.
 
-Every task started as a GitHub issue with a number and a short description. The
-work happened on a branch named after that issue, using the pattern
+#### GitHub Projects & Kanban Workflow
+
+The team used **GitHub Projects** with a **Kanban board** to manage workflow and track
+progress. Kanban—a visual management method originating in Toyota's manufacturing
+processes—uses columns to represent stages of work, providing instant visibility into
+the entire pipeline. Each card (GitHub issue) flows through these stages, showing what
+is planned, active, blocked, and complete. This lean approach proved ideal for a two-person
+team, keeping coordination overhead minimal while maintaining clarity on priorities and
+dependencies.
+
+The board had four columns: **Backlog** for interesting features and improvements that
+could be implemented in the future but were not mandatory, **To Do** for prioritized work
+ready to start, **In Progress** for active tasks, and **Done** for completed work. Every
+task started as a GitHub issue with a number and a short description, then placed in either
+the Backlog (for nice-to-haves) or To Do (for committed work). As work began, the issue
+moved to "In Progress", and upon completion and merge, it settled in "Done". This flow
+ensured both team members always knew what the other was working on, what was queued next,
+and what could be revisited if time permitted.
+
+The work happened on a branch named after that issue, using the pattern
 `<issue>-<short-slug>`, for example
 `80-bug-player-mantiene-movimiento-al-pasar-de-nivel` or
 `137-traducir-todos-los-documentos-a-inglés-último-paso`. Before opening a pull
@@ -741,26 +729,61 @@ available. Those calls are where the `App` / `Engine` split, the corner-zone
 approach and the pause-menu behaviour were settled; the conclusions were then
 written back into the issue so they would not be lost.
 
-### Status and known limitations
 
-The game is playable from start to finish: main menu, ten levels, four ghost
-behaviours, super pac-gums with flee and respawn, lives, per-level timer, pause
-menu, cheat mode, name entry and a persistent leaderboard.
+---
 
-The following items are known and documented rather than hidden:
+## Resources & References
 
-- Pressing `ESC` while paused can start the next level with the pause flag still
-  set, which leaves the new level frozen until `SPACE` is pressed again.
-- `App._game_loop` contains duplicated blocks that compare lives before and
-  after collisions, clear the direction buffer and check for game over. They
-  behave correctly but should be collapsed into one block.
-- The window is sized for the largest level in the configuration, so smaller
-  levels leave empty space around the maze.
-- The instructions screen lists movement, pause and menu selection but not the
-  cheat keys.
-- Packaging and distribution, chapter VII of the subject, is still under review.
+### Documentation
 
-### Repository
+This project relied on extensive documentation and references to understand both the
+classic arcade game and the libraries used to implement it. Key resources included:
 
-The repository is named `Pac-Man` and contains the game, its assets, the
-`mazegenerator` wheel, the test suite and this document.
+**Game & Design References:**
+- Wikipedia, *Pac-Man*: <https://en.wikipedia.org/wiki/Pac-Man> — Essential for
+  understanding the original ghost personalities, super pac-gum mechanics, and
+  timing conventions that define the authentic Pac-Man experience.
+- The original 1980 arcade game documentation and design specifications.
+
+**Python & Libraries:**
+- Pygame documentation: <https://www.pygame.org/docs/> — Comprehensive reference
+  for all graphics, audio, event handling, and sprite management.
+- Pydantic documentation: <https://docs.pydantic.dev/> — Data validation and
+  configuration management using strongly-typed models.
+- `uv` documentation: <https://docs.astral.sh/uv/> — Fast Python package manager
+  and environment management.
+- Python `collections.deque` documentation — Used for the BFS frontier in pathfinding.
+
+**Code Quality & Best Practices:**
+- PEP 257, docstring conventions: <https://peps.python.org/pep-0257/>
+- PEP 484 and PEP 526 — Type hints and variable annotations.
+- `flake8` documentation: <https://flake8.pycqa.org/> — Style guide enforcement.
+- `mypy` documentation: <https://mypy.readthedocs.io/> — Static type checking.
+
+**Algorithms & Data Structures:**
+- Wikipedia, *Breadth-first search*: <https://en.wikipedia.org/wiki/Breadth-first_search>
+  — Core algorithm used for ghost pathfinding and maze reachability analysis.
+
+**External Dependencies:**
+- The `mazegenerator` package shipped in `wheels/` — Procedural maze generation.
+  Its public interface is the only external contract the project depends on.
+
+### AI Usage Disclosure
+
+AI was used as a support tool, never as a replacement for understanding or for
+human review, in the spirit of chapter II of the subject. Every suggestion was
+read, tested and adapted by a team member before it reached `main`; code that
+was not understood was not merged. The concrete uses were:
+
+| Task | Where it was applied |
+|---|---|
+| Docstring and comment pass | Issue #136: PEP 257 docstrings across `src/`, removal of stale comments. |
+| Debugging the super pac-gum timer | Issue #110: the timer was only reset on expiry, so a second super pac-gum did not restart the effect. |
+| Debugging the carried-over movement | Issue #80: the direction buffer survived a level change, so Pac-Man kept walking into the new level. |
+| Sprite pipeline | Issue #51: explaining that `pygame.image.load` on a GIF returns only the first frame, and planning the PNG-per-frame extraction. |
+| Concept explanations | BFS for pathfinding and reachability, bitmask wall encoding, and the window-size formula derived from the largest level. |
+| README drafting | This document, written from the code, the subject and the team's notes. |
+
+No AI-generated code was merged without a test or a manual playthrough, and the
+peer review described in [Project Management](#project-management) applied to
+AI-assisted changes exactly as it applied to any other change.
