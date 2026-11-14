@@ -97,8 +97,8 @@ class Entity:
                     elif "scared" in sub_fol_name:
                         self._frames[Dir.SCARED] = frame_list_sur
         except (OSError, pygame.error) as error:
-            logger.exception("Could not load entity frames from %s: %s",
-                             asset_path, error)
+            logger.error("Could not load entity frames from %s: %s",
+                         asset_path, error)
             raise RuntimeError(
                 f"Could not load entity frames from {asset_path}"
             ) from error

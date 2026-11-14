@@ -1,5 +1,4 @@
-"""Tests for name cleaning and the score leaderboard."""
-
+import io
 import pathlib
 
 import pytest
@@ -54,11 +53,11 @@ def test_name_of_exactly_ten_characters_is_kept() -> None:
 
 
 def test_long_name_is_truncated_with_warning(
-    capsys: pytest.CaptureFixture[str],
+    logs: io.StringIO,
 ) -> None:
     """Truncate long names and log a warning."""
     assert HighScore.clean_name("ABCDEFGHIJK") == "ABCDEFGHIJ"
-    assert "Error" in capsys.readouterr().err
+    assert "Error" in logs.getvalue()
 
 
 def test_leading_spaces_count_toward_the_limit() -> None:
@@ -163,7 +162,7 @@ def test_saved_file_is_not_plain_csv(
 def test_save_total_failure_keeps_memory_and_returns_false(
     tmp_path: pathlib.Path,
     monkeypatch: pytest.MonkeyPatch,
-    capsys: pytest.CaptureFixture[str],
+    logs: io.StringIO,
 ) -> None:
     """Keep the leaderboard in memory when saving fails."""
     monkeypatch.setattr(HighScore, "SCORES_FOLDER", str(tmp_path))
@@ -178,7 +177,7 @@ def test_save_total_failure_keeps_memory_and_returns_false(
     saved: bool = HighScore.save()
     assert saved is False
     assert HighScore.scores == [{"name": "Ana", "score": 1}]
-    assert "total failure" in capsys.readouterr().err
+    assert "total failure" in logs.getvalue()
 
 
 def test_save_succeeds_after_one_failed_attempt(
@@ -295,27 +294,27 @@ def test_register_higher_score_drops_last_when_full(
 def test_register_rejects_invalid_score(
     tmp_path: pathlib.Path,
     monkeypatch: pytest.MonkeyPatch,
-    capsys: pytest.CaptureFixture[str],
+    logs: io.StringIO,
 ) -> None:
     """Reject negative scores without changing the leaderboard."""
     monkeypatch.setattr(HighScore, "SCORES_FOLDER", str(tmp_path))
     monkeypatch.setattr(HighScore, "scores", [])
     assert HighScore.register("Ana", -5) is False
     assert HighScore.scores == []
-    assert "score" in capsys.readouterr().err
+    assert "score" in logs.getvalue()
 
 
 def test_register_rejects_empty_name(
     tmp_path: pathlib.Path,
     monkeypatch: pytest.MonkeyPatch,
-    capsys: pytest.CaptureFixture[str],
+    logs: io.StringIO,
 ) -> None:
     """Reject empty names without changing the leaderboard."""
     monkeypatch.setattr(HighScore, "SCORES_FOLDER", str(tmp_path))
     monkeypatch.setattr(HighScore, "scores", [])
     assert HighScore.register("   ", 100) is False
     assert HighScore.scores == []
-    assert "name" in capsys.readouterr().err
+    assert "name" in logs.getvalue()
 
 
 def test_register_cleans_the_name(
@@ -432,7 +431,7 @@ def test_print_real_highscore_file() -> None:
 def test_load_with_missing_file_starts_empty(
     tmp_path: pathlib.Path,
     monkeypatch: pytest.MonkeyPatch,
-    capsys: pytest.CaptureFixture[str],
+    logs: io.StringIO,
 ) -> None:
     """Start with an empty leaderboard if the score file is missing.
 
@@ -446,7 +445,7 @@ def test_load_with_missing_file_starts_empty(
     assert HighScore.load() == []
     assert HighScore.scores == []
     # A missing file is expected; do not write a warning to stderr.
-    assert capsys.readouterr().err == ""
+    assert logs.getvalue() == ""
 
 
 def test_register_keeps_duplicate_names(

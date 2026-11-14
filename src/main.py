@@ -20,12 +20,11 @@ def main() -> int:
     try:
         app = App(Config.json_parser(sys.argv[1]))
         return app.run()
-    except (OSError, FileNotFoundError, json.JSONDecodeError) as error:
-        logger.exception("Error loading or initializing application: %s",
-                         error)
+    except (OSError, json.JSONDecodeError) as error:
+        logger.error("Error loading or initializing application: %s", error)
         return 1
-    except Exception:
-        logger.exception("Unhandled application error")
+    except Exception as error:
+        logger.error("Unhandled application error: %s", error)
         return 1
     except KeyboardInterrupt:
         logger.error("Forced exit")

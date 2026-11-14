@@ -183,12 +183,12 @@ class HighScore:
                 path.parent.mkdir(parents=True, exist_ok=True)
                 path.write_text(cls._encode(text), encoding="ascii")
                 return True
-            except OSError:
+            except OSError as error:
                 if attempt == cls.SAVE_ATTEMPTS:
                     break
-                logger.exception("Error: could not save the highscore file "
-                                 "(attempt %s of %s).",
-                                 attempt, cls.SAVE_ATTEMPTS)
+                logger.error("Error: could not save the highscore file "
+                             "(attempt %s of %s): %s",
+                             attempt, cls.SAVE_ATTEMPTS, error)
                 for count in range(cls.SAVE_ATTEMPTS, 0, -1):
                     logger.info("Retrying in %s...", count)
                     time.sleep(cls.RETRY_SECONDS)
