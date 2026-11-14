@@ -1,0 +1,804 @@
+[
+  {
+    "number": 4,
+    "title": "feat: commit brach",
+    "branch": "1-investigar-librería-gráfica",
+    "created": "2026-10-09T10:22:24Z",
+    "merged": "2026-10-09T10:23:12Z",
+    "author": "jbarreir",
+    "merged_by": "jbarreir",
+    "additions": 1,
+    "deletions": 0,
+    "changed_files": 2,
+    "closes_issues": []
+  },
+  {
+    "number": 6,
+    "title": "feat: codigo super importante",
+    "branch": "3-desarrollar-parseo",
+    "created": "2026-10-09T10:34:50Z",
+    "merged": "2026-10-09T10:35:24Z",
+    "author": "jbarreir",
+    "merged_by": "jbarreir",
+    "additions": 4,
+    "deletions": 1,
+    "changed_files": 1,
+    "closes_issues": []
+  },
+  {
+    "number": 7,
+    "title": "creacción arhivo prueba para guardar objeto prueba y main",
+    "branch": "5-issue-de-prueba",
+    "created": "2026-10-09T10:36:14Z",
+    "merged": "2026-10-09T10:40:51Z",
+    "author": "aitorres",
+    "merged_by": "aitorres",
+    "additions": 6,
+    "deletions": 1,
+    "changed_files": 2,
+    "closes_issues": []
+  },
+  {
+    "number": 16,
+    "title": "repo: diseño inicial de la estructura del proyecto siguiento el entre…",
+    "branch": "15-estructurar-el-proyecto-contemplando-el-delivery-final-a-steam",
+    "created": "2026-10-10T12:25:58Z",
+    "merged": "2026-10-10T12:26:30Z",
+    "author": "jbarreir",
+    "merged_by": "jbarreir",
+    "additions": 1,
+    "deletions": 10,
+    "changed_files": 15,
+    "closes_issues": [
+      15
+    ]
+  },
+  {
+    "number": 19,
+    "title": "feat: Implementamos el parseo del JSON de congiguración.",
+    "branch": "17-abrir-y-procesar-configjson",
+    "created": "2026-10-12T15:34:25Z",
+    "merged": "2026-10-12T15:35:00Z",
+    "author": "jbarreir",
+    "merged_by": "jbarreir",
+    "additions": 716,
+    "deletions": 0,
+    "changed_files": 6,
+    "closes_issues": [
+      17
+    ]
+  },
+  {
+    "number": 22,
+    "title": "refactor: simplificación de parseo (clase -> func)",
+    "branch": "21-diseñar-un-flujo-funcional-para-cargar-el-archivo",
+    "created": "2026-10-13T10:29:18Z",
+    "merged": "2026-10-13T10:29:41Z",
+    "author": "jbarreir",
+    "merged_by": "jbarreir",
+    "additions": 22,
+    "deletions": 65,
+    "changed_files": 2,
+    "closes_issues": [
+      21
+    ]
+  },
+  {
+    "number": 24,
+    "title": "feat: planteamiento de clase orquestadora",
+    "branch": "23-crear-clase-app-orquestadora",
+    "created": "2026-10-13T12:56:05Z",
+    "merged": "2026-10-13T12:56:19Z",
+    "author": "jbarreir",
+    "merged_by": "jbarreir",
+    "additions": 11,
+    "deletions": 2,
+    "changed_files": 2,
+    "closes_issues": [
+      23
+    ]
+  },
+  {
+    "number": 29,
+    "title": "26 cargar pygame y conseguir abrir una ventana",
+    "branch": "26-cargar-pygame-y-conseguir-abrir-una-ventana",
+    "created": "2026-10-15T08:07:41Z",
+    "merged": "2026-10-15T08:08:01Z",
+    "author": "jbarreir",
+    "merged_by": "jbarreir",
+    "additions": 68,
+    "deletions": 648,
+    "changed_files": 6,
+    "closes_issues": [
+      26
+    ]
+  },
+  {
+    "number": 36,
+    "title": "30 converir bit map en interfaz gráfica",
+    "branch": "30-converir-bit-map-en-interfaz-gráfica",
+    "created": "2026-10-15T16:27:16Z",
+    "merged": "2026-10-15T16:27:30Z",
+    "author": "jbarreir",
+    "merged_by": "jbarreir",
+    "additions": 273,
+    "deletions": 41,
+    "changed_files": 6,
+    "closes_issues": [
+      30
+    ]
+  },
+  {
+    "number": 37,
+    "title": "8 extracción mapa",
+    "branch": "8-extracción-mapa",
+    "created": "2026-10-15T19:26:03Z",
+    "merged": "2026-10-16T06:44:16Z",
+    "author": "aitorres",
+    "merged_by": "jbarreir",
+    "additions": 558,
+    "deletions": 69,
+    "changed_files": 12,
+    "closes_issues": [
+      8
+    ]
+  },
+  {
+    "number": 38,
+    "title": "32 diseñar clase player",
+    "branch": "32-diseñar-clase-player",
+    "created": "2026-10-16T09:14:51Z",
+    "merged": "2026-10-16T09:15:00Z",
+    "author": "jbarreir",
+    "merged_by": "jbarreir",
+    "additions": 139,
+    "deletions": 0,
+    "changed_files": 4,
+    "closes_issues": [
+      32
+    ]
+  },
+  {
+    "number": 40,
+    "title": "feat: imprementación de método _spawn_entities()",
+    "branch": "39-conectar-el-mapamaze-con-clases-player-ghost-y-pacgum",
+    "created": "2026-10-16T10:29:51Z",
+    "merged": "2026-10-16T10:30:01Z",
+    "author": "jbarreir",
+    "merged_by": "jbarreir",
+    "additions": 89,
+    "deletions": 32,
+    "changed_files": 6,
+    "closes_issues": [
+      39
+    ]
+  },
+  {
+    "number": 42,
+    "title": "feat: incluye clase BitMap",
+    "branch": "39-conectar-el-mapamaze-con-clases-player-ghost-y-pacgum",
+    "created": "2026-10-16T12:18:03Z",
+    "merged": "2026-10-16T12:18:14Z",
+    "author": "jbarreir",
+    "merged_by": "jbarreir",
+    "additions": 68,
+    "deletions": 57,
+    "changed_files": 4,
+    "closes_issues": []
+  },
+  {
+    "number": 50,
+    "title": "43 mostrar en pantalla el mapa con las entidades situadas en sus posiciones iniciales",
+    "branch": "43-mostrar-en-pantalla-el-mapa-con-las-entidades-situadas-en-sus-posiciones-iniciales",
+    "created": "2026-10-19T09:58:03Z",
+    "merged": "2026-10-19T09:59:26Z",
+    "author": "jbarreir",
+    "merged_by": "jbarreir",
+    "additions": 296,
+    "deletions": 163,
+    "changed_files": 7,
+    "closes_issues": [
+      43
+    ]
+  },
+  {
+    "number": 57,
+    "title": "feat: implement SuperPacGum class and enhance game mechanics with mov…",
+    "branch": "55-movimiento-de-player-y-ghosts",
+    "created": "2026-10-19T12:26:04Z",
+    "merged": "2026-10-19T12:27:37Z",
+    "author": "jbarreir",
+    "merged_by": "jbarreir",
+    "additions": 110,
+    "deletions": 58,
+    "changed_files": 8,
+    "closes_issues": [
+      55
+    ]
+  },
+  {
+    "number": 59,
+    "title": "35 diseñar highscore",
+    "branch": "35-diseñar-highscore",
+    "created": "2026-10-19T18:12:07Z",
+    "merged": "2026-10-19T18:12:37Z",
+    "author": "aitorres",
+    "merged_by": "aitorres",
+    "additions": 725,
+    "deletions": 22,
+    "changed_files": 6,
+    "closes_issues": [
+      35
+    ]
+  },
+  {
+    "number": 60,
+    "title": "52 bug error en los spawns de los pacgum",
+    "branch": "52-bug-error-en-los-spawns-de-los-pacgum",
+    "created": "2026-10-20T14:10:08Z",
+    "merged": "2026-10-20T14:10:23Z",
+    "author": "aitorres",
+    "merged_by": "aitorres",
+    "additions": 19,
+    "deletions": 3,
+    "changed_files": 3,
+    "closes_issues": [
+      52
+    ]
+  },
+  {
+    "number": 62,
+    "title": "58 diseñar ai de ghosts",
+    "branch": "58-diseñar-ai-de-ghosts",
+    "created": "2026-10-20T14:25:51Z",
+    "merged": "2026-10-20T14:26:04Z",
+    "author": "jbarreir",
+    "merged_by": "jbarreir",
+    "additions": 180,
+    "deletions": 3,
+    "changed_files": 6,
+    "closes_issues": [
+      58
+    ]
+  },
+  {
+    "number": 72,
+    "title": "51 cargar imagenes de player y ghosts",
+    "branch": "51-cargar-imagenes-de-player-y-ghosts",
+    "created": "2026-10-20T17:20:14Z",
+    "merged": "2026-10-21T16:48:22Z",
+    "author": "aitorres",
+    "merged_by": "aitorres",
+    "additions": 213,
+    "deletions": 32,
+    "changed_files": 30,
+    "closes_issues": [
+      51
+    ]
+  },
+  {
+    "number": 73,
+    "title": "feat: implement accurate ghost movement timing and clock tick management",
+    "branch": "66-implementar-pygameclocktick-correctamente",
+    "created": "2026-10-20T18:07:50Z",
+    "merged": "2026-10-20T18:08:01Z",
+    "author": "jbarreir",
+    "merged_by": "jbarreir",
+    "additions": 23,
+    "deletions": 28,
+    "changed_files": 2,
+    "closes_issues": [
+      66
+    ]
+  },
+  {
+    "number": 75,
+    "title": "68 menú inicio",
+    "branch": "68-menú-inicio",
+    "created": "2026-10-22T12:43:20Z",
+    "merged": "2026-10-22T12:43:33Z",
+    "author": "jbarreir",
+    "merged_by": "jbarreir",
+    "additions": 414,
+    "deletions": 168,
+    "changed_files": 8,
+    "closes_issues": [
+      68
+    ]
+  },
+  {
+    "number": 76,
+    "title": "74 movimiento de player continuo",
+    "branch": "74-movimiento-de-player-continuo",
+    "created": "2026-10-22T18:30:19Z",
+    "merged": "2026-10-22T19:25:36Z",
+    "author": "aitorres",
+    "merged_by": "aitorres",
+    "additions": 77,
+    "deletions": 9,
+    "changed_files": 2,
+    "closes_issues": [
+      74
+    ]
+  },
+  {
+    "number": 79,
+    "title": "feat: interaccion con pacgums",
+    "branch": "78-crear-dinámica-de-comer-pacgums",
+    "created": "2026-10-24T17:07:22Z",
+    "merged": "2026-10-24T17:07:32Z",
+    "author": "jbarreir",
+    "merged_by": "jbarreir",
+    "additions": 100,
+    "deletions": 29,
+    "changed_files": 6,
+    "closes_issues": [
+      78
+    ]
+  },
+  {
+    "number": 82,
+    "title": "81 diseño de score",
+    "branch": "81-diseño-de-score",
+    "created": "2026-10-25T19:59:09Z",
+    "merged": "2026-10-25T19:59:33Z",
+    "author": "jbarreir",
+    "merged_by": "jbarreir",
+    "additions": 79,
+    "deletions": 19,
+    "changed_files": 8,
+    "closes_issues": [
+      81
+    ]
+  },
+  {
+    "number": 84,
+    "title": "69 menu pausa",
+    "branch": "69-menu-pausa",
+    "created": "2026-10-26T12:27:19Z",
+    "merged": "2026-10-26T12:27:28Z",
+    "author": "aitorres",
+    "merged_by": "aitorres",
+    "additions": 281,
+    "deletions": 81,
+    "changed_files": 7,
+    "closes_issues": [
+      69
+    ]
+  },
+  {
+    "number": 85,
+    "title": "arreglo, limpieza de lista hecha al empezar un nivel",
+    "branch": "80-bug-player-mantiene-movimiento-al-pasar-de-nivel",
+    "created": "2026-10-26T12:45:48Z",
+    "merged": "2026-10-26T12:48:03Z",
+    "author": "aitorres",
+    "merged_by": "aitorres",
+    "additions": 1,
+    "deletions": 0,
+    "changed_files": 1,
+    "closes_issues": [
+      80
+    ]
+  },
+  {
+    "number": 92,
+    "title": "89 diseñar interacción entre player y ghost",
+    "branch": "89-diseñar-interacción-entre-player-y-ghost",
+    "created": "2026-10-26T16:09:36Z",
+    "merged": "2026-10-26T16:09:54Z",
+    "author": "jbarreir",
+    "merged_by": "jbarreir",
+    "additions": 48,
+    "deletions": 12,
+    "changed_files": 5,
+    "closes_issues": [
+      89
+    ]
+  },
+  {
+    "number": 93,
+    "title": "88 diseñar intrucciones",
+    "branch": "88-diseñar-intrucciones",
+    "created": "2026-10-26T18:18:02Z",
+    "merged": "2026-10-26T18:18:31Z",
+    "author": "aitorres",
+    "merged_by": "aitorres",
+    "additions": 178,
+    "deletions": 24,
+    "changed_files": 5,
+    "closes_issues": [
+      88
+    ]
+  },
+  {
+    "number": 94,
+    "title": "90 descomponer o encontrar por separado cada frame de los gif",
+    "branch": "90-descomponer-o-encontrar-por-separado-cada-frame-de-los-gif",
+    "created": "2026-10-26T20:06:44Z",
+    "merged": "2026-10-26T20:06:55Z",
+    "author": "aitorres",
+    "merged_by": "aitorres",
+    "additions": 297,
+    "deletions": 45,
+    "changed_files": 97,
+    "closes_issues": [
+      90
+    ]
+  },
+  {
+    "number": 98,
+    "title": "97 refactorizar instructionspy y pulir la pantalla",
+    "branch": "97-refactorizar-instructionspy-y-pulir-la-pantalla",
+    "created": "2026-10-27T11:10:33Z",
+    "merged": "2026-10-27T11:28:22Z",
+    "author": "aitorres",
+    "merged_by": "aitorres",
+    "additions": 57,
+    "deletions": 13,
+    "changed_files": 4,
+    "closes_issues": [
+      97
+    ]
+  },
+  {
+    "number": 101,
+    "title": "95 cargar imagenes en vez de cubos",
+    "branch": "95-cargar-imagenes-en-vez-de-cubos",
+    "created": "2026-10-28T12:17:13Z",
+    "merged": "2026-10-28T12:17:38Z",
+    "author": "jbarreir",
+    "merged_by": "jbarreir",
+    "additions": 244,
+    "deletions": 183,
+    "changed_files": 54,
+    "closes_issues": [
+      95
+    ]
+  },
+  {
+    "number": 105,
+    "title": "100 vidas juego",
+    "branch": "100-vidas-juego",
+    "created": "2026-10-28T17:11:58Z",
+    "merged": "2026-10-28T18:28:59Z",
+    "author": "aitorres",
+    "merged_by": "aitorres",
+    "additions": 222,
+    "deletions": 13,
+    "changed_files": 8,
+    "closes_issues": [
+      100
+    ]
+  },
+  {
+    "number": 108,
+    "title": "63 pinky ia",
+    "branch": "63-pinky-ia",
+    "created": "2026-10-30T10:13:33Z",
+    "merged": "2026-10-30T10:14:35Z",
+    "author": "aitorres",
+    "merged_by": "aitorres",
+    "additions": 377,
+    "deletions": 64,
+    "changed_files": 10,
+    "closes_issues": [
+      63
+    ]
+  },
+  {
+    "number": 109,
+    "title": "feat: clyde AI",
+    "branch": "65-clyde-ia",
+    "created": "2026-10-30T11:57:50Z",
+    "merged": "2026-10-30T12:01:38Z",
+    "author": "jbarreir",
+    "merged_by": "jbarreir",
+    "additions": 115,
+    "deletions": 22,
+    "changed_files": 2,
+    "closes_issues": [
+      65
+    ]
+  },
+  {
+    "number": 112,
+    "title": "64 inky ia",
+    "branch": "64-inky-ia",
+    "created": "2026-10-31T15:20:10Z",
+    "merged": "2026-10-31T15:20:19Z",
+    "author": "aitorres",
+    "merged_by": "aitorres",
+    "additions": 112,
+    "deletions": 4,
+    "changed_files": 3,
+    "closes_issues": [
+      64
+    ]
+  },
+  {
+    "number": 114,
+    "title": "86 trasnsicion niveles",
+    "branch": "86-trasnsicion-niveles",
+    "created": "2026-10-31T16:27:21Z",
+    "merged": "2026-10-31T16:27:30Z",
+    "author": "aitorres",
+    "merged_by": "aitorres",
+    "additions": 75,
+    "deletions": 2,
+    "changed_files": 4,
+    "closes_issues": [
+      86
+    ]
+  },
+  {
+    "number": 115,
+    "title": "110 error super pacgum",
+    "branch": "110-error-super-pacgum",
+    "created": "2026-10-31T18:51:06Z",
+    "merged": "2026-10-31T18:51:15Z",
+    "author": "aitorres",
+    "merged_by": "aitorres",
+    "additions": 52,
+    "deletions": 1,
+    "changed_files": 2,
+    "closes_issues": [
+      110
+    ]
+  },
+  {
+    "number": 116,
+    "title": "- Añadir HighScore.top() para obtener la mejor puntuación, o 0 si el …",
+    "branch": "107-traer-higscore-a-la-pantalla-del-juego-actual-0000",
+    "created": "2026-10-31T19:08:10Z",
+    "merged": "2026-10-31T19:08:26Z",
+    "author": "aitorres",
+    "merged_by": "aitorres",
+    "additions": 18,
+    "deletions": 2,
+    "changed_files": 4,
+    "closes_issues": [
+      107
+    ]
+  },
+  {
+    "number": 118,
+    "title": "feat: animación de muerte",
+    "branch": "103-diseño-de-muerte-de-jugador",
+    "created": "2026-11-01T17:24:15Z",
+    "merged": "2026-11-01T17:24:28Z",
+    "author": "jbarreir",
+    "merged_by": "jbarreir",
+    "additions": 92,
+    "deletions": 24,
+    "changed_files": 3,
+    "closes_issues": [
+      103
+    ]
+  },
+  {
+    "number": 119,
+    "title": "fix: Clyde huye correctamente",
+    "branch": "117-bug-clyde-se-queda-atascado-en-su-corner-cuando-huye",
+    "created": "2026-11-01T18:51:17Z",
+    "merged": "2026-11-01T18:51:25Z",
+    "author": "jbarreir",
+    "merged_by": "jbarreir",
+    "additions": 9,
+    "deletions": 13,
+    "changed_files": 1,
+    "closes_issues": [
+      117
+    ]
+  },
+  {
+    "number": 120,
+    "title": "113 cambiar imagen fantasma superpacgum",
+    "branch": "113-cambiar-imagen-fantasma-superpacgum",
+    "created": "2026-11-02T13:31:28Z",
+    "merged": "2026-11-02T13:35:18Z",
+    "author": "aitorres",
+    "merged_by": "aitorres",
+    "additions": 157,
+    "deletions": 86,
+    "changed_files": 19,
+    "closes_issues": [
+      113
+    ]
+  },
+  {
+    "number": 126,
+    "title": "feat: refactor de key_events y pantalla enter name",
+    "branch": "70-menú-game-over",
+    "created": "2026-11-04T16:18:40Z",
+    "merged": "2026-11-04T16:18:55Z",
+    "author": "jbarreir",
+    "merged_by": "jbarreir",
+    "additions": 274,
+    "deletions": 191,
+    "changed_files": 8,
+    "closes_issues": [
+      70
+    ]
+  },
+  {
+    "number": 128,
+    "title": "124 implementar cheat mode",
+    "branch": "124-implementar-cheat-mode",
+    "created": "2026-11-05T15:55:59Z",
+    "merged": "2026-11-05T15:56:16Z",
+    "author": "aitorres",
+    "merged_by": "aitorres",
+    "additions": 99,
+    "deletions": 19,
+    "changed_files": 6,
+    "closes_issues": [
+      124
+    ]
+  },
+  {
+    "number": 129,
+    "title": "125 imlementar time limit",
+    "branch": "125-imlementar-time-limit",
+    "created": "2026-11-06T14:55:10Z",
+    "merged": "2026-11-06T14:55:21Z",
+    "author": "aitorres",
+    "merged_by": "aitorres",
+    "additions": 101,
+    "deletions": 11,
+    "changed_files": 4,
+    "closes_issues": [
+      125
+    ]
+  },
+  {
+    "number": 132,
+    "title": "127 diseñar propmt para pantalla enter name",
+    "branch": "127-diseñar-propmt-para-pantalla-enter-name",
+    "created": "2026-11-07T13:39:44Z",
+    "merged": "2026-11-07T13:40:33Z",
+    "author": "jbarreir",
+    "merged_by": "jbarreir",
+    "additions": 118,
+    "deletions": 64,
+    "changed_files": 7,
+    "closes_issues": [
+      127
+    ]
+  },
+  {
+    "number": 134,
+    "title": "fix: Highsore e Instrucciones se muestran correctamente",
+    "branch": "133-cargar-menú-highscore-con-nombres-y-puntuaciones",
+    "created": "2026-11-07T15:54:49Z",
+    "merged": "2026-11-07T15:54:58Z",
+    "author": "jbarreir",
+    "merged_by": "jbarreir",
+    "additions": 13,
+    "deletions": 8,
+    "changed_files": 2,
+    "closes_issues": [
+      133
+    ]
+  },
+  {
+    "number": 143,
+    "title": "design: alineamiento de UI",
+    "branch": "140-ajuste-de-tamaños-de-ui",
+    "created": "2026-11-08T16:13:36Z",
+    "merged": "2026-11-08T16:13:47Z",
+    "author": "jbarreir",
+    "merged_by": "jbarreir",
+    "additions": 16,
+    "deletions": 13,
+    "changed_files": 3,
+    "closes_issues": [
+      140
+    ]
+  },
+  {
+    "number": 144,
+    "title": "feat: error handling and logger",
+    "branch": "138-blindar-todo-el-código-con-los-try-excepts-necesarios",
+    "created": "2026-11-09T08:50:34Z",
+    "merged": "2026-11-09T08:50:44Z",
+    "author": "jbarreir",
+    "merged_by": "jbarreir",
+    "additions": 316,
+    "deletions": 142,
+    "changed_files": 10,
+    "closes_issues": [
+      138
+    ]
+  },
+  {
+    "number": 148,
+    "title": "fix: ajustamos pantallas de mesajes en el juego",
+    "branch": "141-combinar-pantallas-congratulations-con-new-level",
+    "created": "2026-11-09T09:48:09Z",
+    "merged": "2026-11-09T09:48:21Z",
+    "author": "jbarreir",
+    "merged_by": "jbarreir",
+    "additions": 254,
+    "deletions": 37,
+    "changed_files": 7,
+    "closes_issues": [
+      141
+    ]
+  },
+  {
+    "number": 149,
+    "title": "fix: Player y Ghost ya no se muestran con el juego terminado",
+    "branch": "142-esconder-entities-cuando-la-pantalla-enter-name-está-activa",
+    "created": "2026-11-09T10:09:53Z",
+    "merged": "2026-11-09T10:10:06Z",
+    "author": "jbarreir",
+    "merged_by": "jbarreir",
+    "additions": 20,
+    "deletions": 3,
+    "changed_files": 3,
+    "closes_issues": [
+      142
+    ]
+  },
+  {
+    "number": 150,
+    "title": "fix: update PacGum colors and adjust rendering size in GraphicEngine",
+    "branch": "71-diseño-de-interfaz",
+    "created": "2026-11-09T10:40:40Z",
+    "merged": "2026-11-09T10:41:07Z",
+    "author": "jbarreir",
+    "merged_by": "jbarreir",
+    "additions": 14,
+    "deletions": 11,
+    "changed_files": 2,
+    "closes_issues": [
+      71
+    ]
+  },
+  {
+    "number": 151,
+    "title": "131 pruebas pantalla",
+    "branch": "131-pruebas-pantalla",
+    "created": "2026-11-09T16:18:13Z",
+    "merged": "2026-11-09T16:18:26Z",
+    "author": "aitorres",
+    "merged_by": "aitorres",
+    "additions": 532,
+    "deletions": 68,
+    "changed_files": 6,
+    "closes_issues": [
+      131
+    ]
+  },
+  {
+    "number": 152,
+    "title": "136 añadir docstrigns finales y eliminar comentarios",
+    "branch": "136-añadir-docstrigns-finales-y-eliminar-comentarios",
+    "created": "2026-11-11T00:18:26Z",
+    "merged": "2026-11-11T00:18:40Z",
+    "author": "aitorres",
+    "merged_by": "aitorres",
+    "additions": 743,
+    "deletions": 874,
+    "changed_files": 23,
+    "closes_issues": [
+      136
+    ]
+  },
+  {
+    "number": 153,
+    "title": "137 traducir todos los documentos a inglés último paso",
+    "branch": "137-traducir-todos-los-documentos-a-inglés-último-paso",
+    "created": "2026-11-11T00:40:47Z",
+    "merged": "2026-11-11T00:41:06Z",
+    "author": "aitorres",
+    "merged_by": "aitorres",
+    "additions": 543,
+    "deletions": 444,
+    "changed_files": 23,
+    "closes_issues": [
+      137
+    ]
+  }
+]

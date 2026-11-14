@@ -32,7 +32,7 @@ behaviours, a persistent Top 10 leaderboard and a cheat mode for peer review.
 6. [Implementation](#implementation)
 7. [General Software Architecture](#general-software-architecture)
 8. [Project Management](#project-management)
-9. [Resources & References](#resources--references)
+9. [Resources](#resources)
 
 ---
 
@@ -227,9 +227,9 @@ when something behaves unexpectedly.
 
 `make run` fails because `uv` is missing: run `make install` once; the target
 installs `uv` and then syncs the environment. The window does not open: check
-that a display is available, since Pygame needs one. The game exits with code
-`1` immediately: read the last lines of `temp/log.txt`, which will name the
-configuration file and the failing key. The maze looks different between runs:
+that a display is available, since Pygame needs one. The game starts with
+unexpected values: read `temp/log.txt`, which names the configuration file and
+every key that was clamped or replaced by its default. The maze looks different between runs:
 only level 1 uses the configured seed, later levels ask the generator for a
 random map.
 
@@ -336,14 +336,14 @@ expected type falls back to the default with an error message, so `"lives":
 "many"` yields `3`. An invalid `highscore_filename` falls back to
 `highscore.csv`. Unknown keys are ignored by the model.
 
-A syntactically broken JSON file is a different case: the document never loads,
-so no configuration can be built. `json_parser()` logs the failure and re-raises,
-`main()` catches it, logs `Error loading or initializing application`, and
-returns exit code `1`. The game does not start with defaults in that situation.
-
-A `level` value that is not a list, for example a bare number, is not padded and
-fails Pydantic validation; it follows the same path and the process exits with
-code `1`.
+A file that cannot be used at all never stops the game. If the file is missing
+or unreadable, is not valid JSON, or its top level is not an object,
+`json_parser()` logs the reason and returns a `Config` made entirely of default
+values. If the file loads but some value fails model validation, for example a
+`level` that is a bare number instead of a list, only the offending keys are
+dropped, logged and replaced by their defaults; every other key is kept. In all
+these cases the game starts normally and no traceback is shown. Only a wrong
+number of command-line arguments ends the program, with exit code `1`.
 
 ---
 
@@ -523,8 +523,8 @@ be played as designed.
 ### Execution flow
 
 `pac-man.py` calls `src/main.py:main()`, which requires exactly one argument,
-builds `App` from `Config.json_parser()` and returns `app.run()`. Any load or
-runtime error is logged and turned into exit code `1`, and `pygame.quit()` runs
+builds `App` from `Config.json_parser()` and returns `app.run()`. Configuration problems fall back to defaults;
+any other unexpected error is logged and turned into exit code `1`, and `pygame.quit()` runs
 in a `finally` block so the display is always released.
 
 `App.run()` computes the window size from every level in the configuration,
@@ -682,6 +682,11 @@ graphics layer free of persistence concerns.
 
 ## Project Management
 
+The full evidence of how the project was managed (Kanban board snapshot,
+timeline, progress tracking, team metrics, lead times, bugs and work breakdown,
+all computed from the GitHub issues and pull requests) lives in the dedicated
+[`project_management/`](project_management/) directory.
+
 ### How the work was organised
 
 The project was run as a small, two-person team with a clear owner for
@@ -732,7 +737,7 @@ written back into the issue so they would not be lost.
 
 ---
 
-## Resources & References
+## Resources
 
 ### Documentation
 

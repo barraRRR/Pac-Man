@@ -88,8 +88,8 @@ class Ghost(Entity):
             for png in sorted(Path(SCARED_GHOST).glob("*.png")):
                 frames.append(pygame.image.load(str(png)).convert_alpha())
         except (OSError, pygame.error) as error:
-            logger.exception("Could not load scared ghost frames from %s: %s",
-                             SCARED_GHOST, error)
+            logger.error("Could not load scared ghost frames from %s: %s",
+                         SCARED_GHOST, error)
             raise RuntimeError(
                 f"Could not load scared ghost frames from {SCARED_GHOST}"
             ) from error

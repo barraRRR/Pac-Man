@@ -1,4 +1,4 @@
-.PHONY: install run debug test clean lint lint-strict help
+.PHONY: check-uv install run debug test clean clean_venv lint lint-strict help
 
 UV := $(shell command -v uv 2>/dev/null || echo "$(HOME)/.local/bin/uv")
 
@@ -28,12 +28,13 @@ run:
 	@echo "|   __/  ___  \  |___ |_____||  |  |  |/  ___  \|  |\   |"
 	@echo "|__| /__/   \__\_____|       |__|  |__/__/   \__\__| \__|"
 	@echo "\033[0m"
-	-@uv run python pac-man.py $(RUN_ARGS)
-	@echo "\033[0m"
-	@$(MAKE) clean --no-print-directory
+	@$(UV) run python pac-man.py $(RUN_ARGS); status=$$?; \
+		echo "\033[0m"; \
+		$(MAKE) clean --no-print-directory; \
+		exit $$status
 
 debug:
-	@uv run python -m pdb -m src config.json
+	@$(UV) run python -m pdb -m src config.json
 
 clean:
 	@rm -rf .mypy_cache .pytest_cache
@@ -42,14 +43,14 @@ clean:
 
 lint:
 	@clear
-	@uv run flake8 . --exclude=.venv,data,wheels,__pycache__
-	@uv run mypy . --exclude "(.venv|data|wheels)" --warn-return-any --warn-unused-ignores --ignore-missing-imports --disallow-untyped-defs --check-untyped-defs
+	@$(UV) run flake8 . --exclude=.venv,data,wheels,__pycache__
+	@$(UV) run mypy . --exclude "(.venv|data|wheels)" --warn-return-any --warn-unused-ignores --ignore-missing-imports --disallow-untyped-defs --check-untyped-defs
 	@$(MAKE) clean --no-print-directory
 
 lint-strict:
 	@clear
-	@uv run flake8 . --exclude=.venv,data,wheels,__pycache__
-	@uv run mypy . --strict --disable-error-code=import-untyped --exclude "(.venv|data|wheels)"
+	@$(UV) run flake8 . --exclude=.venv,data,wheels,__pycache__
+	@$(UV) run mypy . --strict --disable-error-code=import-untyped --exclude "(.venv|data|wheels)"
 	@$(MAKE) clean --no-print-directory
 
 clean_venv: clean
@@ -57,7 +58,7 @@ clean_venv: clean
 	@echo "\033[1;32mEntorno y cachés eliminados. Ejecuta 'make install' para reconstruir.\033[0m"
 
 test:
-	@uv run python -m pytest tests/ -v
+	@$(UV) run python -m pytest tests/ -v
 	@$(MAKE) clean --no-print-directory
 
 help:

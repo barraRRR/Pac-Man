@@ -3,6 +3,7 @@
 from typing import Any, Dict, List, Optional, Tuple, ClassVar
 from pydantic import (
     BaseModel,
+    ValidationError,
     Field,
     ValidationInfo,
     field_validator,
@@ -132,14 +133,18 @@ class Config(BaseModel):
 
     @classmethod
     def json_parser(cls, config_file_path: str) -> "Config":
-        """Read a JSON file (with comments) and build a Config."""
+        """Read a JSON file (with comments) and build a Config.
+
+        Any problem with the file falls back to default values: the game
+        keeps running and the reason is logged.
+        """
         try:
             with open(config_file_path, "r", encoding="utf-8") as file:
                 config_raw: str = file.read()
-        except OSError:
-            logger.exception("No se pudo leer la configuración: %s",
-                             config_file_path)
-            raise
+        except (OSError, UnicodeDecodeError) as error:
+            logger.error("Could not read the configuration file %s (%s), "
+                         "using default values.", config_file_path, error)
+            return cls()
 
         # Preserve strings while removing JSON-style comments.
         pattern = r'("(?:\\.|[^"\\])*")|//.*|/\*[\s\S]*?\*/|#.*'
@@ -152,10 +157,26 @@ class Config(BaseModel):
 
         config_clean: str = re.sub(pattern, replacer, config_raw)
         try:
-            config_dict: Dict[str, Any] = json.loads(config_clean)
-        except json.JSONDecodeError:
-            logger.exception("La configuración no contiene JSON válido: %s",
-                             config_file_path)
-            raise
+            config_dict: Any = json.loads(config_clean)
+        except json.JSONDecodeError as error:
+            logger.error("The configuration %s is not valid JSON (%s), "
+                         "using default values.", config_file_path, error)
+            return cls()
 
-        return cls(**config_dict)
+        if not isinstance(config_dict, dict):
+            logger.error("The configuration %s must be a JSON object, "
+                         "using default values.", config_file_path)
+            return cls()
+
+        try:
+            return cls(**config_dict)
+        except ValidationError as error:
+            bad_keys = {str(e["loc"][0]) for e in error.errors() if e["loc"]}
+            logger.error("Invalid configuration values %s, using defaults "
+                         "for them.", sorted(bad_keys))
+            clean = {k: v for k, v in config_dict.items()
+                     if k not in bad_keys}
+            try:
+                return cls(**clean)
+            except ValidationError:
+                return cls()

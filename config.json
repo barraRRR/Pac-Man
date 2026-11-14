@@ -1,19 +1,23 @@
 {
+    # Leaderboard file name, stored inside highscore/.
     "highscore_filename": "highscore.csv",
+
+    // One entry per level (at least ten). Width and height range 15-35.
     "level": [
-        { "width": 40,   "height": 8 },        // tira horizontal válida
-        { "width": 10,   "heigh       t": 99 },       // torre en el mínimo de ancho y el máximo de alto
-        { "width": 99,   "height": 99 },       // mapa gigante en el límite
-        { "width": 10,   "height": 10 },       // mínimo exacto
-        { "width": 3,    "height": 25 },       // ancho por debajo del mínimo
-        { "width": 150,  "height": 5 },        // se pasa por arriba y por abajo
-        { "width": -20,  "height": 1000 },     // negativo y enorme
-        { "width": "abc", "height": 20 },      // texto no numérico
-        { "width": 12.7, "height": null },     // float y null
-        { "width": "30", "height": true }      // número como string y booleano
+        { "width": 15, "height": 15 },
+        { "width": 15, "height": 15 },
+        { "width": 17, "height": 17 },
+        { "width": 17, "height": 17 },
+        { "width": 19, "height": 19 },
+        { "width": 19, "height": 19 },
+        { "width": 21, "height": 21 },
+        { "width": 21, "height": 21 },
+        { "width": 25, "height": 21 },
+        { "width": 25, "height": 21 }
     ],
-    "lives": 1,
-    "pacgum": 1,
+
+    "lives": 3,
+    "pacgum": 42,
     "points_per_pacgum": 10,
     "points_per_super_pacgum": 50,
     "points_per_ghost": 200,
