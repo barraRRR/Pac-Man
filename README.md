@@ -793,7 +793,3 @@ was not understood was not merged. The concrete uses were:
 | Sprite pipeline | Issue #51: explaining that `pygame.image.load` on a GIF returns only the first frame, and planning the PNG-per-frame extraction. |
 | Concept explanations | BFS for pathfinding and reachability, bitmask wall encoding, and the window-size formula derived from the largest level. |
 | README drafting | This document, written from the code, the subject and the team's notes. |
-
-No AI-generated code was merged without a test or a manual playthrough, and the
-peer review described in [Project Management](#project-management) applied to
-AI-assisted changes exactly as it applied to any other change.
