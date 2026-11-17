@@ -47,6 +47,11 @@ be recognisable and playable, not a toy: the player moves through a maze, eats
 pac-gums, is chased by four ghosts, loses lives, races a per-level clock and
 leaves a score behind in a leaderboard that survives between runs.
 
+<br>
+<div align="center">
+<img width="85%" alt="pacman_mockup" src="https://github.com/user-attachments/assets/de96640c-dec6-4060-840c-07dc84b1df91" />
+</div>
+<br>
 
 ### Overview
 
