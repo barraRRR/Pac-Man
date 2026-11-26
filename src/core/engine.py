@@ -24,6 +24,7 @@ _LOGO_AREA = (510, 130)
 _FOOTER_AREA = 60
 
 _ITEM_LINE_SPACING = 60
+_SELECTOR_GAP = 8
 
 _MIN_TILE_SIZE = 10
 _STD_TILE_SIZE = 20
@@ -330,8 +331,13 @@ class GraphicEngine:
             x -= item.sur.get_width() // 2
             item.xy = (x, y)
             self.window.blit(item.sur, (x, y))
-            if item == menu._active_item and menu.selector is not None:
-                self.window.blit(menu.selector, (x - 12, y))
+            if item == menu._active_item:
+                selector = menu.selector
+                selector_x = x - selector.get_width() - _SELECTOR_GAP
+                selector_y = (
+                    y + (item.sur.get_height() - selector.get_height()) // 2
+                )
+                self.window.blit(selector, (selector_x, selector_y))
         self._put_logo()
         self.window.blit(
             credits.sur,
@@ -349,8 +355,9 @@ class GraphicEngine:
         pad: int = 20
         text_w: int = max(item.sur.get_width() for item in menu._items)
         text_h: int = menu._items[0].sur.get_height()
+        selector_w: int = menu.selector.get_width() + _SELECTOR_GAP
         panel_size: Tuple[int, int] = (
-            text_w + pad * 2,
+            selector_w + text_w + pad * 2,
             _ITEM_LINE_SPACING + text_h + pad * 2
         )
         panel: Surface = Surface(panel_size)
@@ -360,8 +367,16 @@ class GraphicEngine:
         self.window.blit(panel, (panel_x, panel_y))
         for item in menu._items:
             self.window.blit(item.sur, item.xy)
-            if item == menu._active_item and menu.selector is not None:
-                self.window.blit(menu.selector, (item.xy[0] - 10, item.xy[1]))
+            if item == menu._active_item:
+                selector = menu.selector
+                selector_x = (
+                    item.xy[0] - selector.get_width() - _SELECTOR_GAP
+                )
+                selector_y = (
+                    item.xy[1]
+                    + (item.sur.get_height() - selector.get_height()) // 2
+                )
+                self.window.blit(selector, (selector_x, selector_y))
 
     def _get_band_size(self, total_h: int) -> Tuple[int, int]:
         """Calculate a banner's size and vertical position."""
