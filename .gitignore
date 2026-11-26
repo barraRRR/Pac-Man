@@ -54,3 +54,20 @@ tempCodeRunnerFile.py
 # macOS
 .DS_Store
 *.DS_Store
+
+# pyinstaller
+build/
+dist/
+
+# subject and local references (not needed to build or run)
+en.subject.pdf
+*.pdf
+
+# local screenshots and references
+image.png
+
+# extra caches and coverage
+*.egg-info/
+.ruff_cache/
+.coverage
+htmlcov/

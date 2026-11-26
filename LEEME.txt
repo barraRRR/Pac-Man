@@ -1,0 +1,47 @@
+PAC-MAN - packaged build (Linux)
+================================
+
+HOW TO RUN
+----------
+1. Extract the whole folder. Do not move the executable out of it: it needs
+   the _internal folder that sits next to it.
+2. Make the launcher executable (only once):
+       chmod +x Pac_Man
+3. Run it:
+       ./Pac_Man
+
+   Double-clicking also works in most file managers.
+
+This build is for Linux (x86_64). It does not need Python installed.
+
+
+CONTROLS
+--------
+Arrows / WASD .... move Pac-Man
+SPACE ............ pause during play; confirm in every menu
+UP / DOWN ........ move the selector in menus
+K ................ toggle SUPER MODE (cheat mode: invincibility)
+ESC .............. skip the current level, only while SUPER MODE is on
+Window X ......... quit
+
+
+CHEAT MODE (for peer review)
+----------------------------
+Press K during play to become invincible: ghosts cannot kill you and you can
+walk through them. While it is on, ESC wins the current level instantly.
+Press K again to turn it off. A new game always starts with it off.
+
+
+CONFIGURATION
+-------------
+The game reads config.json, in the same folder as this file. It is a JSON
+file that also accepts # comments. Edit it to change lives, points, level
+sizes, seed, time limit and the highscore filename. Missing or invalid
+values are clamped to safe defaults and reported in the console; unknown
+keys are ignored. The full key list is in the README of the repository.
+
+
+FILES CREATED AT RUNTIME
+------------------------
+highscore.csv ... top 10 scores, written next to the game on first save
+log.txt ......... log of the session
