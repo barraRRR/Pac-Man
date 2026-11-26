@@ -82,10 +82,10 @@ class Instructions:
 
     @staticmethod
     def _pad_top(surface: Surface, gap: int) -> Surface:
-        """Anade un margen transparente encima de una superficie.
+        """Add transparent padding above a surface.
 
-        Equivale a un salto de linea: la superficie crece en altura y su
-        contenido baja, sin cambiar la posicion que le da el engine.
+        This adds height and moves the content down without changing the
+        position assigned by the engine.
         """
         slot: Surface = Surface(
             (surface.get_width(), surface.get_height() + gap), pygame.SRCALPHA)
@@ -117,11 +117,11 @@ class Instructions:
         color: tuple[int, int, int, int],
         spacing: int
     ) -> Surface:
-        """Renderiza el texto con separacion extra entre caracteres.
+        """Render text with extra spacing between characters.
 
-        Cada caracter se renderiza por separado y se coloca avanzando su
-        ancho mas el espaciado, de modo que la linea final es mas ancha que
-        el texto normal pero conserva la misma altura.
+        Render each character separately and place it after the previous
+        character plus the spacing. The result is wider than regular text
+        while keeping the same height.
         """
         glyphs: list[Surface] = [
             self._render_text(char, size, color) for char in text
@@ -153,8 +153,13 @@ class Instructions:
 
         cap: Surface = Surface((w, h))
         cap.fill(self._KEYCAP_COLOR)
-        cap.blit(content, ((w - content.get_width()) // 2,
-                    (h - content.get_height()) // 2))
+        cap.blit(
+            content,
+            (
+                (w - content.get_width()) // 2,
+                (h - content.get_height()) // 2,
+            ),
+        )
         return cap
 
     def _render_parts_keycap(self, parts: tuple[str, ...]) -> Surface:
