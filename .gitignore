@@ -71,3 +71,8 @@ image.png
 .ruff_cache/
 .coverage
 htmlcov/
+
+# pyinstaller
+build/
+dist/
+Pac_Man-linux/
